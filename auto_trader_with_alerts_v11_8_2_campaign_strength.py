@@ -44,7 +44,7 @@ from solders.message import to_bytes_versioned
 from solders.signature import Signature
 from solders.transaction import VersionedTransaction
 
-import market_scanner as ms
+import market_scanner_2 as ms
 
 
 ROOT = Path(__file__).resolve().parent
