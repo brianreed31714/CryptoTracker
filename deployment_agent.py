@@ -307,9 +307,28 @@ def scan_once():
         except Exception:
             continue
         if req.get("status") == "READY_TO_DEPLOY":
-            done = processed_requests().get(str(req.get("proposal_id") or ""))
+            pid = str(req.get("proposal_id") or "")
+            done = processed_requests().get(pid)
             if done and done.get("status") in {"DEPLOYED", "ROLLED_BACK"}:
                 continue
+
+            # Migration guard for deployments completed by the older agent,
+            # which marked the tracked request file locally instead of using
+            # deploy/state. If the active manifest already matches this exact
+            # proposal+commit, treat it as processed and do not redeploy it.
+            active = load_manifest(ACTIVE_MANIFEST)
+            if (
+                active.get("proposal_id") == pid
+                and str(active.get("commit") or "") == str(req.get("commit") or "")
+            ):
+                mark_processed(
+                    pid,
+                    "DEPLOYED",
+                    commit=req.get("commit"),
+                    migrated_from_active_manifest=True,
+                )
+                continue
+
             deploy(path, req)
 
 
