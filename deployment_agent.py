@@ -78,6 +78,32 @@ ALLOWED_PREFIXES = {
     "dashboard": ("cryptotracker_dashboard_",),
 }
 
+# Capabilities that must survive every future trader deployment unless this
+# guard itself is deliberately changed in an approved release.
+PROTECTED_TRADER_CAPABILITIES = {
+    "remote_autostart": (
+        "REQUIRE_START_LIVE_CONFIRMATION",
+        "Live startup confirmation: DISABLED (automatic)",
+    ),
+    "helius_wallet_cache": (
+        "WALLET_BALANCE_CACHE_SECONDS",
+        "_WALLET_USDC_BALANCE_CACHE",
+    ),
+    "helius_backoff": (
+        "HELIUS_MAX_RETRIES",
+        "def _helius_post_json",
+    ),
+    "scanner_pressure_cap": (
+        "MAX_ACTIVE_SCAN_TOKENS",
+    ),
+    "shadow_forward_outcomes": (
+        "SURGE_FOLLOWUP_AUDIT_FILE",
+    ),
+    "shadow_missed_opportunity_audit": (
+        "MISSED_OPPORTUNITY_AUDIT_FILE",
+    ),
+}
+
 
 def log(msg: str):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -128,6 +154,20 @@ def safe_rel(component: str, rel: str) -> Path:
     return path
 
 
+def validate_trader_capabilities(path: Path):
+    source = path.read_text(encoding="utf-8", errors="replace")
+    missing = []
+    for capability, markers in PROTECTED_TRADER_CAPABILITIES.items():
+        if not all(marker in source for marker in markers):
+            missing.append(capability)
+
+    if missing:
+        raise ValueError(
+            "Trader regression guard failed; missing protected capabilities: "
+            + ", ".join(missing)
+        )
+
+
 def validate_request(req: dict):
     if req.get("status") != "READY_TO_DEPLOY":
         raise ValueError("Request is not READY_TO_DEPLOY.")
@@ -150,6 +190,8 @@ def validate_request(req: dict):
     validated = {}
     for comp in comps:
         validated[comp] = safe_rel(comp, files.get(comp, ""))
+        if comp == "trader":
+            validate_trader_capabilities(validated[comp])
         py_compile.compile(str(validated[comp]), doraise=True)
 
     return pid, commit, validated
