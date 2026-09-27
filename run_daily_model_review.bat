@@ -2,30 +2,49 @@
 setlocal
 cd /d "%~dp0"
 
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set REVIEWDATE=%%i
+
 echo ============================================================
-echo CryptoTracker Daily Model Review
+echo CryptoTracker Agentic Daily Review
+echo Review date: %REVIEWDATE%
 echo ============================================================
 echo.
 
-python build_daily_review_bundle.py
-if errorlevel 1 (
-  echo.
-  echo Bundle build FAILED.
-  pause
-  exit /b 1
-)
+echo [1/4] Building daily review bundle...
+python build_daily_review_bundle.py --date %REVIEWDATE%
+if errorlevel 1 goto :fail
 
 echo.
-python daily_model_review.py
-if errorlevel 1 (
-  echo.
-  echo Daily model review FAILED.
-  pause
-  exit /b 1
-)
+echo [2/4] Running model review...
+python daily_model_review.py --date %REVIEWDATE%
+if errorlevel 1 goto :fail
 
 echo.
-echo Review complete.
-echo See analysis\daily\YYYY-MM-DD\daily_model_review.md
+echo [3/4] Publishing proposal registry + REVIEW.md...
+python proposal_registry.py publish --date %REVIEWDATE%
+if errorlevel 1 goto :fail
+
 echo.
-pause
+echo [4/4] Syncing proposal registry to GitHub...
+python sync_proposals_to_git.py --message "Publish CryptoTracker proposals %REVIEWDATE%"
+if errorlevel 1 goto :fail
+
+echo.
+echo ============================================================
+echo Daily review complete.
+echo ============================================================
+echo.
+echo GitHub proposal review:
+echo   analysis\proposals\REVIEW.md
+echo.
+echo To approve in ChatGPT, use:
+echo   Approve P-YYYYMMDD-NN
+echo.
+exit /b 0
+
+:fail
+echo.
+echo ============================================================
+echo Agentic daily review FAILED.
+echo ============================================================
+exit /b 1

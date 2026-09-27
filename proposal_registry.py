@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-CryptoTracker proposal registry.
+CryptoTracker proposal registry v2.1.
 
-Creates durable, Git-tracked proposal records from the nightly review so a
-proposal can be retrieved later by ID from GitHub.
+Creates durable, Git-tracked proposal records from the nightly review and
+generates a human-readable REVIEW.md that always includes proposal IDs and
+exact ChatGPT approval commands.
 
 Registry layout:
   analysis/proposals/current.json
+  analysis/proposals/REVIEW.md
   analysis/proposals/P-YYYYMMDD-NN.json
 
 This module never deploys or changes trading code.
@@ -63,31 +65,73 @@ def normalize_proposal(p: dict, review_date: str) -> dict:
     return q
 
 
-def publish_review(review_date: str) -> list[dict]:
-    review_path = DAILY_DIR / review_date / "daily_model_review.json"
-    review = load_json(review_path)
-    if not isinstance(review, dict):
-        raise FileNotFoundError(f"Review not found or invalid: {review_path}")
+def build_review_markdown(review_date: str, proposals: list[dict]) -> str:
+    lines = [
+        f"# CryptoTracker Proposals — {review_date}",
+        "",
+        "These are the current model-improvement proposals from the nightly review.",
+        "Each proposal has a stable ID that can be used directly in ChatGPT.",
+        "",
+    ]
 
-    published = []
-    for raw in review.get("proposals", []):
-        q = normalize_proposal(raw, review_date)
-        pid = str(q.get("proposal_id") or "").strip()
-        if not pid:
-            continue
+    if not proposals:
+        lines += [
+            "No proposals were generated for this review.",
+            "",
+            "You can ask ChatGPT:",
+            "",
+            "`Review today's CryptoTracker proposals`",
+            "",
+        ]
+        return "\n".join(lines)
 
-        path = proposal_path(pid)
-        existing = load_json(path, {})
-        # Preserve lifecycle fields if this proposal already exists.
-        if existing:
-            for k in ("status", "approved_at", "declined_at", "implemented_at",
-                      "deployed_at", "implementation", "deployment"):
-                if k in existing:
-                    q[k] = existing[k]
-        q["updated_at"] = datetime.now().isoformat(timespec="seconds")
-        save_json(path, q)
-        published.append(q)
+    for p in proposals:
+        pid = p.get("proposal_id", "")
+        lines += [
+            f"## {pid} — {p.get('title', 'Untitled proposal')}",
+            "",
+            f"- **Status:** {p.get('status', 'PENDING')}",
+            f"- **Type:** {p.get('change_type', 'RESEARCH')}",
+            f"- **Target:** `{p.get('target', '')}`",
+            f"- **Current:** {p.get('current', '')}",
+            f"- **Proposed:** {p.get('proposed', '')}",
+            f"- **Confidence:** {p.get('confidence', 'LOW')}",
+            f"- **Recommended mode:** {p.get('recommended_mode', 'SHADOW')}",
+            f"- **Risk:** {p.get('risk', '')}",
+            "- **Evidence:**",
+        ]
 
+        evidence = p.get("evidence") or []
+        if evidence:
+            for item in evidence:
+                lines.append(f"  - {item}")
+        else:
+            lines.append("  - No evidence text supplied.")
+
+        lines += [
+            "",
+            "**Approve in ChatGPT:**",
+            "",
+            f"`Approve {pid}`",
+            "",
+            "**Decline in ChatGPT:**",
+            "",
+            f"`Decline {pid}`",
+            "",
+            "---",
+            "",
+        ]
+
+    lines += [
+        "## Quick commands",
+        "",
+        "`Review today's CryptoTracker proposals`",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def rebuild_current(review_date: str, published: list[dict]):
     current = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "review_date": review_date,
@@ -105,6 +149,45 @@ def publish_review(review_date: str) -> list[dict]:
         ],
     }
     save_json(PROPOSAL_DIR / "current.json", current)
+    (PROPOSAL_DIR / "REVIEW.md").write_text(
+        build_review_markdown(review_date, published),
+        encoding="utf-8",
+    )
+
+
+def publish_review(review_date: str) -> list[dict]:
+    review_path = DAILY_DIR / review_date / "daily_model_review.json"
+    review = load_json(review_path)
+    if not isinstance(review, dict):
+        raise FileNotFoundError(f"Review not found or invalid: {review_path}")
+
+    published = []
+    for raw in review.get("proposals", []):
+        q = normalize_proposal(raw, review_date)
+        pid = str(q.get("proposal_id") or "").strip()
+        if not pid:
+            continue
+
+        path = proposal_path(pid)
+        existing = load_json(path, {})
+        if existing:
+            for k in (
+                "status",
+                "approved_at",
+                "declined_at",
+                "implemented_at",
+                "deployed_at",
+                "implementation",
+                "deployment",
+            ):
+                if k in existing:
+                    q[k] = existing[k]
+
+        q["updated_at"] = datetime.now().isoformat(timespec="seconds")
+        save_json(path, q)
+        published.append(q)
+
+    rebuild_current(review_date, published)
     return published
 
 
@@ -124,8 +207,10 @@ def set_status(proposal_id: str, status: str, note: str = "") -> dict:
 
     p["status"] = status
     p["updated_at"] = datetime.now().isoformat(timespec="seconds")
+
     if note:
         p["status_note"] = note
+
     stamp_key = {
         "APPROVED": "approved_at",
         "DECLINED": "declined_at",
@@ -135,21 +220,20 @@ def set_status(proposal_id: str, status: str, note: str = "") -> dict:
         "FAILED": "failed_at",
         "ROLLED_BACK": "rolled_back_at",
     }.get(status)
+
     if stamp_key:
         p[stamp_key] = p["updated_at"]
+
     save_json(path, p)
 
-    current_path = PROPOSAL_DIR / "current.json"
-    cur = load_json(current_path, {}) or {}
-    for row in cur.get("proposals", []):
-        if row.get("proposal_id") == proposal_id:
-            row["status"] = status
-    cur["pending"] = [
-        x.get("proposal_id") for x in cur.get("proposals", [])
-        if x.get("status") == "PENDING"
-    ]
-    cur["generated_at"] = datetime.now().isoformat(timespec="seconds")
-    save_json(current_path, cur)
+    # Rebuild current.json and REVIEW.md from all proposal files for the same review date.
+    same_day = []
+    for f in sorted(PROPOSAL_DIR.glob("P-*.json")):
+        row = load_json(f, {})
+        if row and row.get("review_date") == p.get("review_date"):
+            same_day.append(row)
+
+    rebuild_current(p.get("review_date", ""), same_day)
     return p
 
 
@@ -175,9 +259,12 @@ def main():
         print(f"Published {len(rows)} proposal(s).")
         for r in rows:
             print(f"  {r['proposal_id']} | {r['status']} | {r.get('title','')}")
+        print(f"Human-readable review: {PROPOSAL_DIR / 'REVIEW.md'}")
+
     elif args.cmd == "status":
         p = set_status(args.id, args.set, args.note)
         print(json.dumps(p, indent=2))
+
     else:
         p = load_json(proposal_path(args.id))
         if not p:
