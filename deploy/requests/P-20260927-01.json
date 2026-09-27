@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260927-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "1c8e470cd61185158c46ce2f8cbfbecaaa43eec5",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_5_helius_resilience.py"
+  },
+  "mode": "LIVE",
+  "note": "Approved Helius resilience + scanner pressure fix. Wallet USDC cache 300s, Helius bounded exponential backoff, persistent watch 2h, active scan cap 100."
+}
