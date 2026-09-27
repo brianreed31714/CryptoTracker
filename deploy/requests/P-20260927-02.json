@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260927-02",
+  "status": "READY_TO_DEPLOY",
+  "commit": "86d6810e2b4575214ba580755d55d4bb5fe8e26a",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_6_shadow_audits_helius_resilience.py"
+  },
+  "mode": "LIVE",
+  "note": "Regression repair: preserves SHADOW audits while restoring remote autostart, Helius cache/backoff, scanner pressure controls, and .env.config loading. Deployment agent now blocks trader releases missing protected capabilities."
+}
