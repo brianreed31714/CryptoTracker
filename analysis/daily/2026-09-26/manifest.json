@@ -1,0 +1,65 @@
+{
+  "review_date": "2026-09-26",
+  "created_at_local": "2026-09-26T22:06:07",
+  "files": [
+    {
+      "source": "SmartMoneyMonitor\\data\\smart_money_events_v21.csv",
+      "bundle_file": "analysis\\daily\\2026-09-26\\raw\\smart_money_events_v21.csv",
+      "bytes": 658,
+      "sha256": "49a540ec6d1d9c9bcb69fedd015eb70d452557e82e06cd9ec54a306b01f2822b",
+      "mode": "filtered",
+      "rows": 0,
+      "timestamp_column": "detected_at_utc"
+    },
+    {
+      "source": "SmartMoneyMonitor\\data\\smart_money_campaigns_v21.csv",
+      "bundle_file": "analysis\\daily\\2026-09-26\\raw\\smart_money_campaigns_v21.csv",
+      "bytes": 368,
+      "sha256": "36159673a059985d141699c6ecf3b4f1e4944e5d33ec1f665d2a0afdbd57d8fe",
+      "mode": "filtered",
+      "rows": 0,
+      "timestamp_column": "updated_at_utc"
+    },
+    {
+      "source": "SmartMoneyMonitor\\data\\trader_performance_v21.csv",
+      "bundle_file": "analysis\\daily\\2026-09-26\\raw\\trader_performance_v21.csv",
+      "bytes": 393,
+      "sha256": "44135c3621fd6ffc595eece9e31d9a14255ae02cec6b1115e90313657d898b82",
+      "mode": "filtered",
+      "rows": 0,
+      "timestamp_column": "trade_time_utc"
+    },
+    {
+      "source": ".env.config",
+      "bundle_file": "analysis\\daily\\2026-09-26\\meta\\.env.config",
+      "bytes": 16869,
+      "sha256": "9369001bdd04121404e8189cf955f5712932e704093018fc1268b2d36e57d3b1",
+      "mode": "copied",
+      "rows": null,
+      "timestamp_column": null
+    }
+  ],
+  "versions": [
+    {
+      "path": "auto_trader_with_alerts_v11_8_2_campaign_strength.py",
+      "modified": "2026-09-26T20:32:33",
+      "sha256": "0c31e8fd5ca8cb7b9747ef704ea7e9b9c21ea213275cdf6b164be7114b6c8b5f"
+    },
+    {
+      "path": "cryptotracker_dashboard_v11_8_2.py",
+      "modified": "2026-09-26T20:32:47",
+      "sha256": "3940952822ace0e9d26eb2857894df89c7899df1c8f154560bdab1dc692a35f3"
+    },
+    {
+      "path": "SmartMoneyMonitor\\smart_money_monitor_v2_2_1_campaign_strength.py",
+      "modified": "2026-09-26T20:31:11",
+      "sha256": "3e0e97f78c840a1769d0017e8e57e9588d8e700ff2a0ec06f616a2dbef33154a"
+    }
+  ],
+  "notes": [
+    "Secrets excluded.",
+    ".env.config may be included because it is intended to be non-secret."
+  ],
+  "file_count": 4,
+  "version_count": 3
+}
