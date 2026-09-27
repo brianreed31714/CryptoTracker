@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20260926-04",
+  "status": "READY_TO_DEPLOY",
+  "commit": "80078f321081e3b6b158df1ce148026606c3e27a",
+  "components": [
+    "trader",
+    "smart_money",
+    "dashboard"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_5_shadow_evidence_audits.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "mode": "SHADOW",
+  "bundled_proposals": [
+    "P-20260926-01",
+    "P-20260926-02",
+    "P-20260926-03",
+    "P-20260926-04"
+  ],
+  "note": "Combined SHADOW evidence release. Adds forward-outcome, Smart Money feed-health, Luna outcome, and missed-opportunity audits. No trading thresholds, position sizing, entry/exit logic, or execution gates changed."
+}
