@@ -16,14 +16,14 @@
   "status": "READY_TO_DEPLOY",
   "review_date": "2026-09-26",
   "created_at": "2026-09-26T22:59:13",
-  "updated_at": "2026-09-26T23:00:00",
+  "updated_at": "2026-09-27T12:54:00-07:00",
   "implementation": {
     "mode": "SHADOW",
     "commit": "f5e545dc71a93c85eee3671e37b4fb8fb4e404aa",
     "files": [
-      "auto_trader_with_alerts_v11_8_3_forward_outcome_audit.py",
-      ".env.config",
-      "build_daily_review_bundle.py"
+      "auto_trader_with_alerts_v11_8_5_shadow_evidence_audits.py",
+      "build_daily_review_bundle.py",
+      "daily_model_review.py"
     ],
     "audit_output": "data/surge_followup_audit.csv",
     "events": [
@@ -44,17 +44,29 @@
     "calibration_gate": "Do not propose calibration until at least 12 outcome-labeled relevant observations exist.",
     "validation": {
       "python_compile": "PASSED",
-      "live_runtime_test": "PENDING_DEPLOYMENT"
-    }
+      "live_runtime_test": "PENDING_DEPLOYMENT",
+      "deployment_agent_py_compile": "PENDING_AT_DEPLOY"
+    },
+    "release_commit": "80078f321081e3b6b158df1ce148026606c3e27a"
   },
   "deployment": {
-    "status": "READY_TO_DEPLOY",
-    "component": "trader",
-    "file": "auto_trader_with_alerts_v11_8_3_forward_outcome_audit.py",
-    "commit": "f5e545dc71a93c85eee3671e37b4fb8fb4e404aa"
+    "mode": "SHADOW",
+    "bundle_request": "P-20260926-04",
+    "status": "BUNDLED",
+    "commit": "80078f321081e3b6b158df1ce148026606c3e27a",
+    "components": [
+      "trader",
+      "smart_money",
+      "dashboard"
+    ],
+    "files": {
+      "trader": "auto_trader_with_alerts_v11_8_5_shadow_evidence_audits.py",
+      "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+      "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+    }
   },
   "approved_at": "2026-09-26T23:00:00",
   "implementation_started_at": "2026-09-26T23:00:00",
-  "ready_to_deploy_at": "2026-09-26T23:00:00",
-  "status_note": "Approved by user; SHADOW-only forward-outcome audit implemented and syntax-validated. No trading thresholds, sizing, exits, or execution gates changed."
+  "ready_to_deploy_at": "2026-09-27T12:54:00-07:00",
+  "status_note": "Approved by user in SHADOW mode; implementation is bundled into P-20260926-04 full-release deployment to avoid stopping unrelated running components."
 }
