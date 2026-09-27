@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260926-07",
+  "status": "READY_TO_DEPLOY",
+  "commit": "d7f1d9d5d64c4c7791a369462c9dd5aaf667bfd9",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_4_remote_autostart.py"
+  },
+  "mode": "LIVE",
+  "note": "User-requested remote startup fix. Adds REQUIRE_START_LIVE_CONFIRMATION=0 and deploy-agent local-state fix; trading thresholds, sizing, exits, and execution rules unchanged."
+}
