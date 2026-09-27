@@ -13,10 +13,48 @@
   "confidence": "HIGH",
   "recommended_mode": "SHADOW",
   "approval_required": true,
-  "status": "PENDING",
+  "status": "READY_TO_DEPLOY",
   "review_date": "2026-09-26",
   "created_at": "2026-09-26T22:59:13",
-  "updated_at": "2026-09-26T22:59:13",
-  "implementation": {},
-  "deployment": {}
+  "updated_at": "2026-09-26T23:00:00",
+  "implementation": {
+    "mode": "SHADOW",
+    "commit": "f5e545dc71a93c85eee3671e37b4fb8fb4e404aa",
+    "files": [
+      "auto_trader_with_alerts_v11_8_3_forward_outcome_audit.py",
+      ".env.config",
+      "build_daily_review_bundle.py"
+    ],
+    "audit_output": "data/surge_followup_audit.csv",
+    "events": [
+      "CANDIDATE_SEEN",
+      "DEDUPED",
+      "PATH_ASSIGNED",
+      "SIGNAL_REGISTERED",
+      "OUTCOME_DUE",
+      "OUTCOME_CAPTURED",
+      "OUTCOME_MISSED",
+      "SIGNAL_COMPLETE"
+    ],
+    "outcome_horizons_minutes": [
+      30,
+      60,
+      120
+    ],
+    "calibration_gate": "Do not propose calibration until at least 12 outcome-labeled relevant observations exist.",
+    "validation": {
+      "python_compile": "PASSED",
+      "live_runtime_test": "PENDING_DEPLOYMENT"
+    }
+  },
+  "deployment": {
+    "status": "READY_TO_DEPLOY",
+    "component": "trader",
+    "file": "auto_trader_with_alerts_v11_8_3_forward_outcome_audit.py",
+    "commit": "f5e545dc71a93c85eee3671e37b4fb8fb4e404aa"
+  },
+  "approved_at": "2026-09-26T23:00:00",
+  "implementation_started_at": "2026-09-26T23:00:00",
+  "ready_to_deploy_at": "2026-09-26T23:00:00",
+  "status_note": "Approved by user; SHADOW-only forward-outcome audit implemented and syntax-validated. No trading thresholds, sizing, exits, or execution gates changed."
 }
