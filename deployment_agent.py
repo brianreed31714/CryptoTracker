@@ -51,6 +51,7 @@ REQUEST_DIR = DEPLOY_DIR / "requests"
 STATE_DIR = DEPLOY_DIR / "state"
 ACTIVE_MANIFEST = STATE_DIR / "active_release.json"
 PREVIOUS_MANIFEST = STATE_DIR / "previous_release.json"
+PROCESSED_REQUESTS = STATE_DIR / "processed_requests.json"
 LOG_FILE = STATE_DIR / "deployment_agent.log"
 
 load_dotenv(ROOT / ".env.config")
@@ -206,6 +207,21 @@ def stop_active(manifest: dict):
             taskkill_for_script(Path(rel).name)
 
 
+def processed_requests():
+    data = load_manifest(PROCESSED_REQUESTS)
+    return data if isinstance(data, dict) else {}
+
+
+def mark_processed(proposal_id: str, status: str, **extra):
+    data = processed_requests()
+    data[proposal_id] = {
+        "status": status,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+        **extra,
+    }
+    save_manifest(PROCESSED_REQUESTS, data)
+
+
 def deploy(req_path: Path, req: dict):
     old = load_manifest(ACTIVE_MANIFEST)
     pid, commit, validated = validate_request(req)
@@ -235,9 +251,15 @@ def deploy(req_path: Path, req: dict):
         }
         save_manifest(ACTIVE_MANIFEST, active)
 
-        req["status"] = "DEPLOYED"
-        req["deployed_at"] = active["deployed_at"]
-        req_path.write_text(json.dumps(req, indent=2), encoding="utf-8")
+        # Never mutate the Git-tracked deployment request locally. Doing so
+        # dirties the repo and blocks the next git pull. Record local lifecycle
+        # state under deploy/state instead.
+        mark_processed(
+            pid,
+            "DEPLOYED",
+            commit=commit,
+            deployed_at=active["deployed_at"],
+        )
         log(f"{pid}: deployment successful")
         push("CryptoTracker Deployment", f"{pid} deployed successfully.\nCommit {commit[:10]}")
         return True
@@ -264,8 +286,12 @@ def deploy(req_path: Path, req: dict):
         else:
             req["status"] = "FAILED"
 
-        req["error"] = str(exc)
-        req_path.write_text(json.dumps(req, indent=2), encoding="utf-8")
+        mark_processed(
+            pid,
+            req.get("status", "FAILED"),
+            commit=commit,
+            error=str(exc),
+        )
         push("CryptoTracker Deployment FAILED", f"{pid}: {exc}")
         return False
 
@@ -281,6 +307,9 @@ def scan_once():
         except Exception:
             continue
         if req.get("status") == "READY_TO_DEPLOY":
+            done = processed_requests().get(str(req.get("proposal_id") or ""))
+            if done and done.get("status") in {"DEPLOYED", "ROLLED_BACK"}:
+                continue
             deploy(path, req)
 
 
