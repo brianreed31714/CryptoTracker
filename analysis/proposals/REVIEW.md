@@ -5,7 +5,7 @@ Each proposal has a stable ID that can be used directly in ChatGPT.
 
 ## P-20260926-01 — Audit forward-outcome collection
 
-- **Status:** PENDING
+- **Status:** READY_TO_DEPLOY
 - **Type:** RESEARCH
 - **Target:** `surge follow-up outcome pipeline`
 - **Current:** 12 follow-up rows; all path NONE; no forward horizons found
