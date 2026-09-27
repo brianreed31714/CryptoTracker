@@ -1,6 +1,6 @@
 {
   "proposal_id": "P-20260926-01",
-  "status": "READY_TO_DEPLOY",
+  "status": "BUNDLED",
   "commit": "f5e545dc71a93c85eee3671e37b4fb8fb4e404aa",
   "components": [
     "trader"
@@ -9,5 +9,6 @@
     "trader": "auto_trader_with_alerts_v11_8_3_forward_outcome_audit.py"
   },
   "mode": "SHADOW",
-  "note": "Instrumentation-only forward-outcome audit; no trading thresholds or execution logic changed."
+  "note": "Superseded by combined SHADOW release P-20260926-04; forward-outcome audit is included in the bundled trader.",
+  "bundle_request": "P-20260926-04"
 }
