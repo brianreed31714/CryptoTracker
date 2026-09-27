@@ -19,7 +19,7 @@ TIMESTAMP_COLUMNS = [
 
 ROOT_PATTERNS = [
     "trades_{date}.csv","missed_opportunities_{date}.csv","surge_followup_log.csv",
-    "confirmation_feed_log.csv","ai_confirmation_log.csv","reacceleration_watch_log.csv",
+    "surge_followup_audit.csv","confirmation_feed_log.csv","ai_confirmation_log.csv","reacceleration_watch_log.csv",
     "discovery_source_log.csv","holder_metrics_history.csv","x_api_usage_log.csv"
 ]
 SMART_FILES = [
