@@ -1,0 +1,34 @@
+{
+  "proposal_id": "P-20260927-02",
+  "title": "Repair trader regression and add deployment capability guard",
+  "change_type": "CODE+DEPLOYMENT_SAFETY",
+  "target": "active trader release lineage and deployment validation",
+  "current": "Combined SHADOW release regressed previously deployed auto-start, Helius cache/backoff, and scanner-pressure protections.",
+  "proposed": "Create V11.8.6 from the SHADOW audit trader while restoring remote auto-start, .env.config loading, wallet USDC caching, Helius retry/backoff, scanner pressure controls, and add a deployment-agent guard that blocks future trader releases missing protected capabilities.",
+  "evidence": [
+    "The deployed shadow-audit trader contains an unconditional START LIVE input prompt.",
+    "The deployed shadow-audit trader lacks WALLET_BALANCE_CACHE_SECONDS, HELIUS_MAX_RETRIES, MAX_ACTIVE_SCAN_TOKENS, and _helius_post_json.",
+    "The current .env.config still has REQUIRE_START_LIVE_CONFIRMATION=0, proving the regression is in the deployed code rather than the intended configuration."
+  ],
+  "risk": "Deployment guard intentionally blocks future trader releases that remove protected features until the guard is deliberately updated. V11.8.6 preserves current trading thresholds and SHADOW audit instrumentation.",
+  "confidence": "HIGH",
+  "recommended_mode": "LIVE",
+  "approval_required": true,
+  "status": "APPROVED",
+  "review_date": "2026-09-27",
+  "approved_at": "2026-09-27T16:30:00-07:00",
+  "status_note": "Explicitly approved by user in ChatGPT: 'go'.",
+  "implementation": {
+    "trader_file": "auto_trader_with_alerts_v11_8_6_shadow_audits_helius_resilience.py",
+    "trader_commit": "1418a60277c2336112996f630f4e11d3c55ce895",
+    "deployment_guard_commit": "b46f54f44f91a40f48cb7161f4c11230dcc0b006",
+    "protected_capabilities": [
+      "remote_autostart",
+      "helius_wallet_cache",
+      "helius_backoff",
+      "scanner_pressure_cap",
+      "shadow_forward_outcomes",
+      "shadow_missed_opportunity_audit"
+    ]
+  }
+}
