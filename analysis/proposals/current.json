@@ -1,15 +1,23 @@
 {
-  "generated_at": "2026-09-26T22:23:31",
+  "generated_at": "2026-09-26T22:46:23",
   "review_date": "2026-09-26",
-  "proposal_count": 1,
+  "proposal_count": 2,
   "pending": [
-    "P-20260926-01"
+    "P-20260926-01",
+    "P-20260926-02"
   ],
   "proposals": [
     {
       "proposal_id": "P-20260926-01",
-      "title": "Audit daily evidence collection completeness",
+      "title": "Audit daily evidence completeness",
       "confidence": "HIGH",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20260926-02",
+      "title": "Verify smart-money monitor health",
+      "confidence": "MEDIUM",
       "recommended_mode": "SHADOW",
       "status": "PENDING"
     }

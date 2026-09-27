@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20260926-02",
+  "title": "Verify smart-money monitor health",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor event, campaign, and trader-performance pipeline",
+  "current": "All three smart-money files were present after date filtering but contained zero rows.",
+  "proposed": "Perform a shadow health check that separately reports poll success, tracked-wallet count, transactions inspected, qualifying buys detected, campaigns updated, and timestamp-filter exclusions, without changing campaign thresholds or trading influence.",
+  "evidence": [
+    "smart_money_events_v21.csv has n=0 filtered rows.",
+    "smart_money_campaigns_v21.csv has n=0 filtered rows.",
+    "trader_performance_v21.csv has n=0 filtered rows, leaving campaign strength and wallet 30-minute outcomes unevaluable."
+  ],
+  "risk": "Additional health telemetry may increase log volume and API usage if implemented without preserving the existing polling behavior.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-09-26",
+  "created_at": "2026-09-26T22:46:23",
+  "updated_at": "2026-09-26T22:46:23",
+  "implementation": {},
+  "deployment": {}
+}

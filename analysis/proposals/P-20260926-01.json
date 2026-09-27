@@ -1,24 +1,23 @@
 {
   "proposal_id": "P-20260926-01",
-  "title": "Audit daily evidence collection completeness",
+  "title": "Audit daily evidence completeness",
   "change_type": "RESEARCH",
-  "target": "daily telemetry generation and evidence bundling",
-  "current": "The review has only three zero-row operational CSV files and no trade, follow-up, Luna, confirmation-feed, X-usage, or missed-opportunity observations.",
-  "proposed": "With explicit human approval, run a SHADOW-only audit for the next review period that verifies each configured collector's process status, expected output path, last-write timestamp, row count, and zero-activity reason; do not alter trading thresholds or execution behavior.",
+  "target": "daily evidence collection and bundle assembly",
+  "current": "The daily bundle lists discovery and smart-money files but does not list trade, surge-follow-up, AI-confirmation, or missed-opportunity outputs; associated metrics contain zero observations.",
+  "proposed": "Run a shadow-only completeness audit for the next review cycle that records whether each expected output was generated, whether it contains a header, its row count, its latest timestamp, and whether zero rows mean no qualifying events rather than collection or bundling failure.",
   "evidence": [
-    "Smart-money events, campaigns, and trader-performance files each contain 0 rows.",
-    "Metrics report 0 buys, 0 sells, 0 follow-ups, 0 Luna rows, 0 campaign rows, and 0 unique campaigns.",
-    "Configured outputs such as surge_followup_log.csv, ai_confirmation_log.csv, confirmation_feed_log.csv, x_api_usage_log.csv, and the dated missed-opportunity report are not present in the supplied manifest.",
-    "With n=0, hit rates, medians, MFE, MAE, and false-positive cost cannot be calculated."
+    "Trades, follow-ups, and Luna each have n=0.",
+    "Expected trades_YYYY-MM-DD.csv, surge_followup_log.csv, ai_confirmation_log.csv, and missed_opportunities_YYYY-MM-DD.csv are not listed in files_present.",
+    "Without rejected-candidate and follow-up records, hit rates, MFE, MAE, false-positive cost, and false-negative cost cannot be calculated."
   ],
-  "risk": "The audit may create operational noise or false alarms on a legitimately inactive day and adds monitoring overhead without directly improving trading returns.",
+  "risk": "The audit adds operational work and may produce alerts on legitimately inactive days unless true-zero and missing-data states are distinguished.",
   "confidence": "HIGH",
   "recommended_mode": "SHADOW",
   "approval_required": true,
   "status": "PENDING",
   "review_date": "2026-09-26",
-  "created_at": "2026-09-26T22:23:31",
-  "updated_at": "2026-09-26T22:23:31",
+  "created_at": "2026-09-26T22:46:23",
+  "updated_at": "2026-09-26T22:46:23",
   "implementation": {},
   "deployment": {}
 }
