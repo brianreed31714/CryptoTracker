@@ -1,0 +1,24 @@
+{
+  "proposal_id": "P-20260926-01",
+  "title": "Audit daily evidence collection completeness",
+  "change_type": "RESEARCH",
+  "target": "daily telemetry generation and evidence bundling",
+  "current": "The review has only three zero-row operational CSV files and no trade, follow-up, Luna, confirmation-feed, X-usage, or missed-opportunity observations.",
+  "proposed": "With explicit human approval, run a SHADOW-only audit for the next review period that verifies each configured collector's process status, expected output path, last-write timestamp, row count, and zero-activity reason; do not alter trading thresholds or execution behavior.",
+  "evidence": [
+    "Smart-money events, campaigns, and trader-performance files each contain 0 rows.",
+    "Metrics report 0 buys, 0 sells, 0 follow-ups, 0 Luna rows, 0 campaign rows, and 0 unique campaigns.",
+    "Configured outputs such as surge_followup_log.csv, ai_confirmation_log.csv, confirmation_feed_log.csv, x_api_usage_log.csv, and the dated missed-opportunity report are not present in the supplied manifest.",
+    "With n=0, hit rates, medians, MFE, MAE, and false-positive cost cannot be calculated."
+  ],
+  "risk": "The audit may create operational noise or false alarms on a legitimately inactive day and adds monitoring overhead without directly improving trading returns.",
+  "confidence": "HIGH",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-09-26",
+  "created_at": "2026-09-26T22:23:31",
+  "updated_at": "2026-09-26T22:23:31",
+  "implementation": {},
+  "deployment": {}
+}
