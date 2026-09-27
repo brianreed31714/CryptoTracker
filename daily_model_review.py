@@ -165,18 +165,103 @@ def summarize_smart_money(campaigns, scorecard):
         "wallet_30m_scorecard":perf
     }
 
+def summarize_luna_outcomes(rows):
+    if not rows:
+        return {"rows":0,"signals":0,"labeled_rows":0}
+    signal_ids={str(r.get("signal_id") or "") for r in rows if r.get("signal_id")}
+    labeled=[r for r in rows if int(fnum(r.get("outcome_labeled")) or 0)==1]
+    groups={}
+    grouped=defaultdict(list)
+    for r in labeled:
+        key=(
+            str(r.get("ai_assessment") or "UNKNOWN").upper(),
+            str(r.get("ai_confidence_band") or "UNKNOWN").upper(),
+            int(fnum(r.get("horizon_minutes")) or 0),
+        )
+        grouped[key].append(r)
+    for key,items in grouped.items():
+        vals=[fnum(x.get("return_pct")) for x in items]
+        vals=[v for v in vals if v is not None]
+        mfe=[fnum(x.get("mfe_pct")) for x in items]
+        mfe=[v for v in mfe if v is not None]
+        mae=[fnum(x.get("mae_pct")) for x in items]
+        mae=[v for v in mae if v is not None]
+        groups["|".join(map(str,key))]={
+            "n":len(items),
+            "median_return_pct":round(med(vals),3) if vals else None,
+            "positive_rate_pct":round(pct(sum(v>0 for v in vals),len(vals)),2) if vals else None,
+            "median_mfe_pct":round(med(mfe),3) if mfe else None,
+            "median_mae_pct":round(med(mae),3) if mae else None,
+        }
+    return {
+        "rows":len(rows),
+        "signals":len(signal_ids),
+        "labeled_rows":len(labeled),
+        "groups":groups,
+    }
+
+
+def summarize_feed_health(rows):
+    if not rows:
+        return {"rows":0}
+    coverage=[fnum(r.get("wallet_coverage_pct")) for r in rows]
+    coverage=[x for x in coverage if x is not None]
+    failed=sum(int(fnum(r.get("failed_wallet_checks")) or 0) for r in rows)
+    event_delta=sum(int(fnum(r.get("event_rows_delta")) or 0) for r in rows)
+    campaign_delta=sum(int(fnum(r.get("campaign_rows_delta")) or 0) for r in rows)
+    propagation_issues=sum(
+        str(r.get("event_to_campaign_status") or "").upper()=="EVENTS_WITHOUT_CAMPAIGN_UPDATE"
+        for r in rows
+    )
+    latest=rows[-1]
+    return {
+        "rows":len(rows),
+        "latest_status":str(latest.get("status") or "UNKNOWN").upper(),
+        "latest_wallet_coverage_pct":fnum(latest.get("wallet_coverage_pct")),
+        "median_wallet_coverage_pct":round(med(coverage),2) if coverage else None,
+        "failed_wallet_checks":failed,
+        "event_rows_delta":event_delta,
+        "campaign_rows_delta":campaign_delta,
+        "event_without_campaign_cycles":propagation_issues,
+        "latest_error":str(latest.get("last_error") or "")[:300],
+    }
+
+
+def summarize_missed_audit(rows):
+    if not rows:
+        return {"rows":0}
+    latest=rows[-1]
+    return {
+        "rows":len(rows),
+        "latest_status":str(latest.get("status") or "UNKNOWN").upper(),
+        "signal_rows":int(fnum(latest.get("signal_rows")) or 0),
+        "rejected_signal_rows":int(fnum(latest.get("rejected_signal_rows")) or 0),
+        "usable_rejected_signals":int(fnum(latest.get("usable_rejected_signals")) or 0),
+        "report_exists":int(fnum(latest.get("report_exists")) or 0),
+        "sample_30_rows":int(fnum(latest.get("sample_30_rows")) or 0),
+        "sample_60_rows":int(fnum(latest.get("sample_60_rows")) or 0),
+    }
+
+
 def build_metrics(raw: Path):
     trade_files = sorted(raw.glob("trades_*.csv"))
     trades = read_csv(trade_files[-1]) if trade_files else []
     followups = read_csv(raw/"surge_followup_log.csv")
     ai = read_csv(raw/"ai_confirmation_log.csv")
+    luna_outcome_files = sorted(raw.glob("luna_outcomes_*.csv"))
+    luna_outcomes = read_csv(luna_outcome_files[-1]) if luna_outcome_files else []
+    feed_health = read_csv(raw/"smart_money_feed_health_v23.csv")
+    missed_audit = read_csv(raw/"missed_opportunity_audit.csv")
     campaigns = read_csv(raw/"smart_money_campaigns_v22.csv") or read_csv(raw/"smart_money_campaigns_v21.csv")
     scorecard = read_csv(raw/"wallet_scorecard_v22.csv")
     return {
         "trades":summarize_trades(trades),
         "followups":summarize_followups(followups),
         "luna":summarize_ai(ai),
+        "luna_outcomes":summarize_luna_outcomes(luna_outcomes),
         "smart_money":summarize_smart_money(campaigns,scorecard),
+        "smart_money_feed_health":summarize_feed_health(feed_health),
+        "missed_opportunity_audit":summarize_missed_audit(missed_audit),
         "files_present":sorted(p.name for p in raw.glob("*") if p.is_file())
     }
 
@@ -191,6 +276,25 @@ def deterministic_findings(metrics):
     s=metrics["smart_money"]
     if s.get("unique_campaigns"):
         out.append(f"{s['unique_campaigns']} smart-money campaigns; {s['multi_wallet_convergence_count']} multi-wallet convergence events.")
+    fh=metrics.get("smart_money_feed_health",{})
+    if fh.get("rows"):
+        out.append(
+            f"Smart-money feed health {fh.get('latest_status','UNKNOWN')}; "
+            f"latest wallet coverage {fh.get('latest_wallet_coverage_pct')}%; "
+            f"failed wallet checks {fh.get('failed_wallet_checks',0)}."
+        )
+    lo=metrics.get("luna_outcomes",{})
+    if lo.get("rows"):
+        out.append(
+            f"Luna outcome scorecard has {lo.get('signals',0)} signal(s) and "
+            f"{lo.get('labeled_rows',0)} labeled horizon rows."
+        )
+    ma=metrics.get("missed_opportunity_audit",{})
+    if ma.get("rows"):
+        out.append(
+            f"Missed-opportunity audit status {ma.get('latest_status','UNKNOWN')}; "
+            f"{ma.get('usable_rejected_signals',0)} rejected signal(s) have usable forward horizons."
+        )
     if not out:
         out.append("Insufficient same-day data for a reliable deterministic conclusion.")
     return out
