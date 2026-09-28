@@ -1,0 +1,35 @@
+{
+  "proposal_id": "P-20260927-03",
+  "title": "Move CryptoTracker EOD AI analysis earlier",
+  "change_type": "CODE+CONFIG",
+  "target": "CryptoTracker EOD Pushover + Luna EOD review schedule",
+  "current": "Recurring CryptoTracker EOD analysis is scheduled too late for the user.",
+  "proposed": "Send tonight's EOD analysis at 10:30 PM Pacific on 2026-09-27, then automatically use 10:00 PM Pacific every day thereafter. Preserve the existing Luna EOD review, missed-opportunity review, outcome scorecard, and Pushover report.",
+  "evidence": [
+    "User explicitly requested 10:30 PM PDT tonight and 10:00 PM PDT going forward.",
+    "The EOD Pushover path already calls the Luna EOD review before sending the report.",
+    "A one-date override avoids requiring a manual configuration change tomorrow."
+  ],
+  "risk": "Low. Scheduling-only change; trading logic, position sizing, entry/exit gates, and protected capabilities are unchanged.",
+  "confidence": "HIGH",
+  "recommended_mode": "LIVE",
+  "approval_required": true,
+  "status": "READY_TO_DEPLOY",
+  "review_date": "2026-09-27",
+  "created_at": "2026-09-27T22:18:00-07:00",
+  "updated_at": "2026-09-27T22:18:00-07:00",
+  "approved_at": "2026-09-27T22:18:00-07:00",
+  "status_note": "User explicitly authorized this schedule change in ChatGPT.",
+  "implementation": {
+    "trader_file": "auto_trader_with_alerts_v11_8_7_eod_schedule.py",
+    "implementation_commit": "b06406ff9abad14aca957b2b957ddadde239413f",
+    "config_commit": "c560d2da59ea2f0f5e3fbe29ae4471ba8eaf0b5d",
+    "tonight": "2026-09-27 22:30 America/Los_Angeles",
+    "recurring": "22:00 America/Los_Angeles"
+  },
+  "deployment": {
+    "status": "QUEUED",
+    "trader_file": "auto_trader_with_alerts_v11_8_7_eod_schedule.py",
+    "release_commit": "b06406ff9abad14aca957b2b957ddadde239413f"
+  }
+}
