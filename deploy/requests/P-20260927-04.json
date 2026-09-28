@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260927-04",
+  "status": "READY_TO_DEPLOY",
+  "commit": "3100bffb9616ad8b5e6d81e9bdac05d470eb1a2e",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_7_1_eod_schedule_fix.py"
+  },
+  "mode": "LIVE",
+  "note": "Fixes immediate startup failure caused by parsing CRYPTO_EOD_ONCE_DATE as float. Preserves protected capabilities and 10 PM recurring EOD schedule."
+}
