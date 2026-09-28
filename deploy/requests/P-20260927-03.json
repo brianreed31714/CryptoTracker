@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260927-03",
+  "status": "READY_TO_DEPLOY",
+  "commit": "b06406ff9abad14aca957b2b957ddadde239413f",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_7_eod_schedule.py"
+  },
+  "mode": "LIVE",
+  "note": "Scheduling-only change: 10:30 PM Pacific tonight, then 10:00 PM Pacific recurring. Preserves all protected trader capabilities and existing EOD AI analysis."
+}
