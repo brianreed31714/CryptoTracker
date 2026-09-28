@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-27T12:54:00-07:00",
+  "generated_at": "2026-09-27T23:03:00-07:00",
   "review_date": "2026-09-26",
-  "proposal_count": 4,
+  "proposal_count": 5,
   "pending": [],
   "proposals": [
     {
@@ -30,6 +30,13 @@
       "title": "Audit missed-opportunity report generation",
       "confidence": "MEDIUM",
       "recommended_mode": "SHADOW",
+      "status": "READY_TO_DEPLOY"
+    },
+    {
+      "proposal_id": "P-20260927-04",
+      "title": "Fix CryptoTracker EOD schedule startup failure",
+      "confidence": "HIGH",
+      "recommended_mode": "LIVE",
       "status": "READY_TO_DEPLOY"
     }
   ]
