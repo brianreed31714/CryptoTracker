@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260928-91",
+  "status": "READY_TO_DEPLOY",
+  "commit": "b05d92fc31aeb3068b6ef2f49e2f9c7cf4e653af",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_7_2_eod_schedule_precedence_fix.py"
+  },
+  "mode": "LIVE",
+  "note": "Reliability fix: makes the approved .env.config EOD schedule authoritative over stale schedule keys in local .env. Preserves all trading thresholds, sizing, entry/exit logic, secrets, shadow audits, and protected capabilities. Because the configured 8 PM time has passed and tonight is unsent, the report should run after restart on the next completed cycle."
+}
