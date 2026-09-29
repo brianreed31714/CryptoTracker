@@ -243,6 +243,59 @@ def summarize_missed_audit(rows):
     }
 
 
+def summarize_paper_models(rows):
+    models = defaultdict(list)
+    for row in rows:
+        if str(row.get("action") or "").upper() == "SELL":
+            models[str(row.get("model") or "UNKNOWN")].append(row)
+
+    result = []
+    for name, items in models.items():
+        returns = [fnum(r.get("net_return_pct")) for r in items]
+        returns = [x for x in returns if x is not None]
+        pnls = [fnum(r.get("realized_pnl_usd")) for r in items]
+        pnls = [x for x in pnls if x is not None]
+        gross_win = sum(x for x in pnls if x > 0)
+        gross_loss = abs(sum(x for x in pnls if x < 0))
+        result.append({
+            "model": name,
+            "completed": len(items),
+            "wins": sum(x > 0 for x in pnls),
+            "losses": sum(x < 0 for x in pnls),
+            "win_rate_pct": round(pct(sum(x > 0 for x in pnls), len(pnls)) or 0, 2),
+            "realized_pnl_usd": round(sum(pnls), 8),
+            "avg_net_return_pct": round(sum(returns) / len(returns), 4) if returns else 0.0,
+            "median_net_return_pct": round(med(returns) or 0, 4),
+            "profit_factor": (
+                round(gross_win / gross_loss, 4)
+                if gross_loss
+                else (999.0 if gross_win else 0.0)
+            ),
+        })
+
+    ranked = sorted(
+        result,
+        key=lambda x: (x["realized_pnl_usd"], x["avg_net_return_pct"]),
+        reverse=True,
+    )
+    return {
+        "models": ranked,
+        "completed_across_models": sum(x["completed"] for x in ranked),
+        "preliminary_leader": (
+            ranked[0]["model"]
+            if ranked and ranked[0]["completed"] >= 12
+            else None
+        ),
+        "promotion_candidates": [
+            x["model"]
+            for x in ranked
+            if x["completed"] >= 30
+            and x["avg_net_return_pct"] > 0
+            and x["profit_factor"] >= 1.3
+        ],
+    }
+
+
 def build_metrics(raw: Path):
     trade_files = sorted(raw.glob("trades_*.csv"))
     trades = read_csv(trade_files[-1]) if trade_files else []
@@ -252,6 +305,7 @@ def build_metrics(raw: Path):
     luna_outcomes = read_csv(luna_outcome_files[-1]) if luna_outcome_files else []
     feed_health = read_csv(raw/"smart_money_feed_health_v23.csv")
     missed_audit = read_csv(raw/"missed_opportunity_audit.csv")
+    paper_trades = read_csv(raw/"paper_trades.csv")
     campaigns = read_csv(raw/"smart_money_campaigns_v22.csv") or read_csv(raw/"smart_money_campaigns_v21.csv")
     scorecard = read_csv(raw/"wallet_scorecard_v22.csv")
     return {
@@ -262,6 +316,7 @@ def build_metrics(raw: Path):
         "smart_money":summarize_smart_money(campaigns,scorecard),
         "smart_money_feed_health":summarize_feed_health(feed_health),
         "missed_opportunity_audit":summarize_missed_audit(missed_audit),
+        "paper_research":summarize_paper_models(paper_trades),
         "files_present":sorted(p.name for p in raw.glob("*") if p.is_file())
     }
 
@@ -294,6 +349,12 @@ def deterministic_findings(metrics):
         out.append(
             f"Missed-opportunity audit status {ma.get('latest_status','UNKNOWN')}; "
             f"{ma.get('usable_rejected_signals',0)} rejected signal(s) have usable forward horizons."
+        )
+    pr=metrics.get("paper_research",{})
+    if pr.get("completed_across_models"):
+        out.append(
+            f"Paper laboratory completed {pr['completed_across_models']} exits across models; "
+            f"preliminary leader {pr.get('preliminary_leader') or 'not established'}."
         )
     if not out:
         out.append("Insufficient same-day data for a reliable deterministic conclusion.")
