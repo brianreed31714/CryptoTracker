@@ -490,16 +490,92 @@ def daily_summary(report_date=None, write_files=True):
     return summary
 
 
+def campaign_summary(write_files=True):
+    """Score the full paper campaign with a chronological 70/30 holdout."""
+    rows = []
+    if TRADE_FILE.exists():
+        try:
+            with TRADE_FILE.open("r", newline="", encoding="utf-8") as handle:
+                rows = [r for r in csv.DictReader(handle) if r.get("action") == "SELL"]
+        except Exception:
+            rows = []
+
+    def segment_stats(items):
+        pnls = [_num(r.get("realized_pnl_usd")) for r in items]
+        returns = [_num(r.get("net_return_pct")) for r in items]
+        gross_win = sum(x for x in pnls if x > 0)
+        gross_loss = abs(sum(x for x in pnls if x < 0))
+        return {
+            "n": len(items),
+            "avg_net_return_pct": sum(returns) / len(returns) if returns else 0.0,
+            "median_net_return_pct": median(returns) if returns else 0.0,
+            "realized_pnl_usd": sum(pnls),
+            "win_rate_pct": sum(x > 0 for x in pnls) / len(pnls) * 100 if pnls else 0.0,
+            "profit_factor": gross_win / gross_loss if gross_loss else (999.0 if gross_win else 0.0),
+        }
+
+    models = []
+    for name in MODEL_SPECS:
+        items = sorted(
+            [r for r in rows if r.get("model") == name],
+            key=lambda r: str(r.get("timestamp") or ""),
+        )
+        split = max(1, int(len(items) * 0.70)) if items else 0
+        train = segment_stats(items[:split])
+        holdout = segment_stats(items[split:])
+        all_stats = segment_stats(items)
+        stable = (
+            all_stats["n"] >= 30
+            and train["avg_net_return_pct"] > 0
+            and holdout["avg_net_return_pct"] > 0
+            and holdout["profit_factor"] >= 1.3
+        )
+        models.append({
+            "model": name,
+            "all": all_stats,
+            "development_70pct": train,
+            "holdout_30pct": holdout,
+            "stable_positive_holdout": stable,
+        })
+    models.sort(
+        key=lambda x: (
+            x["stable_positive_holdout"],
+            x["holdout_30pct"]["avg_net_return_pct"],
+            x["all"]["realized_pnl_usd"],
+        ),
+        reverse=True,
+    )
+    summary = {
+        "generated_at": datetime.now().isoformat(),
+        "split": "chronological_70_30",
+        "minimum_completed_for_promotion_review": 30,
+        "models": models,
+        "promotion_candidates": [
+            x["model"] for x in models if x["stable_positive_holdout"]
+        ],
+    }
+    if write_files:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        (DATA_DIR / "campaign_summary.json").write_text(
+            json.dumps(summary, indent=2),
+            encoding="utf-8",
+        )
+    return summary
+
+
 def eod_summary_text(report_date=None):
-    summary = daily_summary(report_date, write_files=True)
+    daily_summary(report_date, write_files=True)
+    summary = campaign_summary(write_files=True)
     models = summary.get("models") or []
-    completed = sum(int(m.get("completed", 0)) for m in models)
+    completed = sum(int((m.get("all") or {}).get("n", 0)) for m in models)
     if not completed:
         return "Paper lab: no completed model trades yet."
     top = models[0]
+    all_stats = top.get("all") or {}
     return (
         f"Paper lab: {completed} exits | leader {top['model']} "
-        f"{top['avg_net_return_pct']:+.2f}% avg | ${top['realized_pnl_usd']:+.4f}"
+        f"{all_stats.get('avg_net_return_pct', 0):+.2f}% avg | "
+        f"${all_stats.get('realized_pnl_usd', 0):+.4f}"
     )
 
 
