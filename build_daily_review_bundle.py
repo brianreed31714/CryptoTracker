@@ -145,6 +145,9 @@ def main():
         item = copy_one(PAPER_DATA_DIR/"daily"/f"{date_str}.{suffix}", raw, date_str)
         if item:
             manifest["files"].append(item)
+    item = copy_one(PAPER_DATA_DIR/"campaign_summary.json", raw, date_str)
+    if item:
+        manifest["files"].append(item)
 
     v22_keys = set()
     for name in SMART_FILES:
