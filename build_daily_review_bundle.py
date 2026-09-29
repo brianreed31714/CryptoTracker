@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 SMART_DATA_DIR = ROOT / "SmartMoneyMonitor" / "data"
+PAPER_DATA_DIR = DATA_DIR / "paper_research"
 ANALYSIS_DIR = ROOT / "analysis" / "daily"
 
 DENY_NAMES = {".env", "traders.json", "wallet.json", "wallets.json"}
@@ -22,6 +23,12 @@ ROOT_PATTERNS = [
     "surge_followup_audit.csv","confirmation_feed_log.csv","ai_confirmation_log.csv","reacceleration_watch_log.csv",
     "discovery_source_log.csv","holder_metrics_history.csv","x_api_usage_log.csv",
     "luna_outcomes_{date}.csv","missed_opportunity_audit.csv"
+]
+PAPER_FILES = [
+    "candidate_observations.csv",
+    "model_decisions.csv",
+    "paper_trades.csv",
+    "model_equity.csv",
 ]
 SMART_FILES = [
     "smart_money_feed_health_v23.csv",
@@ -129,6 +136,15 @@ def main():
             if item:
                 manifest["files"].append(item)
                 break
+
+    for name in PAPER_FILES:
+        item = copy_one(PAPER_DATA_DIR/name, raw, date_str)
+        if item:
+            manifest["files"].append(item)
+    for suffix in ("json", "md"):
+        item = copy_one(PAPER_DATA_DIR/"daily"/f"{date_str}.{suffix}", raw, date_str)
+        if item:
+            manifest["files"].append(item)
 
     v22_keys = set()
     for name in SMART_FILES:
