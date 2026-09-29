@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260928-92",
+  "status": "READY_TO_DEPLOY",
+  "commit": "fc097effbdca57c87b4eebe1f52cd90139466cc6",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_9_paper_research.py"
+  },
+  "mode": "PAPER",
+  "note": "Deploys the protected V11.9 multi-model paper research campaign. LIVE_TRADING=false is repository-authoritative. The lab cannot sign or submit swaps. It logs nine virtual portfolios, executable-cost estimates, rejections, exits, equity, daily rankings, and chronological 70/30 holdout results. No automatic live promotion."
+}
