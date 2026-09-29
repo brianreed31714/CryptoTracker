@@ -69,6 +69,8 @@ _AUTHORITATIVE_CONFIG_KEYS = (
     "CRYPTO_EOD_ONCE_DATE",
     "CRYPTO_EOD_ONCE_HOUR",
     "CRYPTO_EOD_ONCE_MINUTE",
+    "HELIUS_ENABLED",
+    "SOLANA_RPC_URL",
 )
 _config_values = dotenv_values(CONFIG_FILE)
 for _key in _AUTHORITATIVE_CONFIG_KEYS:
@@ -143,6 +145,7 @@ _GECKO_DISCOVERY_CACHE = {"fetched_at": 0.0, "tokens": []}
 _HOLDER_METRICS_CACHE = {}
 _AI_CONFIRMATION_CACHE = {}
 _WALLET_USDC_BALANCE_CACHE = {"value": None, "fetched_at": 0.0}
+_HELIUS_CIRCUIT = {"open_until": 0.0, "reason": "", "opened_at": 0.0, "alerted": False}
 
 DEFAULTS = {
     "SCAN_INTERVAL_SECONDS": 60,
@@ -182,6 +185,7 @@ DEFAULTS = {
     "HELIUS_MAX_RETRIES": 3,
     "HELIUS_BACKOFF_BASE_SECONDS": 1.0,
     "HELIUS_BACKOFF_MAX_SECONDS": 8.0,
+    "HELIUS_CIRCUIT_BREAKER_SECONDS": 86400,
 
     # ----------------------------
     # V11.5 multi-source discovery
@@ -1240,6 +1244,20 @@ def _helius_holder_count(token_address, settings):
     is marked capped and shown as e.g. 10,000+ rather than pretending it is exact.
     """
     helius_key = str(os.getenv("HELIUS_API_KEY") or "").strip()
+    if not helius_enabled(settings):
+        return {
+            "holder_count": 0,
+            "holder_count_capped": False,
+            "pages_fetched": 0,
+            "status": "HELIUS_DISABLED",
+        }
+    if _helius_circuit_open():
+        return {
+            "holder_count": 0,
+            "holder_count_capped": False,
+            "pages_fetched": 0,
+            "status": "HELIUS_CIRCUIT_OPEN",
+        }
     if not helius_key:
         return {
             "holder_count": 0,
@@ -3384,21 +3402,100 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     return sent
 
 
+def helius_enabled(settings=None):
+    """Repository-controlled Helius switch; local stale settings cannot override it."""
+    settings = settings or {}
+    raw = settings.get("HELIUS_ENABLED")
+    if raw is None:
+        raw = os.getenv("HELIUS_ENABLED", "1")
+    return str(raw).strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _is_helius_url(url):
+    return "helius" in str(url or "").lower()
+
+
+def _helius_circuit_open():
+    return time.time() < safe_number(_HELIUS_CIRCUIT.get("open_until"))
+
+
+def helius_data_quality():
+    if not helius_enabled():
+        return "UNAVAILABLE_DISABLED"
+    if _helius_circuit_open():
+        return "UNAVAILABLE_CIRCUIT_OPEN"
+    return "AVAILABLE"
+
+
+def _permanent_helius_failure(status_code, text):
+    text = str(text or "").lower()
+    markers = (
+        "service halted", "credits exhausted", "credit usage",
+        "upgrade plan", "plan credits", "payment required",
+        "quota exhausted", "monthly credits",
+    )
+    return (
+        int(status_code or 0) in {402, 403}
+        or any(marker in text for marker in markers)
+    )
+
+
+def _open_helius_circuit(reason, settings=None):
+    settings = settings or {}
+    seconds = settings.get("HELIUS_CIRCUIT_BREAKER_SECONDS")
+    if seconds is None:
+        seconds = os.getenv("HELIUS_CIRCUIT_BREAKER_SECONDS", "86400")
+    try:
+        seconds = max(3600, int(float(seconds)))
+    except Exception:
+        seconds = 86400
+    now = time.time()
+    _HELIUS_CIRCUIT.update({
+        "open_until": now + seconds,
+        "opened_at": now,
+        "reason": str(reason or "Helius unavailable")[:300],
+    })
+    _warn_api_once(
+        "helius-permanent-halt",
+        f"Helius disabled for {seconds // 3600}h: {_HELIUS_CIRCUIT['reason']}",
+        seconds,
+    )
+    if not _HELIUS_CIRCUIT.get("alerted"):
+        _HELIUS_CIRCUIT["alerted"] = True
+        try:
+            send_pushover_once(
+                "helius-service-halted",
+                "CryptoTracker data degraded",
+                "Helius service is halted or out of credits. Helius-only holder data is disabled; wallet reads use fallback Solana RPC. Paper trading continues.",
+                cooldown_seconds=seconds,
+                audience="personal",
+            )
+        except Exception:
+            pass
+
+
 def _solana_rpc_url():
     explicit = str(os.getenv("SOLANA_RPC_URL") or "").strip()
     if explicit:
         return explicit
 
     helius_key = str(os.getenv("HELIUS_API_KEY") or "").strip()
-    if helius_key:
+    if helius_enabled() and helius_key and not _helius_circuit_open():
         return f"https://mainnet.helius-rpc.com/?api-key={helius_key}"
 
     return "https://api.mainnet-beta.solana.com"
 
 
 def _helius_post_json(url, payload, timeout=25, settings=None):
-    """POST to Helius with bounded exponential backoff for 429/5xx errors."""
+    """POST JSON with retries, but fail fast and open a circuit on permanent Helius failures."""
     settings = settings or {}
+    is_helius = _is_helius_url(url)
+    if is_helius and not helius_enabled(settings):
+        raise RuntimeError("HELIUS_DISABLED")
+    if is_helius and _helius_circuit_open():
+        raise RuntimeError(
+            f"HELIUS_CIRCUIT_OPEN: {_HELIUS_CIRCUIT.get('reason', 'service unavailable')}"
+        )
 
     def _num(key, default, cast=float):
         raw = settings.get(key)
@@ -3412,10 +3509,17 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
     retries = max(0, _num("HELIUS_MAX_RETRIES", 3, int))
     base_delay = max(0.25, _num("HELIUS_BACKOFF_BASE_SECONDS", 1.0))
     max_delay = max(base_delay, _num("HELIUS_BACKOFF_MAX_SECONDS", 8.0))
+    provider = "Helius" if is_helius else "Solana RPC"
 
     for attempt in range(retries + 1):
         try:
             response = requests.post(url, json=payload, timeout=timeout)
+            response_text = str(getattr(response, "text", "") or "")[:1000]
+            if is_helius and _permanent_helius_failure(response.status_code, response_text):
+                reason = f"HTTP {response.status_code}: {response_text[:240]}"
+                _open_helius_circuit(reason, settings)
+                raise RuntimeError(f"HELIUS_PERMANENT_FAILURE: {reason}")
+
             retryable = response.status_code in {429, 500, 502, 503, 504}
             if retryable and attempt < retries:
                 retry_after = safe_number(response.headers.get("Retry-After"))
@@ -3423,7 +3527,7 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
                     max_delay, base_delay * (2 ** attempt)
                 )
                 print(
-                    f"  Helius HTTP {response.status_code}; "
+                    f"  {provider} HTTP {response.status_code}; "
                     f"retry {attempt + 1}/{retries} in {delay:.1f}s..."
                 )
                 time.sleep(delay)
@@ -3434,6 +3538,9 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
             error = body.get("error")
             if error:
                 error_text = str(error).lower()
+                if is_helius and _permanent_helius_failure(0, error_text):
+                    _open_helius_circuit(error, settings)
+                    raise RuntimeError(f"HELIUS_PERMANENT_FAILURE: {error}")
                 throttled = (
                     "429" in error_text
                     or "too many requests" in error_text
@@ -3442,7 +3549,7 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
                 if throttled and attempt < retries:
                     delay = min(max_delay, base_delay * (2 ** attempt))
                     print(
-                        f"  Helius RPC throttled; "
+                        f"  {provider} throttled; "
                         f"retry {attempt + 1}/{retries} in {delay:.1f}s..."
                     )
                     time.sleep(delay)
@@ -3450,17 +3557,19 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
                 raise RuntimeError(str(error))
             return body
 
+        except RuntimeError:
+            raise
         except requests.RequestException as exc:
             if attempt >= retries:
                 raise
             delay = min(max_delay, base_delay * (2 ** attempt))
             print(
-                f"  Helius request warning: {exc}; "
+                f"  {provider} request warning: {exc}; "
                 f"retry {attempt + 1}/{retries} in {delay:.1f}s..."
             )
             time.sleep(delay)
 
-    raise RuntimeError("Helius request failed after retries.")
+    raise RuntimeError(f"{provider} request failed after retries.")
 
 
 def invalidate_wallet_usdc_balance_cache():
@@ -8199,6 +8308,10 @@ def run_cycle(
                     size,
                     settings,
                 ),
+                data_quality={
+                    "helius_status": helius_data_quality(),
+                    "flags": "" if helius_data_quality() == "AVAILABLE" else "HELIUS_UNAVAILABLE_OPTIONAL",
+                },
             )
         except Exception as exc:
             print(f"  PAPER RESEARCH WARNING: {exc}")
