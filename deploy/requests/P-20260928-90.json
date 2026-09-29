@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260928-90",
+  "status": "READY_TO_DEPLOY",
+  "commit": "2f6f7defcef649ff0f0f0feb1878b0eaf176bd96",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_8_7_1_eod_schedule_fix.py"
+  },
+  "mode": "LIVE",
+  "note": "Operator-approved scheduling-only change: daily CryptoTracker log review, AI self-assessment, and EOD performance report move to 8:00 PM America/Los_Angeles. Trading thresholds, sizing, entry/exit logic, and protected capabilities are unchanged."
+}
