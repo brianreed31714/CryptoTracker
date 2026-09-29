@@ -1,0 +1,28 @@
+{
+  "proposal_id": "P-20260928-92",
+  "title": "Launch multi-model paper research campaign",
+  "status": "APPROVED",
+  "approval_source": "Direct user instruction on 2026-09-28",
+  "recommended_mode": "PAPER",
+  "deployment_commit": "fc097effbdca57c87b4eebe1f52cd90139466cc6",
+  "changes": [
+    "Force LIVE_TRADING=false from repository-authoritative non-secret config",
+    "Run nine independent virtual portfolios",
+    "Log candidate features, rejections, model decisions, simulated fills, exits, costs, and equity",
+    "Compare strict, balanced-EV, flow, whale/Luna, early-breakout, low-friction, fast-exit, patient-runner, and regime-filtered models",
+    "Use chronological 70/30 development and holdout evaluation",
+    "Include paper evidence in the 8 PM EOD report and nightly self-assessment"
+  ],
+  "promotion_gate": {
+    "minimum_completed_trades": 30,
+    "development_expectancy_must_be_positive": true,
+    "holdout_expectancy_must_be_positive": true,
+    "minimum_holdout_profit_factor": 1.3,
+    "automatic_live_promotion": false
+  },
+  "safety": [
+    "Paper laboratory contains no signing or transaction-submission code",
+    "Protected Helius resilience, scanner controls, shadow audits, and remote startup remain present",
+    "Any future live promotion requires explicit approval"
+  ]
+}
