@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20260929-93",
+  "status": "READY_TO_DEPLOY",
+  "commit": "cd173d629212cf836b0984849802ad0b8bd9d13a",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_9_paper_research.py"
+  },
+  "mode": "PAPER",
+  "note": "Deploys the V11.9 Helius-free resilience update. LIVE_TRADING=false remains repository-authoritative. Helius calls are disabled, wallet reads use the public Solana RPC, permanent quota failures trip a 24-hour circuit without retries, and paper evidence is tagged when optional holder data is unavailable."
+}
