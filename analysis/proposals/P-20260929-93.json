@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20260929-93",
+  "title": "Operate without paid Helius",
+  "status": "APPROVED",
+  "approval_source": "Direct user instruction on 2026-09-29",
+  "recommended_mode": "PAPER",
+  "deployment_commit": "cd173d629212cf836b0984849802ad0b8bd9d13a",
+  "changes": [
+    "Disable Helius through repository-authoritative configuration",
+    "Route ordinary Solana wallet balance reads to the public mainnet RPC",
+    "Treat service-halted, credit-exhausted, payment-required, and plan-quota responses as permanent failures",
+    "Open a 24-hour Helius circuit breaker and suppress retry storms",
+    "Send one deduplicated personal degradation alert when a permanent Helius failure is detected",
+    "Cache holder data for one hour and cap future holder lookups at two tokens per cycle if Helius is re-enabled",
+    "Tag paper observations, model decisions, simulated trades, and equity rows when optional Helius data is unavailable"
+  ],
+  "safety": [
+    "LIVE_TRADING remains false and repository-authoritative",
+    "Paper laboratory still contains no signing or transaction-submission code",
+    "Helius holder metrics remain observation-only and cannot affect model entry or exit logic",
+    "No paid service or plan upgrade is required"
+  ]
+}
