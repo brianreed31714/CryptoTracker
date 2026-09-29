@@ -212,9 +212,10 @@ def _model_score(candidate, spec, regime):
     return _clip(balanced, 0, 100)
 
 
-def _candidate_row(candidate, regime, scores):
+def _candidate_row(candidate, regime, scores, data_quality=None):
     f = _features(candidate)
     now = datetime.now()
+    data_quality = data_quality or {}
     row = {
         "timestamp": now.isoformat(),
         "date": now.date().isoformat(),
@@ -227,6 +228,8 @@ def _candidate_row(candidate, regime, scores):
         **f,
         "regime": regime["name"],
         "market_breadth": regime["breadth"],
+        "helius_status": data_quality.get("helius_status", "UNKNOWN"),
+        "data_quality_flags": data_quality.get("flags", ""),
     }
     for name in MODEL_SPECS:
         row[f"score_{name}"] = round(scores[name], 6)
@@ -274,6 +277,8 @@ def _close_position(name, model, position, exit_price, reason, now):
         "net_return_pct": round(net_return, 8), "realized_pnl_usd": round(pnl, 8),
         "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
         "roundtrip_preflight_pct": position.get("roundtrip_pct", ""),
+        "helius_status": position.get("helius_status", "UNKNOWN"),
+        "data_quality_flags": position.get("data_quality_flags", ""),
         "equity_after": round(equity, 8),
     })
 
@@ -322,11 +327,14 @@ def _manage_position(name, model, spec, candidates_by_token, price_lookup, now):
         })
 
 
-def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup=None):
+def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup=None, data_quality=None):
     """Run one research cycle.  This function cannot submit a transaction."""
     if not _bool_env("PAPER_RESEARCH_ENABLED", True):
         return {}
     now = datetime.now()
+    data_quality = data_quality or {}
+    helius_status = str(data_quality.get("helius_status") or "UNKNOWN")
+    quality_flags = str(data_quality.get("flags") or "")
     starting_equity = _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15)
     state = _load_state(starting_equity)
     for name in MODEL_SPECS:
@@ -349,7 +357,7 @@ def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup
 
     top_n = int(_num(os.getenv("PAPER_RESEARCH_LOG_TOP_N", "25"), 25))
     for candidate, scores in scored[:max(1, top_n)]:
-        _append_csv(OBS_FILE, _candidate_row(candidate, regime, scores))
+        _append_csv(OBS_FILE, _candidate_row(candidate, regime, scores, data_quality))
 
     quote_cache = {}
     max_quotes = int(_num(os.getenv("PAPER_RESEARCH_MAX_QUOTES_PER_CYCLE", "3"), 3))
@@ -398,6 +406,8 @@ def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup
             "reason": ";".join(dict.fromkeys(reasons)) or "qualified",
             "regime": regime["name"], "roundtrip_pct": roundtrip,
             "integrity_detail": integrity_reason,
+            "helius_status": helius_status,
+            "data_quality_flags": quality_flags,
         })
         if not safe:
             continue
@@ -407,6 +417,7 @@ def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup
             "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
             "size_usdc": size, "score": score, "roundtrip_pct": roundtrip,
             "peak_return_pct": 0.0, "regime": regime["name"],
+            "helius_status": helius_status, "data_quality_flags": quality_flags,
         }
         model["position"] = position
         _append_csv(TRADE_FILE, {
@@ -417,6 +428,7 @@ def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup
             "raw_return_pct": "", "estimated_cost_pct": 100.0 - roundtrip,
             "net_return_pct": "", "realized_pnl_usd": "", "peak_return_pct": "",
             "roundtrip_preflight_pct": roundtrip,
+            "helius_status": helius_status, "data_quality_flags": quality_flags,
             "equity_after": _num(model.get("starting_equity")) + _num(model.get("realized_pnl")),
         })
 
@@ -428,6 +440,7 @@ def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup
             "completed": int(model.get("completed", 0)),
             "open_symbol": (model.get("position") or {}).get("symbol", ""),
             "max_drawdown_pct": round(_num(model.get("max_drawdown_pct")), 8),
+            "helius_status": helius_status, "data_quality_flags": quality_flags,
         })
     state["last_cycle_at"] = now.isoformat()
     state["last_regime"] = regime
@@ -524,6 +537,11 @@ def campaign_summary(write_files=True):
         train = segment_stats(items[:split])
         holdout = segment_stats(items[split:])
         all_stats = segment_stats(items)
+        optional_helius_degraded = sum(
+            "HELIUS_UNAVAILABLE_OPTIONAL" in str(r.get("data_quality_flags") or "")
+            for r in items
+        )
+        all_stats["optional_helius_degraded_trades"] = optional_helius_degraded
         stable = (
             all_stats["n"] >= 30
             and train["avg_net_return_pct"] > 0
