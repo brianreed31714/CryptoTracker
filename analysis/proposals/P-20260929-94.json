@@ -1,0 +1,20 @@
+{
+  "proposal_id": "P-20260929-94",
+  "title": "Run Crypto EOD analysis immediately",
+  "status": "APPROVED",
+  "approval_source": "Direct user instruction on 2026-09-29",
+  "recommended_mode": "PAPER",
+  "deployment_commit": "8a2fbd9a06a0ff10649945acead66ec2fed002ac",
+  "changes": [
+    "Add a repository-controlled one-time EOD trigger",
+    "Run the full local CryptoTracker EOD evidence bundle immediately",
+    "Send the resulting performance report through the existing EOD Pushover route",
+    "Record the one-time key and mark today's recurring report complete to prevent duplicates",
+    "Leave the recurring EOD schedule at 8:00 PM Pacific for future days"
+  ],
+  "safety": [
+    "No arbitrary remote commands are permitted",
+    "LIVE_TRADING remains false and repository-authoritative",
+    "The trigger can execute only once for its exact date and minute"
+  ]
+}
