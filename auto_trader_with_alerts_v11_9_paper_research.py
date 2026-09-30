@@ -3263,12 +3263,33 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     now = datetime.now(crypto_eod_timezone())
     hour = int(settings.get("PUSHOVER_CRYPTO_EOD_HOUR", 23))
     minute = int(settings.get("PUSHOVER_CRYPTO_EOD_MINUTE", 55))
-    if not force and (now.hour, now.minute) < (hour, minute):
-        return False
-
     report_date = now.date().isoformat()
     state = load_json(CRYPTO_EOD_STATE_FILE, {})
-    if not force and state.get("last_sent_date") == report_date:
+
+    # Repository-triggered one-time EOD. This lets an approved remote request
+    # run the full local analysis immediately without permanently moving the
+    # recurring 8 PM schedule or allowing arbitrary remote commands.
+    once_date = str(os.getenv("CRYPTO_EOD_ONCE_DATE") or "").strip()
+    try:
+        once_hour = int(os.getenv("CRYPTO_EOD_ONCE_HOUR", str(hour)))
+        once_minute = int(os.getenv("CRYPTO_EOD_ONCE_MINUTE", str(minute)))
+    except Exception:
+        once_hour, once_minute = hour, minute
+    once_key = f"{once_date}T{once_hour:02d}:{once_minute:02d}"
+    manual_once_due = (
+        bool(once_date)
+        and once_date == report_date
+        and (now.hour, now.minute) >= (once_hour, once_minute)
+        and state.get("manual_once_key") != once_key
+    )
+
+    if not force and not manual_once_due and (now.hour, now.minute) < (hour, minute):
+        return False
+    if (
+        not force
+        and not manual_once_due
+        and state.get("last_sent_date") == report_date
+    ):
         return False
 
     stats = crypto_eod_trade_stats(settings)
@@ -3390,12 +3411,23 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     if sent:
         if force:
             print("  Crypto EOD forced report sent; tonight's scheduled report remains eligible.")
+        elif manual_once_due:
+            save_json(
+                CRYPTO_EOD_STATE_FILE,
+                {
+                    "last_sent_date": report_date,
+                    "sent_at": now.isoformat(),
+                    "manual_once_key": once_key,
+                },
+            )
+            print("  Crypto EOD one-time report sent; recurring report consumed for today.")
         else:
             save_json(
                 CRYPTO_EOD_STATE_FILE,
                 {
                     "last_sent_date": report_date,
                     "sent_at": now.isoformat(),
+                    "manual_once_key": state.get("manual_once_key", ""),
                 },
             )
             print("  Crypto EOD Pushover report sent.")
