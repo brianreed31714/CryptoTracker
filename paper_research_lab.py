@@ -116,8 +116,6 @@ MODEL_SPECS = {
 }
 
 
-def _regime
-
 
 def _regime(candidates):
     usable = [c for c in candidates if _num(c.get("liquidity")) >= 20_000]
@@ -240,8 +238,6 @@ def _model_score(candidate, spec, regime):
     elif regime["name"] == "RISK_OFF":
         balanced -= 12
     return _clip(balanced, 0, 100)
-
-def _candidate_row
 
 def _candidate_row(candidate, regime, scores, data_quality=None):
     f = _features(candidate)
@@ -528,8 +524,6 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         })
     model["shadow_positions"] = positions
 
-
-def run_paper_research
 
 def run_paper_research(
     candidates,
@@ -827,8 +821,6 @@ def run_paper_research(
     return {"regime": regime, "models": state["models"]}
 
 
-def daily_summary
-
 def _max_drawdown_from_returns(returns):
     equity = 1.0
     peak = 1.0
@@ -993,8 +985,6 @@ def daily_summary(report_date=None, write_files=True):
 
     return summary
 
-
-def campaign_summary
 
 def campaign_summary(write_files=True):
     """Score the full paper campaign with a chronological 70/30 holdout."""
