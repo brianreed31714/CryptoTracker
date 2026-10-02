@@ -25,6 +25,7 @@ STATE_FILE = DATA_DIR / "state.json"
 OBS_FILE = DATA_DIR / "candidate_observations.csv"
 DECISION_FILE = DATA_DIR / "model_decisions.csv"
 TRADE_FILE = DATA_DIR / "paper_trades.csv"
+SHADOW_TRADE_FILE = DATA_DIR / "shadow_trades.csv"
 EQUITY_FILE = DATA_DIR / "model_equity.csv"
 SUMMARY_DIR = DATA_DIR / "daily"
 
@@ -111,7 +112,11 @@ MODEL_SPECS = {
     "fast_exit": ModelSpec(58, 98.5, -4, 3, 6, 5, 30),
     "patient_runner": ModelSpec(58, 98.5, -7, 10, 10, 10, 120),
     "regime_filtered": ModelSpec(55, 98.5, -5, 5, 8, 6, 45, requires_risk_on=True),
+    "anti_chase": ModelSpec(56, 98.8, -5, 5, 8, 6, 45, score_kind="anti_chase"),
 }
+
+
+def _regime
 
 
 def _regime(candidates):
@@ -174,6 +179,18 @@ def _model_score(candidate, spec, regime):
     if spec.score_kind == "strict":
         return 100.0 if f["entry_path"] in {"NORMAL", "EARLY_ACCEL"} else 0.0
 
+    negative_penalty = 0.0
+    if f["delta"] < 0:
+        negative_penalty += min(18.0, abs(f["delta"]) * 0.30)
+    if f["volume_accel"] < 1.0:
+        negative_penalty += min(12.0, (1.0 - f["volume_accel"]) * 12.0)
+    if f["buy_sell"] < 1.0:
+        negative_penalty += min(12.0, (1.0 - f["buy_sell"]) * 18.0)
+    if f["price_5m"] > 12.0:
+        negative_penalty += min(15.0, (f["price_5m"] - 12.0) * 0.9)
+    if f["price_1h"] > 45.0:
+        negative_penalty += min(15.0, (f["price_1h"] - 45.0) * 0.25)
+
     balanced = 100 * (
         0.30 * _clip(f["quant"] / 120)
         + 0.20 * _clip(f["delta"] / 60)
@@ -182,35 +199,49 @@ def _model_score(candidate, spec, regime):
         + 0.10 * _clip(f["tx5"] / 80)
         + 0.05 * _clip(math.log10(max(f["volume_5m"], 1)) / 5)
         + 0.05 * _clip(1 - abs(f["price_5m"] - 6) / 20)
-    )
+    ) - negative_penalty
+
     if spec.score_kind == "flow":
-        return 100 * (
+        score = 100 * (
             0.30 * _clip((f["volume_accel"] - 1) / 3)
             + 0.25 * _clip((f["buy_sell"] - 1) / 1.5)
             + 0.20 * _clip(f["delta"] / 60)
             + 0.15 * _clip(f["tx5"] / 80)
             + 0.10 * _clip(1 - abs(f["price_5m"] - 5) / 18)
         )
+        return _clip(score - negative_penalty, 0, 100)
     if spec.score_kind == "whale_ai":
-        return 0.60 * balanced + 40 * (
+        score = 0.60 * balanced + 40 * (
             0.45 * _clip(f["whale"] / 25)
             + 0.35 * _clip(f["ai_confidence"] / 100)
             + 0.20 * _clip(f["token_social"] / 10)
         )
+        return _clip(score, 0, 100)
     if spec.score_kind == "early":
-        return 100 * (
+        score = 100 * (
             0.30 * _clip(f["delta"] / 70)
             + 0.25 * _clip((f["volume_accel"] - 1) / 4)
             + 0.20 * _clip((f["buy_sell"] - 1) / 2)
             + 0.15 * _clip(f["tx5"] / 60)
             + 0.10 * _clip(1 - abs(f["price_5m"] - 4) / 15)
         )
+        return _clip(score - negative_penalty, 0, 100)
+    if spec.score_kind == "anti_chase":
+        extension_penalty = 0.0
+        if f["price_5m"] > 9:
+            extension_penalty += (f["price_5m"] - 9) * 2.0
+        if f["price_1h"] > 35:
+            extension_penalty += (f["price_1h"] - 35) * 0.35
+        if f["price_5m"] < 1:
+            extension_penalty += (1 - f["price_5m"]) * 5.0
+        return _clip(balanced + 6.0 - extension_penalty, 0, 100)
     if regime["name"] == "RISK_ON":
         balanced += 7
     elif regime["name"] == "RISK_OFF":
         balanced -= 12
     return _clip(balanced, 0, 100)
 
+def _candidate_row
 
 def _candidate_row(candidate, regime, scores, data_quality=None):
     f = _features(candidate)
