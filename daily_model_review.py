@@ -249,33 +249,62 @@ def summarize_paper_models(rows):
         if str(row.get("action") or "").upper() == "SELL":
             models[str(row.get("model") or "UNKNOWN")].append(row)
 
+    def max_drawdown(returns):
+        equity = 1.0
+        peak = 1.0
+        worst = 0.0
+        for value in returns:
+            equity *= max(0.000001, 1.0 + value / 100.0)
+            peak = max(peak, equity)
+            if peak > 0:
+                worst = max(worst, (peak - equity) / peak * 100.0)
+        return worst
+
     result = []
     for name, items in models.items():
         returns = [fnum(r.get("net_return_pct")) for r in items]
         returns = [x for x in returns if x is not None]
         pnls = [fnum(r.get("realized_pnl_usd")) for r in items]
         pnls = [x for x in pnls if x is not None]
-        gross_win = sum(x for x in pnls if x > 0)
-        gross_loss = abs(sum(x for x in pnls if x < 0))
+
+        # Shadow cohorts do not have dollar PnL; use return sign for W/L
+        # and keep realized PnL at zero so they remain research-only.
+        sign_source = pnls if pnls else returns
+        gross_win = sum(x for x in sign_source if x > 0)
+        gross_loss = abs(sum(x for x in sign_source if x < 0))
         result.append({
             "model": name,
             "completed": len(items),
-            "wins": sum(x > 0 for x in pnls),
-            "losses": sum(x < 0 for x in pnls),
-            "win_rate_pct": round(pct(sum(x > 0 for x in pnls), len(pnls)) or 0, 2),
+            "wins": sum(x > 0 for x in sign_source),
+            "losses": sum(x < 0 for x in sign_source),
+            "win_rate_pct": round(
+                pct(sum(x > 0 for x in sign_source), len(sign_source)) or 0,
+                2,
+            ),
             "realized_pnl_usd": round(sum(pnls), 8),
-            "avg_net_return_pct": round(sum(returns) / len(returns), 4) if returns else 0.0,
+            "avg_net_return_pct": round(
+                sum(returns) / len(returns),
+                4,
+            ) if returns else 0.0,
             "median_net_return_pct": round(med(returns) or 0, 4),
             "profit_factor": (
                 round(gross_win / gross_loss, 4)
                 if gross_loss
                 else (999.0 if gross_win else 0.0)
             ),
+            "max_drawdown_pct": round(max_drawdown(returns), 4),
         })
 
     ranked = sorted(
         result,
-        key=lambda x: (x["realized_pnl_usd"], x["avg_net_return_pct"]),
+        key=lambda x: (
+            x["completed"] >= 12,
+            x["avg_net_return_pct"],
+            min(x["profit_factor"], 10.0),
+            -x["max_drawdown_pct"],
+            x["median_net_return_pct"],
+            x["realized_pnl_usd"],
+        ),
         reverse=True,
     )
     return {
@@ -292,9 +321,9 @@ def summarize_paper_models(rows):
             if x["completed"] >= 30
             and x["avg_net_return_pct"] > 0
             and x["profit_factor"] >= 1.3
+            and x["max_drawdown_pct"] <= 15
         ],
     }
-
 
 def build_metrics(raw: Path):
     trade_files = sorted(raw.glob("trades_*.csv"))
@@ -306,6 +335,7 @@ def build_metrics(raw: Path):
     feed_health = read_csv(raw/"smart_money_feed_health_v23.csv")
     missed_audit = read_csv(raw/"missed_opportunity_audit.csv")
     paper_trades = read_csv(raw/"paper_trades.csv")
+    shadow_trades = read_csv(raw/"shadow_trades.csv")
     campaigns = read_csv(raw/"smart_money_campaigns_v22.csv") or read_csv(raw/"smart_money_campaigns_v21.csv")
     scorecard = read_csv(raw/"wallet_scorecard_v22.csv")
     return {
@@ -317,6 +347,7 @@ def build_metrics(raw: Path):
         "smart_money_feed_health":summarize_feed_health(feed_health),
         "missed_opportunity_audit":summarize_missed_audit(missed_audit),
         "paper_research":summarize_paper_models(paper_trades),
+        "paper_shadow_research":summarize_paper_models(shadow_trades),
         "files_present":sorted(p.name for p in raw.glob("*") if p.is_file())
     }
 
@@ -353,8 +384,14 @@ def deterministic_findings(metrics):
     pr=metrics.get("paper_research",{})
     if pr.get("completed_across_models"):
         out.append(
-            f"Paper laboratory completed {pr['completed_across_models']} exits across models; "
+            f"Executable paper laboratory completed {pr['completed_across_models']} exits across models; "
             f"preliminary leader {pr.get('preliminary_leader') or 'not established'}."
+        )
+    ps=metrics.get("paper_shadow_research",{})
+    if ps.get("completed_across_models"):
+        out.append(
+            f"Multi-candidate shadow laboratory completed {ps['completed_across_models']} exits; "
+            f"preliminary shadow leader {ps.get('preliminary_leader') or 'not established'}."
         )
     if not out:
         out.append("Insufficient same-day data for a reliable deterministic conclusion.")
