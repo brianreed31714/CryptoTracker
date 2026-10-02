@@ -102,6 +102,14 @@ PROTECTED_TRADER_CAPABILITIES = {
     "shadow_missed_opportunity_audit": (
         "MISSED_OPPORTUNITY_AUDIT_FILE",
     ),
+    "v11_10_research_fairness": (
+        "paper_research_lab_v11_10",
+        "exit_value_lookup",
+    ),
+    "daily_evidence_publish": (
+        "publish_daily_evidence",
+        "Evidence publish:",
+    ),
 }
 
 
@@ -193,6 +201,22 @@ def validate_request(req: dict):
         if comp == "trader":
             validate_trader_capabilities(validated[comp])
         py_compile.compile(str(validated[comp]), doraise=True)
+
+        # Compile versioned local dependencies referenced by protected traders.
+        if comp == "trader":
+            trader_source = validated[comp].read_text(
+                encoding="utf-8",
+                errors="replace",
+            )
+            dependency_markers = {
+                "paper_research_lab_v11_10": ROOT / "paper_research_lab_v11_10.py",
+                "publish_daily_evidence": ROOT / "publish_daily_evidence.py",
+            }
+            for marker, dep_path in dependency_markers.items():
+                if marker in trader_source:
+                    if not dep_path.exists():
+                        raise FileNotFoundError(str(dep_path.relative_to(ROOT)))
+                    py_compile.compile(str(dep_path), doraise=True)
 
     return pid, commit, validated
 
