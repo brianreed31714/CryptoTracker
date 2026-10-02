@@ -47,12 +47,55 @@ def _bool_env(name, default=True):
 
 
 def _append_csv(path, row):
+    """Append while safely evolving CSV schemas without losing old rows."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    new_fields = list(row.keys())
     exists = path.exists() and path.stat().st_size > 0
-    with path.open("a", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row.keys()), extrasaction="ignore")
-        if not exists:
+
+    if not exists:
+        with path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=new_fields,
+                extrasaction="ignore",
+            )
             writer.writeheader()
+            writer.writerow(row)
+        return
+
+    try:
+        with path.open("r", newline="", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle)
+            old_fields = list(reader.fieldnames or [])
+            old_rows = list(reader)
+    except Exception:
+        old_fields = []
+        old_rows = []
+
+    combined_fields = list(old_fields)
+    for field in new_fields:
+        if field not in combined_fields:
+            combined_fields.append(field)
+
+    if combined_fields != old_fields:
+        temp = path.with_suffix(path.suffix + ".schema.tmp")
+        with temp.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=combined_fields,
+                extrasaction="ignore",
+            )
+            writer.writeheader()
+            for old_row in old_rows:
+                writer.writerow(old_row)
+        temp.replace(path)
+
+    with path.open("a", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=combined_fields or new_fields,
+            extrasaction="ignore",
+        )
         writer.writerow(row)
 
 
