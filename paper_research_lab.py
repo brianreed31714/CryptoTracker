@@ -531,181 +531,470 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
 
 def run_paper_research
 
-def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup=None, data_quality=None):
-    """Run one research cycle.  This function cannot submit a transaction."""
+def run_paper_research(
+    candidates,
+    settings,
+    price_lookup=None,
+    integrity_lookup=None,
+    exit_value_lookup=None,
+    data_quality=None,
+):
+    """Run one protected research cycle. This function cannot submit a transaction."""
     if not _bool_env("PAPER_RESEARCH_ENABLED", True):
         return {}
+
     now = datetime.now()
     data_quality = data_quality or {}
     helius_status = str(data_quality.get("helius_status") or "UNKNOWN")
     quality_flags = str(data_quality.get("flags") or "")
     starting_equity = _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15)
     state = _load_state(starting_equity)
+
     for name in MODEL_SPECS:
         state.setdefault("models", {}).setdefault(name, {
-            "starting_equity": starting_equity, "realized_pnl": 0.0,
-            "peak_equity": starting_equity, "max_drawdown_pct": 0.0,
-            "completed": 0, "wins": 0, "losses": 0, "position": None,
+            "starting_equity": starting_equity,
+            "realized_pnl": 0.0,
+            "peak_equity": starting_equity,
+            "max_drawdown_pct": 0.0,
+            "completed": 0,
+            "wins": 0,
+            "losses": 0,
+            "position": None,
+            "shadow_positions": [],
+            "shadow_last_entry": {},
         })
+        state["models"][name].setdefault("shadow_positions", [])
+        state["models"][name].setdefault("shadow_last_entry", {})
 
     regime = _regime(candidates)
-    candidates_by_token = {str(c.get("token_address")): c for c in candidates if c.get("token_address")}
+    candidates_by_token = {
+        str(c.get("token_address")): c
+        for c in candidates
+        if c.get("token_address")
+    }
+
     for name, spec in MODEL_SPECS.items():
-        _manage_position(name, state["models"][name], spec, candidates_by_token, price_lookup, now)
+        model = state["models"][name]
+        _manage_position(
+            name,
+            model,
+            spec,
+            candidates_by_token,
+            price_lookup,
+            exit_value_lookup,
+            now,
+        )
+        _manage_shadow_positions(
+            name,
+            model,
+            spec,
+            candidates_by_token,
+            price_lookup,
+            now,
+        )
 
     scored = []
     for candidate in candidates:
-        scores = {name: _model_score(candidate, spec, regime) for name, spec in MODEL_SPECS.items()}
+        scores = {
+            name: _model_score(candidate, spec, regime)
+            for name, spec in MODEL_SPECS.items()
+        }
         candidate["paper_model_scores"] = scores
         scored.append((candidate, scores))
 
     top_n = int(_num(os.getenv("PAPER_RESEARCH_LOG_TOP_N", "25"), 25))
     for candidate, scores in scored[:max(1, top_n)]:
-        _append_csv(OBS_FILE, _candidate_row(candidate, regime, scores, data_quality))
+        _append_csv(
+            OBS_FILE,
+            _candidate_row(candidate, regime, scores, data_quality),
+        )
 
-    quote_cache = {}
-    max_quotes = int(_num(os.getenv("PAPER_RESEARCH_MAX_QUOTES_PER_CYCLE", "3"), 3))
     normal_size = _num(settings.get("NORMAL_TRADE_SIZE_USDC", 1.5), 1.5)
     early_size = _num(settings.get("EARLY_ACCEL_TRADE_SIZE_USDC", 0.75), 0.75)
+
+    ranked_by_model = {
+        name: sorted(scored, key=lambda item: item[1][name], reverse=True)
+        for name in MODEL_SPECS
+    }
+
+    for name, spec in MODEL_SPECS.items():
+        _add_shadow_positions(
+            name,
+            state["models"][name],
+            spec,
+            ranked_by_model[name],
+            regime,
+            now,
+        )
+
+    # Nominate first, quote second. This removes sequential model-order bias.
+    nominations = {}
+    model_nomination = {}
+    for name, spec in MODEL_SPECS.items():
+        model = state["models"][name]
+        if model.get("position"):
+            continue
+
+        for candidate, scores in ranked_by_model[name]:
+            score = scores.get(name, 0.0)
+            safe, reasons = _safety_pass(candidate)
+            if spec.requires_risk_on and regime["name"] != "RISK_ON":
+                safe = False
+                reasons.append("regime_not_risk_on")
+            if score < spec.threshold:
+                safe = False
+                reasons.append("score_below_threshold")
+            if not safe:
+                continue
+
+            size = early_size if spec.size_key == "EARLY" else normal_size
+            token = str(candidate.get("token_address") or "")
+            key = f"{token}|{size:.8f}"
+            nominations.setdefault(
+                key,
+                {"candidate": candidate, "size": size, "models": []},
+            )
+            nominations[key]["models"].append(name)
+            model_nomination[name] = (key, candidate, scores)
+            break
+
+    quote_cache = {}
+    configured_quote_cap = int(
+        _num(
+            os.getenv(
+                "PAPER_RESEARCH_MAX_QUOTES_PER_CYCLE",
+                str(len(MODEL_SPECS)),
+            ),
+            len(MODEL_SPECS),
+        )
+    )
+    max_quotes = max(len(MODEL_SPECS), configured_quote_cap)
+
+    for key, item in list(nominations.items())[:max_quotes]:
+        if not integrity_lookup:
+            quote_cache[key] = {"error": "integrity_lookup_unavailable"}
+            continue
+        try:
+            quote_cache[key] = (
+                integrity_lookup(item["candidate"], item["size"]) or {}
+            )
+        except Exception as exc:
+            quote_cache[key] = {"error": str(exc)}
 
     for name, spec in MODEL_SPECS.items():
         model = state["models"][name]
         if model.get("position"):
             continue
-        ranked = sorted(scored, key=lambda item: item[1][name], reverse=True)
-        candidate, scores = ranked[0] if ranked else ({}, {name: 0.0})
-        score = scores.get(name, 0.0)
-        safe, reasons = _safety_pass(candidate) if candidate else (False, ["no_candidate"])
-        if spec.requires_risk_on and regime["name"] != "RISK_ON":
-            safe = False
-            reasons.append("regime_not_risk_on")
-        if score < spec.threshold:
-            safe = False
-            reasons.append("score_below_threshold")
-        token = str(candidate.get("token_address") or "")
-        roundtrip = 0.0
-        integrity_reason = ""
-        if safe and token:
-            if token not in quote_cache and integrity_lookup and len(quote_cache) < max_quotes:
-                size = early_size if spec.size_key == "EARLY" else normal_size
-                try:
-                    quote_cache[token] = integrity_lookup(candidate, size) or {}
-                except Exception as exc:
-                    quote_cache[token] = {"error": str(exc)}
-            integrity = quote_cache.get(token, {})
-            roundtrip = _num(integrity.get("worst_roundtrip_pct"))
-            if roundtrip <= 0:
-                safe = False
-                reasons.append("no_executable_quote")
-                integrity_reason = str(integrity.get("error") or "")[:180]
-            elif roundtrip < spec.roundtrip_floor:
-                safe = False
-                reasons.append("roundtrip_below_model_floor")
 
-        action = "ENTER" if safe else "REJECT"
+        nomination = model_nomination.get(name)
+        if not nomination:
+            if ranked_by_model[name]:
+                candidate, scores = ranked_by_model[name][0]
+            else:
+                candidate, scores = {}, {name: 0.0}
+            _append_csv(DECISION_FILE, {
+                "timestamp": now.isoformat(),
+                "date": now.date().isoformat(),
+                "model": name,
+                "action": "REJECT",
+                "symbol": candidate.get("symbol", ""),
+                "token_address": candidate.get("token_address", ""),
+                "score": round(scores.get(name, 0.0), 6),
+                "threshold": spec.threshold,
+                "reason": "no_eligible_candidate",
+                "regime": regime["name"],
+                "roundtrip_pct": 0.0,
+                "integrity_detail": "",
+                "helius_status": helius_status,
+                "data_quality_flags": quality_flags,
+            })
+            continue
+
+        key, candidate, scores = nomination
+        integrity = quote_cache.get(key, {})
+        roundtrip = _num(integrity.get("worst_roundtrip_pct"))
+        reasons = []
+        if roundtrip <= 0:
+            reasons.append("no_executable_quote")
+        elif roundtrip < spec.roundtrip_floor:
+            reasons.append("roundtrip_below_model_floor")
+        if integrity.get("passed") is False:
+            reasons.extend(
+                str(x)
+                for x in (integrity.get("reasons") or [])
+            )
+
         _append_csv(DECISION_FILE, {
-            "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
-            "action": action, "symbol": candidate.get("symbol", ""),
-            "token_address": token, "score": round(score, 6), "threshold": spec.threshold,
+            "timestamp": now.isoformat(),
+            "date": now.date().isoformat(),
+            "model": name,
+            "action": "ENTER" if not reasons else "REJECT",
+            "symbol": candidate.get("symbol", ""),
+            "token_address": candidate.get("token_address", ""),
+            "score": round(scores.get(name, 0.0), 6),
+            "threshold": spec.threshold,
             "reason": ";".join(dict.fromkeys(reasons)) or "qualified",
-            "regime": regime["name"], "roundtrip_pct": roundtrip,
-            "integrity_detail": integrity_reason,
+            "regime": regime["name"],
+            "roundtrip_pct": roundtrip,
+            "integrity_detail": str(integrity.get("error") or "")[:180],
             "helius_status": helius_status,
             "data_quality_flags": quality_flags,
         })
-        if not safe:
+        if reasons:
             continue
+
         size = early_size if spec.size_key == "EARLY" else normal_size
+        samples = list(integrity.get("samples") or [])
+        chosen_sample = (
+            min(
+                samples,
+                key=lambda x: _num(x.get("return_pct"), 999.0),
+            )
+            if samples
+            else {}
+        )
+        entry_token_raw = int(_num(chosen_sample.get("token_raw")))
         position = {
-            "symbol": candidate.get("symbol", ""), "token_address": token,
-            "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
-            "size_usdc": size, "score": score, "roundtrip_pct": roundtrip,
-            "peak_return_pct": 0.0, "regime": regime["name"],
-            "helius_status": helius_status, "data_quality_flags": quality_flags,
+            "symbol": candidate.get("symbol", ""),
+            "token_address": str(candidate.get("token_address") or ""),
+            "entry_time": now.isoformat(),
+            "entry_price": _num(candidate.get("price_usd")),
+            "size_usdc": size,
+            "score": scores.get(name, 0.0),
+            "roundtrip_pct": roundtrip,
+            "entry_token_raw": entry_token_raw,
+            "peak_return_pct": 0.0,
+            "regime": regime["name"],
+            "decay_confirmations": 0,
+            "helius_status": helius_status,
+            "data_quality_flags": quality_flags,
         }
         model["position"] = position
         _append_csv(TRADE_FILE, {
-            "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
-            "action": "BUY", "symbol": position["symbol"], "token_address": token,
-            "reason": "MODEL_ENTRY", "entry_time": now.isoformat(),
-            "entry_price": position["entry_price"], "exit_price": "", "size_usdc": size,
-            "raw_return_pct": "", "estimated_cost_pct": 100.0 - roundtrip,
-            "net_return_pct": "", "realized_pnl_usd": "", "peak_return_pct": "",
+            "timestamp": now.isoformat(),
+            "date": now.date().isoformat(),
+            "model": name,
+            "action": "BUY",
+            "symbol": position["symbol"],
+            "token_address": position["token_address"],
+            "reason": "MODEL_ENTRY",
+            "entry_time": now.isoformat(),
+            "entry_price": position["entry_price"],
+            "exit_price": "",
+            "size_usdc": size,
+            "raw_return_pct": "",
+            "estimated_cost_pct": 100.0 - roundtrip,
+            "net_return_pct": "",
+            "realized_pnl_usd": "",
+            "peak_return_pct": "",
             "roundtrip_preflight_pct": roundtrip,
-            "helius_status": helius_status, "data_quality_flags": quality_flags,
-            "equity_after": _num(model.get("starting_equity")) + _num(model.get("realized_pnl")),
+            "entry_regime": regime["name"],
+            "exit_quote_status": "",
+            "exit_value_usdc": "",
+            "helius_status": helius_status,
+            "data_quality_flags": quality_flags,
+            "equity_after": (
+                _num(model.get("starting_equity"))
+                + _num(model.get("realized_pnl"))
+            ),
         })
 
     for name, model in state["models"].items():
-        equity = _num(model.get("starting_equity")) + _num(model.get("realized_pnl"))
+        equity = (
+            _num(model.get("starting_equity"))
+            + _num(model.get("realized_pnl"))
+        )
         _append_csv(EQUITY_FILE, {
-            "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
-            "equity": round(equity, 8), "realized_pnl": round(_num(model.get("realized_pnl")), 8),
+            "timestamp": now.isoformat(),
+            "date": now.date().isoformat(),
+            "model": name,
+            "equity": round(equity, 8),
+            "realized_pnl": round(_num(model.get("realized_pnl")), 8),
             "completed": int(model.get("completed", 0)),
             "open_symbol": (model.get("position") or {}).get("symbol", ""),
-            "max_drawdown_pct": round(_num(model.get("max_drawdown_pct")), 8),
-            "helius_status": helius_status, "data_quality_flags": quality_flags,
+            "shadow_open": len(model.get("shadow_positions") or []),
+            "max_drawdown_pct": round(
+                _num(model.get("max_drawdown_pct")),
+                8,
+            ),
+            "helius_status": helius_status,
+            "data_quality_flags": quality_flags,
         })
+
     state["last_cycle_at"] = now.isoformat()
     state["last_regime"] = regime
     _save_state(state)
     return {"regime": regime, "models": state["models"]}
 
 
+def daily_summary
+
+def _max_drawdown_from_returns(returns):
+    equity = 1.0
+    peak = 1.0
+    max_dd = 0.0
+    for value in returns:
+        equity *= max(0.000001, 1.0 + _num(value) / 100.0)
+        peak = max(peak, equity)
+        if peak > 0:
+            max_dd = max(max_dd, (peak - equity) / peak * 100.0)
+    return max_dd
+
+
 def daily_summary(report_date=None, write_files=True):
     report_date = report_date or datetime.now().date().isoformat()
     rows = []
+    shadow_rows = []
+
     if TRADE_FILE.exists():
         try:
             with TRADE_FILE.open("r", newline="", encoding="utf-8") as handle:
-                rows = [r for r in csv.DictReader(handle) if r.get("date") == report_date]
+                rows = [
+                    r
+                    for r in csv.DictReader(handle)
+                    if r.get("date") == report_date
+                ]
         except Exception:
             rows = []
+
+    if SHADOW_TRADE_FILE.exists():
+        try:
+            with SHADOW_TRADE_FILE.open(
+                "r",
+                newline="",
+                encoding="utf-8",
+            ) as handle:
+                shadow_rows = [
+                    r
+                    for r in csv.DictReader(handle)
+                    if r.get("date") == report_date
+                ]
+        except Exception:
+            shadow_rows = []
+
     results = []
     for name in MODEL_SPECS:
-        sells = [r for r in rows if r.get("model") == name and r.get("action") == "SELL"]
-        buys = [r for r in rows if r.get("model") == name and r.get("action") == "BUY"]
+        sells = [
+            r
+            for r in rows
+            if r.get("model") == name and r.get("action") == "SELL"
+        ]
+        buys = [
+            r
+            for r in rows
+            if r.get("model") == name and r.get("action") == "BUY"
+        ]
+        shadow_sells = [
+            r
+            for r in shadow_rows
+            if r.get("model") == name and r.get("action") == "SELL"
+        ]
         pnls = [_num(r.get("realized_pnl_usd")) for r in sells]
         returns = [_num(r.get("net_return_pct")) for r in sells]
         wins = [p for p in pnls if p > 0]
         losses = [p for p in pnls if p < 0]
         gross_win = sum(wins)
         gross_loss = abs(sum(losses))
+        avg_ret = sum(returns) / len(returns) if returns else 0.0
+        med_ret = median(returns) if returns else 0.0
+        profit_factor = (
+            gross_win / gross_loss
+            if gross_loss > 0
+            else (999.0 if gross_win > 0 else 0.0)
+        )
         results.append({
-            "model": name, "entries": len(buys), "completed": len(sells),
-            "wins": len(wins), "losses": len(losses),
-            "win_rate_pct": (len(wins) / len(sells) * 100) if sells else 0.0,
+            "model": name,
+            "entries": len(buys),
+            "completed": len(sells),
+            "shadow_completed": len(shadow_sells),
+            "wins": len(wins),
+            "losses": len(losses),
+            "win_rate_pct": (
+                len(wins) / len(sells) * 100
+                if sells
+                else 0.0
+            ),
             "realized_pnl_usd": sum(pnls),
-            "avg_net_return_pct": (sum(returns) / len(returns)) if returns else 0.0,
-            "median_net_return_pct": median(returns) if returns else 0.0,
-            "profit_factor": (gross_win / gross_loss) if gross_loss > 0 else (999.0 if gross_win > 0 else 0.0),
+            "avg_net_return_pct": avg_ret,
+            "median_net_return_pct": med_ret,
+            "profit_factor": profit_factor,
+            "max_drawdown_pct": _max_drawdown_from_returns(returns),
         })
-    ranked = sorted(results, key=lambda r: (r["realized_pnl_usd"], r["avg_net_return_pct"]), reverse=True)
+
+    ranked = sorted(
+        results,
+        key=lambda r: (
+            r["completed"] >= 12,
+            r["avg_net_return_pct"],
+            min(r["profit_factor"], 10.0),
+            -r["max_drawdown_pct"],
+            r["median_net_return_pct"],
+            r["realized_pnl_usd"],
+        ),
+        reverse=True,
+    )
+
     summary = {
         "date": report_date,
         "generated_at": datetime.now().isoformat(),
+        "ranking_basis": (
+            "sample-qualified normalized return, profit factor, drawdown, "
+            "median return; dollar PnL secondary"
+        ),
         "minimum_completed_for_preliminary_comparison": 12,
         "minimum_completed_for_promotion_review": 30,
         "models": ranked,
-        "leader": ranked[0]["model"] if ranked and ranked[0]["completed"] >= 12 else None,
+        "leader": (
+            ranked[0]["model"]
+            if ranked and ranked[0]["completed"] >= 12
+            else None
+        ),
         "promotion_eligible": [
-            r["model"] for r in ranked
-            if r["completed"] >= 30 and r["avg_net_return_pct"] > 0 and r["profit_factor"] >= 1.3
+            r["model"]
+            for r in ranked
+            if r["completed"] >= 30
+            and r["avg_net_return_pct"] > 0
+            and r["profit_factor"] >= 1.3
+            and r["max_drawdown_pct"] <= 15
         ],
     }
+
     if write_files:
         SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
-        (SUMMARY_DIR / f"{report_date}.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-        md = [f"# CryptoTracker paper research — {report_date}", "", "| Model | Trades | W/L | Avg net | P&L | PF |", "|---|---:|---:|---:|---:|---:|"]
+        (SUMMARY_DIR / f"{report_date}.json").write_text(
+            json.dumps(summary, indent=2),
+            encoding="utf-8",
+        )
+        md = [
+            f"# CryptoTracker paper research — {report_date}",
+            "",
+            "| Model | Trades | Shadow | W/L | Avg net | Median | Max DD | PnL | PF |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        ]
         for row in ranked:
             md.append(
-                f"| {row['model']} | {row['completed']} | {row['wins']}/{row['losses']} | "
-                f"{row['avg_net_return_pct']:+.2f}% | ${row['realized_pnl_usd']:+.4f} | {row['profit_factor']:.2f} |"
+                f"| {row['model']} | {row['completed']} | "
+                f"{row['shadow_completed']} | {row['wins']}/{row['losses']} | "
+                f"{row['avg_net_return_pct']:+.2f}% | "
+                f"{row['median_net_return_pct']:+.2f}% | "
+                f"{row['max_drawdown_pct']:.2f}% | "
+                f"{row['realized_pnl_usd']:+.4f} | "
+                f"{row['profit_factor']:.2f} |"
             )
-        md.extend(["", "No live promotion occurs automatically. Any change requires explicit approval."])
-        (SUMMARY_DIR / f"{report_date}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+        md.extend([
+            "",
+            "No live promotion occurs automatically. "
+            "Any change requires explicit approval.",
+        ])
+        (SUMMARY_DIR / f"{report_date}.md").write_text(
+            "\n".join(md) + "\n",
+            encoding="utf-8",
+        )
+
     return summary
 
+
+def campaign_summary
 
 def campaign_summary(write_files=True):
     """Score the full paper campaign with a chronological 70/30 holdout."""
