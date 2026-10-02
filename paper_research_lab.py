@@ -1008,6 +1008,7 @@ def campaign_summary(write_files=True):
             "realized_pnl_usd": sum(pnls),
             "win_rate_pct": sum(x > 0 for x in pnls) / len(pnls) * 100 if pnls else 0.0,
             "profit_factor": gross_win / gross_loss if gross_loss else (999.0 if gross_win else 0.0),
+            "max_drawdown_pct": _max_drawdown_from_returns(returns),
         }
 
     models = []
@@ -1025,23 +1026,36 @@ def campaign_summary(write_files=True):
             for r in items
         )
         all_stats["optional_helius_degraded_trades"] = optional_helius_degraded
+        by_regime = {}
+        for regime_name in ("RISK_ON", "NEUTRAL", "RISK_OFF", "NO_DATA"):
+            regime_items = [
+                r for r in items
+                if str(r.get("entry_regime") or "") == regime_name
+            ]
+            if regime_items:
+                by_regime[regime_name] = segment_stats(regime_items)
         stable = (
             all_stats["n"] >= 30
             and train["avg_net_return_pct"] > 0
             and holdout["avg_net_return_pct"] > 0
             and holdout["profit_factor"] >= 1.3
+            and holdout["max_drawdown_pct"] <= 15
         )
         models.append({
             "model": name,
             "all": all_stats,
             "development_70pct": train,
             "holdout_30pct": holdout,
+            "by_entry_regime": by_regime,
             "stable_positive_holdout": stable,
         })
     models.sort(
         key=lambda x: (
             x["stable_positive_holdout"],
             x["holdout_30pct"]["avg_net_return_pct"],
+            min(x["holdout_30pct"]["profit_factor"], 10.0),
+            -x["holdout_30pct"]["max_drawdown_pct"],
+            x["all"]["avg_net_return_pct"],
             x["all"]["realized_pnl_usd"],
         ),
         reverse=True,
