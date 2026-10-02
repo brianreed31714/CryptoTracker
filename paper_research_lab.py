@@ -279,12 +279,27 @@ def _current_price(position, candidates_by_token, price_lookup):
         return 0.0, None
 
 
-def _close_position(name, model, position, exit_price, reason, now):
+def _close_position(
+    name,
+    model,
+    position,
+    exit_price,
+    reason,
+    now,
+    exit_value_usdc=None,
+    exit_quote_status="MARK_FALLBACK",
+):
     entry_price = _num(position.get("entry_price"))
     raw_return = ((exit_price - entry_price) / entry_price * 100) if entry_price > 0 else 0.0
-    cost_pct = max(0.0, 100.0 - _num(position.get("roundtrip_pct"), 100.0))
-    net_return = raw_return - cost_pct
     size = _num(position.get("size_usdc"))
+
+    if exit_value_usdc is not None and size > 0:
+        net_return = ((_num(exit_value_usdc) - size) / size) * 100.0
+        cost_pct = raw_return - net_return
+    else:
+        cost_pct = max(0.0, 100.0 - _num(position.get("roundtrip_pct"), 100.0))
+        net_return = raw_return - cost_pct
+
     pnl = size * net_return / 100.0
     model["realized_pnl"] = _num(model.get("realized_pnl")) + pnl
     model["completed"] = int(model.get("completed", 0)) + 1
@@ -308,17 +323,46 @@ def _close_position(name, model, position, exit_price, reason, now):
         "net_return_pct": round(net_return, 8), "realized_pnl_usd": round(pnl, 8),
         "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
         "roundtrip_preflight_pct": position.get("roundtrip_pct", ""),
+        "entry_regime": position.get("regime", ""),
+        "exit_quote_status": exit_quote_status,
+        "exit_value_usdc": round(_num(exit_value_usdc), 8) if exit_value_usdc is not None else "",
         "helius_status": position.get("helius_status", "UNKNOWN"),
         "data_quality_flags": position.get("data_quality_flags", ""),
         "equity_after": round(equity, 8),
     })
 
 
-def _manage_position(name, model, spec, candidates_by_token, price_lookup, now):
+def _dynamic_decay(candidate):
+    if not candidate:
+        return False, []
+    f = _features(candidate)
+    reasons = []
+    if str(candidate.get("momentum_state") or "").upper() != "SURGING":
+        reasons.append("not_surging")
+    if f["quant"] < _num(os.getenv("PAPER_EXIT_SCORE_BELOW", "35"), 35):
+        reasons.append("score_decay")
+    if f["delta"] <= _num(os.getenv("PAPER_EXIT_DELTA_BELOW", "-20"), -20):
+        reasons.append("delta_decay")
+    if f["buy_sell"] < _num(os.getenv("PAPER_EXIT_BUY_SELL_BELOW", "0.85"), 0.85):
+        reasons.append("sell_pressure")
+    if f["volume_accel"] < _num(os.getenv("PAPER_EXIT_VOLUME_ACCEL_BELOW", "0.75"), 0.75):
+        reasons.append("volume_decay")
+    return bool(reasons), reasons
+
+
+def _manage_position(
+    name,
+    model,
+    spec,
+    candidates_by_token,
+    price_lookup,
+    exit_value_lookup,
+    now,
+):
     position = model.get("position")
     if not position:
         return
-    price, _ = _current_price(position, candidates_by_token, price_lookup)
+    price, candidate = _current_price(position, candidates_by_token, price_lookup)
     if price <= 0:
         _append_csv(DECISION_FILE, {
             "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
@@ -328,6 +372,7 @@ def _manage_position(name, model, spec, candidates_by_token, price_lookup, now):
             "roundtrip_pct": position.get("roundtrip_pct", ""),
         })
         return
+
     entry_price = _num(position.get("entry_price"))
     raw_return = ((price - entry_price) / entry_price * 100) if entry_price > 0 else 0.0
     position["peak_return_pct"] = max(_num(position.get("peak_return_pct")), raw_return)
@@ -335,6 +380,13 @@ def _manage_position(name, model, spec, candidates_by_token, price_lookup, now):
         age = (now - datetime.fromisoformat(position["entry_time"])).total_seconds() / 60.0
     except Exception:
         age = 0.0
+
+    decay, decay_reasons = _dynamic_decay(candidate)
+    if age >= spec.grace_minutes and decay:
+        position["decay_confirmations"] = int(position.get("decay_confirmations", 0)) + 1
+    else:
+        position["decay_confirmations"] = 0
+
     reason = None
     if raw_return <= spec.stop_pct:
         reason = "STOP"
@@ -344,19 +396,140 @@ def _manage_position(name, model, spec, candidates_by_token, price_lookup, now):
         position["peak_return_pct"] - raw_return >= spec.trail_pct
     ):
         reason = "RUNNER_TRAIL"
+    elif position["decay_confirmations"] >= int(_num(os.getenv("PAPER_EXIT_CONFIRMATIONS", "2"), 2)):
+        reason = "MOMENTUM_DECAY:" + ",".join(decay_reasons)
     elif age >= spec.grace_minutes and raw_return <= -2.0:
         reason = "FAILED_MOMENTUM"
+
     if reason:
-        _close_position(name, model, position, price, reason, now)
+        exit_value = None
+        quote_status = "MARK_FALLBACK"
+        if exit_value_lookup and _num(position.get("entry_token_raw")) > 0:
+            try:
+                exit_value = exit_value_lookup(position)
+                if exit_value is not None and _num(exit_value) > 0:
+                    quote_status = "EXECUTABLE_JUPITER"
+                else:
+                    exit_value = None
+                    quote_status = "EXIT_QUOTE_EMPTY"
+            except Exception as exc:
+                quote_status = "EXIT_QUOTE_ERROR:" + str(exc)[:80]
+        _close_position(
+            name, model, position, price, reason, now,
+            exit_value_usdc=exit_value,
+            exit_quote_status=quote_status,
+        )
     else:
         _append_csv(DECISION_FILE, {
             "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
             "action": "HOLD", "symbol": position.get("symbol", ""),
             "token_address": position.get("token_address", ""), "score": "",
-            "threshold": spec.threshold, "reason": f"pnl={raw_return:+.3f};age={age:.1f}",
+            "threshold": spec.threshold,
+            "reason": f"pnl={raw_return:+.3f};age={age:.1f};decay={position.get('decay_confirmations',0)}",
             "regime": "", "roundtrip_pct": position.get("roundtrip_pct", ""),
         })
 
+
+def _shadow_exit_reason(position, candidate, spec, price, now):
+    entry_price = _num(position.get("entry_price"))
+    raw_return = ((price - entry_price) / entry_price * 100) if entry_price > 0 else 0.0
+    position["peak_return_pct"] = max(_num(position.get("peak_return_pct")), raw_return)
+    try:
+        age = (now - datetime.fromisoformat(position["entry_time"])).total_seconds() / 60.0
+    except Exception:
+        age = 0.0
+    decay, _ = _dynamic_decay(candidate)
+    if age >= spec.grace_minutes and decay:
+        position["decay_confirmations"] = int(position.get("decay_confirmations", 0)) + 1
+    else:
+        position["decay_confirmations"] = 0
+    if raw_return <= spec.stop_pct:
+        return "STOP", raw_return
+    if age >= spec.max_hold_minutes:
+        return "MAX_HOLD", raw_return
+    if position["peak_return_pct"] >= spec.runner_activate_pct and (
+        position["peak_return_pct"] - raw_return >= spec.trail_pct
+    ):
+        return "RUNNER_TRAIL", raw_return
+    if position["decay_confirmations"] >= int(_num(os.getenv("PAPER_EXIT_CONFIRMATIONS", "2"), 2)):
+        return "MOMENTUM_DECAY", raw_return
+    if age >= spec.grace_minutes and raw_return <= -2.0:
+        return "FAILED_MOMENTUM", raw_return
+    return None, raw_return
+
+
+def _manage_shadow_positions(name, model, spec, candidates_by_token, price_lookup, now):
+    positions = list(model.get("shadow_positions") or [])
+    kept = []
+    for position in positions:
+        price, candidate = _current_price(position, candidates_by_token, price_lookup)
+        if price <= 0:
+            kept.append(position)
+            continue
+        reason, raw_return = _shadow_exit_reason(position, candidate, spec, price, now)
+        if not reason:
+            kept.append(position)
+            continue
+        _append_csv(SHADOW_TRADE_FILE, {
+            "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
+            "action": "SELL", "symbol": position.get("symbol", ""),
+            "token_address": position.get("token_address", ""), "reason": reason,
+            "entry_time": position.get("entry_time", ""), "entry_price": position.get("entry_price", ""),
+            "exit_price": price, "net_return_pct": round(raw_return, 8),
+            "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
+            "entry_regime": position.get("regime", ""),
+        })
+    model["shadow_positions"] = kept
+
+
+def _add_shadow_positions(name, model, spec, ranked, regime, now):
+    max_open = max(1, int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5)))
+    cooldown = max(0.0, _num(os.getenv("PAPER_RESEARCH_SHADOW_REENTRY_MINUTES", "60"), 60))
+    positions = list(model.get("shadow_positions") or [])
+    open_tokens = {str(p.get("token_address") or "") for p in positions}
+    last_entries = model.setdefault("shadow_last_entry", {})
+
+    for candidate, scores in ranked:
+        if len(positions) >= max_open:
+            break
+        token = str(candidate.get("token_address") or "")
+        if not token or token in open_tokens:
+            continue
+        safe, _ = _safety_pass(candidate)
+        if spec.requires_risk_on and regime["name"] != "RISK_ON":
+            safe = False
+        if scores.get(name, 0.0) < spec.threshold:
+            safe = False
+        if not safe:
+            continue
+        last = str(last_entries.get(token) or "")
+        if last:
+            try:
+                minutes_since = (now - datetime.fromisoformat(last)).total_seconds() / 60.0
+                if minutes_since < cooldown:
+                    continue
+            except Exception:
+                pass
+        position = {
+            "symbol": candidate.get("symbol", ""), "token_address": token,
+            "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
+            "score": scores.get(name, 0.0), "peak_return_pct": 0.0,
+            "regime": regime["name"], "decay_confirmations": 0,
+        }
+        positions.append(position)
+        open_tokens.add(token)
+        last_entries[token] = now.isoformat()
+        _append_csv(SHADOW_TRADE_FILE, {
+            "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
+            "action": "BUY", "symbol": position["symbol"], "token_address": token,
+            "reason": "SHADOW_MULTI_CANDIDATE", "entry_time": now.isoformat(),
+            "entry_price": position["entry_price"], "exit_price": "",
+            "net_return_pct": "", "peak_return_pct": "", "entry_regime": regime["name"],
+        })
+    model["shadow_positions"] = positions
+
+
+def run_paper_research
 
 def run_paper_research(candidates, settings, price_lookup=None, integrity_lookup=None, data_quality=None):
     """Run one research cycle.  This function cannot submit a transaction."""
