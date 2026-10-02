@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261001-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "31c2966189d74811e3a4ac69c758a056a3fb57d8",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Approved V11.10 research upgrade: fair quote allocation across all models, anti-chase and deterioration penalties, executable Jupiter exit valuation, momentum-decay exits, five-position-per-model shadow cohorts, normalized risk-aware leaderboard, regime-aware holdout analysis, and sanitized daily GitHub evidence publishing. LIVE_TRADING=false remains repository-authoritative."
+}
