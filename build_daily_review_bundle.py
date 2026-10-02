@@ -26,8 +26,10 @@ ROOT_PATTERNS = [
 ]
 PAPER_FILES = [
     "candidate_observations.csv",
+    "candidate_observations.csv",
     "model_decisions.csv",
     "paper_trades.csv",
+    "shadow_trades.csv",
     "model_equity.csv",
 ]
 SMART_FILES = [
