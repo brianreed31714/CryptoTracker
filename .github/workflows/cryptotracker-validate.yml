@@ -1,0 +1,32 @@
+name: CryptoTracker Python Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.py"
+      - ".github/workflows/cryptotracker-validate.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile protected Python files
+        run: |
+          python -m py_compile paper_research_lab_v11_10.py
+          python -m py_compile publish_daily_evidence.py
+          python -m py_compile build_daily_review_bundle.py
+          python -m py_compile auto_trader_with_alerts_v11_10_research_fairness.py
+      - name: Smoke test research module
+        run: |
+          python - <<'PY'
+          import paper_research_lab_v11_10 as lab
+          assert "anti_chase" in lab.MODEL_SPECS
+          assert len(lab.MODEL_SPECS) >= 10
+          print("models", sorted(lab.MODEL_SPECS))
+          PY
