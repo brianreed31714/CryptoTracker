@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261005-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "5beab3d502c3e545ae87dc60ab08f643eaa7872b",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "EOD reporting clarity update only: show paper-day account-equivalent return and PnL, cumulative campaign return and equity, leader W/L, average and median trade return, holdout performance, and promotion readiness. Trading logic and LIVE_TRADING=false are unchanged."
+}
