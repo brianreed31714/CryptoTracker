@@ -1122,19 +1122,88 @@ def campaign_summary(write_files=True):
 
 
 def eod_summary_text(report_date=None):
-    daily_summary(report_date, write_files=True)
-    summary = campaign_summary(write_files=True)
-    models = summary.get("models") or []
-    completed = sum(int((m.get("all") or {}).get("n", 0)) for m in models)
-    if not completed:
+    """Compact EOD summary with daily and campaign account-equivalent returns."""
+    daily = daily_summary(report_date, write_files=True)
+    campaign = campaign_summary(write_files=True)
+    models = campaign.get("models") or []
+    if not models:
         return "Paper lab: no completed model trades yet."
+
     top = models[0]
+    model_name = top.get("model", "unknown")
     all_stats = top.get("all") or {}
-    return (
-        f"Paper lab: {completed} exits | leader {top['model']} "
-        f"{all_stats.get('avg_net_return_pct', 0):+.2f}% avg | "
-        f"${all_stats.get('realized_pnl_usd', 0):+.4f}"
+    holdout = top.get("holdout_30pct") or {}
+
+    campaign_completed = int(all_stats.get("n", 0) or 0)
+    if not campaign_completed:
+        return "Paper lab: no completed model trades yet."
+
+    configured_start = _num(
+        os.getenv("PAPER_STARTING_EQUITY_USDC", "15"),
+        15,
     )
+    state = _load_state(configured_start)
+    model_state = (state.get("models") or {}).get(model_name) or {}
+    starting_equity = _num(
+        model_state.get("starting_equity"),
+        configured_start,
+    )
+    if starting_equity <= 0:
+        starting_equity = configured_start if configured_start > 0 else 15.0
+
+    campaign_pnl = _num(all_stats.get("realized_pnl_usd"))
+    campaign_return_pct = (
+        campaign_pnl / starting_equity * 100.0
+        if starting_equity > 0
+        else 0.0
+    )
+    ending_equity = starting_equity + campaign_pnl
+
+    daily_model = next(
+        (
+            row for row in (daily.get("models") or [])
+            if row.get("model") == model_name
+        ),
+        {},
+    )
+    daily_pnl = _num(daily_model.get("realized_pnl_usd"))
+    daily_return_pct = (
+        daily_pnl / starting_equity * 100.0
+        if starting_equity > 0
+        else 0.0
+    )
+
+    avg_trade = _num(all_stats.get("avg_net_return_pct"))
+    median_trade = _num(all_stats.get("median_net_return_pct"))
+    wins = int(round(campaign_completed * _num(all_stats.get("win_rate_pct")) / 100.0))
+    losses = max(0, campaign_completed - wins)
+
+    holdout_n = int(holdout.get("n", 0) or 0)
+    holdout_avg = _num(holdout.get("avg_net_return_pct"))
+
+    if top.get("stable_positive_holdout"):
+        promotion_text = "Promotion: ELIGIBLE FOR REVIEW"
+    elif campaign_completed < 30:
+        promotion_text = (
+            f"Promotion: NOT YET — need {30 - campaign_completed} more trades"
+        )
+    else:
+        promotion_text = "Promotion: NOT YET — holdout criteria unmet"
+
+    return "\n".join([
+        f"Paper day: {daily_return_pct:+.2f}% | ${daily_pnl:+.4f}",
+        (
+            f"Campaign: {campaign_return_pct:+.2f}% | "
+            f"${starting_equity:.2f} -> ${ending_equity:.2f}"
+        ),
+        (
+            f"Leader: {model_name} | {campaign_completed} trades | "
+            f"{wins}W/{losses}L"
+        ),
+        f"Avg trade: {avg_trade:+.2f}% | Median: {median_trade:+.2f}%",
+        f"Holdout: {holdout_n} trades | {holdout_avg:+.2f}% avg",
+        promotion_text,
+    ])
 
 
 if __name__ == "__main__":
