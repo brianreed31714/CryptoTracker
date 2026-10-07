@@ -1782,6 +1782,13 @@ SURGE_LOG_FIELDS = [
     "record_type",
     "signal_id",
     "symbol",
+    "token_name",
+    "signal_name_novelty_score",
+    "signal_novelty_shock_score",
+    "signal_novelty_trend_score",
+    "signal_novelty_meme_score",
+    "signal_novelty_style_score",
+    "signal_novelty_flags",
     "token_address",
     "pair_url",
     "signal_time",
@@ -1965,6 +1972,13 @@ def surge_signal_base_row(signal):
     return {
         "signal_id": signal.get("signal_id", ""),
         "symbol": signal.get("symbol", ""),
+        "token_name": signal.get("token_name", ""),
+        "signal_name_novelty_score": signal.get("signal_name_novelty_score", ""),
+        "signal_novelty_shock_score": signal.get("signal_novelty_shock_score", ""),
+        "signal_novelty_trend_score": signal.get("signal_novelty_trend_score", ""),
+        "signal_novelty_meme_score": signal.get("signal_novelty_meme_score", ""),
+        "signal_novelty_style_score": signal.get("signal_novelty_style_score", ""),
+        "signal_novelty_flags": signal.get("signal_novelty_flags", ""),
         "token_address": signal.get("token_address", ""),
         "pair_url": signal.get("pair_url", ""),
         "signal_time": signal.get("signal_time", ""),
@@ -2177,9 +2191,29 @@ def register_surge_signals(candidates, settings):
                 + safe_number(candidate.get("sells_5m"))
             )
 
+            novelty = candidate.get("paper_name_novelty") or {}
             signal = {
                 "signal_id": signal_id,
                 "symbol": candidate.get("symbol", "?"),
+                "token_name": candidate.get("name", ""),
+                "signal_name_novelty_score": safe_number(
+                    novelty.get("name_novelty_score")
+                ),
+                "signal_novelty_shock_score": safe_number(
+                    novelty.get("novelty_shock_score")
+                ),
+                "signal_novelty_trend_score": safe_number(
+                    novelty.get("novelty_trend_score")
+                ),
+                "signal_novelty_meme_score": safe_number(
+                    novelty.get("novelty_meme_score")
+                ),
+                "signal_novelty_style_score": safe_number(
+                    novelty.get("novelty_style_score")
+                ),
+                "signal_novelty_flags": str(
+                    novelty.get("novelty_flags") or ""
+                ),
                 "token_address": token,
                 "pair_url": candidate.get("pair_url", ""),
                 "signal_time": now.isoformat(),
@@ -2993,7 +3027,14 @@ def crypto_eod_trade_stats(settings):
 MISSED_OPPORTUNITY_FIELDS = [
     "report_date",
     "symbol",
+    "token_name",
     "token_address",
+    "signal_name_novelty_score",
+    "signal_novelty_shock_score",
+    "signal_novelty_trend_score",
+    "signal_novelty_meme_score",
+    "signal_novelty_style_score",
+    "signal_novelty_flags",
     "signal_time",
     "signal_score",
     "signal_score_delta",
@@ -3097,7 +3138,24 @@ def generate_missed_opportunity_report(settings, report_date=None):
         record = {
             "report_date": report_date,
             "symbol": sig.get("symbol", "?"),
+            "token_name": sig.get("token_name", ""),
             "token_address": sig.get("token_address", ""),
+            "signal_name_novelty_score": safe_number(
+                sig.get("signal_name_novelty_score")
+            ),
+            "signal_novelty_shock_score": safe_number(
+                sig.get("signal_novelty_shock_score")
+            ),
+            "signal_novelty_trend_score": safe_number(
+                sig.get("signal_novelty_trend_score")
+            ),
+            "signal_novelty_meme_score": safe_number(
+                sig.get("signal_novelty_meme_score")
+            ),
+            "signal_novelty_style_score": safe_number(
+                sig.get("signal_novelty_style_score")
+            ),
+            "signal_novelty_flags": sig.get("signal_novelty_flags", ""),
             "signal_time": sig.get("signal_time", ""),
             "signal_score": safe_number(sig.get("signal_score")),
             "signal_score_delta": safe_number(sig.get("signal_score_delta")),
@@ -6238,6 +6296,13 @@ LUNA_OUTCOME_FIELDS = [
     "report_date",
     "signal_id",
     "symbol",
+    "token_name",
+    "name_novelty_score",
+    "novelty_shock_score",
+    "novelty_trend_score",
+    "novelty_meme_score",
+    "novelty_style_score",
+    "novelty_flags",
     "token_address",
     "signal_time",
     "entry_path",
@@ -6327,6 +6392,23 @@ def generate_luna_outcome_scorecard(settings, report_date=None):
                 "report_date": report_date,
                 "signal_id": signal_id,
                 "symbol": sig.get("symbol", ""),
+                "token_name": sig.get("token_name", ""),
+                "name_novelty_score": safe_number(
+                    sig.get("signal_name_novelty_score")
+                ),
+                "novelty_shock_score": safe_number(
+                    sig.get("signal_novelty_shock_score")
+                ),
+                "novelty_trend_score": safe_number(
+                    sig.get("signal_novelty_trend_score")
+                ),
+                "novelty_meme_score": safe_number(
+                    sig.get("signal_novelty_meme_score")
+                ),
+                "novelty_style_score": safe_number(
+                    sig.get("signal_novelty_style_score")
+                ),
+                "novelty_flags": sig.get("signal_novelty_flags", ""),
                 "token_address": sig.get("token_address", ""),
                 "signal_time": sig.get("signal_time", ""),
                 "entry_path": entry_path,
