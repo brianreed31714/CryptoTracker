@@ -1098,6 +1098,8 @@ def run_paper_research(
 
     scored = []
     for candidate in candidates:
+        novelty = _name_novelty(candidate)
+        candidate["paper_name_novelty"] = novelty
         scores = {
             name: _model_score(candidate, spec, regime)
             for name, spec in MODEL_SPECS.items()
