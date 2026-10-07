@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261007-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "c3ab4831da6771febfa57e52f96b89099bae27d2",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Approved V11.11 paper-lab expansion: add extended_probe with $0.75 probes for quality signals rejected mainly for price extension; add staged_runner with 25% scale-outs at +15% and +30% plus ratcheting profit floors on the remaining runner; add novelty_probe scoring shock/semi-vulgar, meme/wordplay, and configurable trend/public-figure/tech name affinity; retain all existing models as controls; require executable quote/basic momentum and liquidity safeguards; LIVE_TRADING=false unchanged."
+}
