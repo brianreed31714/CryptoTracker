@@ -13,6 +13,8 @@ import csv
 import json
 import math
 import os
+import re
+from difflib import SequenceMatcher
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
@@ -156,7 +158,133 @@ MODEL_SPECS = {
     "patient_runner": ModelSpec(58, 98.5, -7, 10, 10, 10, 120),
     "regime_filtered": ModelSpec(55, 98.5, -5, 5, 8, 6, 45, requires_risk_on=True),
     "anti_chase": ModelSpec(56, 98.8, -5, 5, 8, 6, 45, score_kind="anti_chase"),
+    "extended_probe": ModelSpec(62, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="extended"),
+    "staged_runner": ModelSpec(58, 98.5, -6, 10, 15, 12, 120, score_kind="balanced"),
+    "novelty_probe": ModelSpec(58, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="novelty"),
 }
+
+
+_DEFAULT_NOVELTY_TREND_TERMS = (
+    "ai,gpt,chatgpt,openai,claude,grok,agent,robot,quantum,"
+    "nvidia,tesla,spacex,apple,google,meta,musk,elon,altman,"
+    "trump,bezos,zuckerberg"
+)
+_DEFAULT_NOVELTY_SHOCK_TERMS = (
+    "fart,butt,poop,shit,fuck,dick,cock,boob,titty,piss,bitch,balls,cum"
+)
+_DEFAULT_NOVELTY_MEME_TERMS = (
+    "pepe,bonk,doge,shib,inu,cat,dog,frog,baby,moon,pump,wojak,chad,69,420"
+)
+
+
+def _term_list(env_name, default_text):
+    raw = str(os.getenv(env_name, default_text) or "")
+    return [
+        re.sub(r"[^a-z0-9]+", "", item.lower())
+        for item in raw.split(",")
+        if re.sub(r"[^a-z0-9]+", "", item.lower())
+    ]
+
+
+def _name_novelty(candidate):
+    """Deterministic paper-only name novelty / cultural-affinity proxy."""
+    name = str(candidate.get("name") or "")
+    symbol = str(candidate.get("symbol") or "")
+    raw = (name + " " + symbol).strip()
+    compact = re.sub(r"[^a-z0-9]+", "", raw.lower())
+    words = [
+        re.sub(r"[^a-z0-9]+", "", x.lower())
+        for x in re.split(r"[^A-Za-z0-9]+", raw)
+        if x
+    ]
+
+    if not compact or compact in {"unknown", "none"}:
+        return {
+            "name_novelty_score": 0.0,
+            "novelty_shock_score": 0.0,
+            "novelty_trend_score": 0.0,
+            "novelty_meme_score": 0.0,
+            "novelty_style_score": 0.0,
+            "novelty_flags": "",
+        }
+
+    shock_terms = _term_list(
+        "PAPER_NOVELTY_SHOCK_TERMS",
+        _DEFAULT_NOVELTY_SHOCK_TERMS,
+    )
+    trend_terms = _term_list(
+        "PAPER_NOVELTY_TREND_TERMS",
+        _DEFAULT_NOVELTY_TREND_TERMS,
+    )
+    meme_terms = _term_list(
+        "PAPER_NOVELTY_MEME_TERMS",
+        _DEFAULT_NOVELTY_MEME_TERMS,
+    )
+
+    def direct_hits(terms):
+        return sorted({
+            term for term in terms
+            if len(term) >= 2 and (
+                term in compact
+                or any(term == word for word in words)
+            )
+        })
+
+    shock_hits = direct_hits(shock_terms)
+    trend_hits = direct_hits(trend_terms)
+    meme_hits = direct_hits(meme_terms)
+
+    fuzzy_term = ""
+    fuzzy_ratio = 0.0
+    for term in trend_terms:
+        if len(term) < 4:
+            continue
+        ratio = SequenceMatcher(None, compact, term).ratio()
+        if ratio > fuzzy_ratio:
+            fuzzy_ratio = ratio
+            fuzzy_term = term
+    if fuzzy_ratio >= 0.72 and fuzzy_term and fuzzy_term not in trend_hits:
+        trend_hits.append(fuzzy_term)
+
+    shock_score = min(30.0, 18.0 * len(shock_hits))
+    trend_score = min(
+        35.0,
+        18.0 * len(trend_hits)
+        + (8.0 if fuzzy_ratio >= 0.72 else 0.0),
+    )
+    meme_score = min(20.0, 8.0 * len(meme_hits))
+
+    style_score = 0.0
+    if any(ch.isdigit() for ch in raw):
+        style_score += 3.0
+    if any(ch in raw for ch in ("$", "!", "?", "_", "-")):
+        style_score += 3.0
+    if 5 <= len(compact) <= 18:
+        style_score += 4.0
+    semantic_hits = set(shock_hits + trend_hits + meme_hits)
+    if len(semantic_hits) >= 2:
+        style_score += 5.0
+    style_score = min(15.0, style_score)
+
+    score = min(100.0, shock_score + trend_score + meme_score + style_score)
+    flags = []
+    if shock_hits:
+        flags.append("shock:" + ",".join(shock_hits[:3]))
+    if trend_hits:
+        flags.append("trend:" + ",".join(trend_hits[:3]))
+    if meme_hits:
+        flags.append("meme:" + ",".join(meme_hits[:3]))
+    if fuzzy_ratio >= 0.72 and fuzzy_term:
+        flags.append(f"fuzzy:{fuzzy_term}:{fuzzy_ratio:.2f}")
+
+    return {
+        "name_novelty_score": round(score, 4),
+        "novelty_shock_score": round(shock_score, 4),
+        "novelty_trend_score": round(trend_score, 4),
+        "novelty_meme_score": round(meme_score, 4),
+        "novelty_style_score": round(style_score, 4),
+        "novelty_flags": "|".join(flags),
+    }
 
 
 
@@ -180,6 +308,7 @@ def _features(candidate):
     tx5 = _num(candidate.get("buys_5m")) + _num(candidate.get("sells_5m"))
     ai = candidate.get("ai_confirmation_detail") or {}
     ai_positive = str(ai.get("assessment") or "").upper() == "POSITIVE"
+    novelty = _name_novelty(candidate)
     return {
         "quant": _num(candidate.get("quant_score_raw", candidate.get("momentum_score"))),
         "delta": _num(candidate.get("score_delta")),
@@ -194,6 +323,7 @@ def _features(candidate):
         "token_social": _num(candidate.get("token_social_bonus")),
         "ai_confidence": _num(ai.get("confidence")) if ai_positive else 0.0,
         "entry_path": str(candidate.get("research_entry_path") or "NONE"),
+        **novelty,
     }
 
 
@@ -213,6 +343,75 @@ def _safety_pass(candidate):
     if _num(candidate.get("price_usd")) <= 0:
         reasons.append("missing_price")
     return not reasons, reasons
+
+
+def _model_safety_pass(name, candidate, spec, regime, score):
+    """Paper-only eligibility; existing control models retain their old gates."""
+    if name not in {"extended_probe", "novelty_probe"}:
+        safe, reasons = _safety_pass(candidate)
+        if spec.requires_risk_on and regime["name"] != "RISK_ON":
+            safe = False
+            reasons.append("regime_not_risk_on")
+        if score < spec.threshold:
+            safe = False
+            reasons.append("score_below_threshold")
+        return safe, reasons
+
+    f = _features(candidate)
+    reasons = []
+    if str(candidate.get("momentum_state") or "").upper() != "SURGING":
+        reasons.append("not_surging")
+    if _num(candidate.get("price_usd")) <= 0:
+        reasons.append("missing_price")
+
+    if name == "extended_probe":
+        extended = (
+            f["price_5m"] > _num(os.getenv("PAPER_EXTENDED_LIVE_5M_PCT", "15"), 15)
+            or f["price_1h"] > _num(os.getenv("PAPER_EXTENDED_LIVE_1H_PCT", "40"), 40)
+        )
+        if not extended:
+            reasons.append("not_extended")
+        if f["liquidity"] < _num(os.getenv("PAPER_EXTENDED_MIN_LIQUIDITY", "40000"), 40000):
+            reasons.append("liquidity")
+        if f["tx5"] < _num(os.getenv("PAPER_EXTENDED_MIN_TX5", "15"), 15):
+            reasons.append("tx5")
+        if f["quant"] < _num(os.getenv("PAPER_EXTENDED_MIN_QUANT", "70"), 70):
+            reasons.append("quant")
+        if f["delta"] <= 0:
+            reasons.append("delta_not_positive")
+        if f["volume_accel"] < _num(os.getenv("PAPER_EXTENDED_MIN_VOLUME_ACCEL", "1.25"), 1.25):
+            reasons.append("volume_accel")
+        if f["buy_sell"] < _num(os.getenv("PAPER_EXTENDED_MIN_BUY_SELL", "1.10"), 1.10):
+            reasons.append("buy_sell")
+        if not (0.5 <= f["price_5m"] <= _num(os.getenv("PAPER_EXTENDED_MAX_5M_PCT", "60"), 60)):
+            reasons.append("5m_too_extreme")
+        if not (-20 <= f["price_1h"] <= _num(os.getenv("PAPER_EXTENDED_MAX_1H_PCT", "250"), 250)):
+            reasons.append("1h_too_extreme")
+
+    elif name == "novelty_probe":
+        if f["name_novelty_score"] < _num(os.getenv("PAPER_NOVELTY_MIN_SCORE", "45"), 45):
+            reasons.append("novelty_below_floor")
+        if f["liquidity"] < _num(os.getenv("PAPER_NOVELTY_MIN_LIQUIDITY", "20000"), 20000):
+            reasons.append("liquidity")
+        if f["tx5"] < _num(os.getenv("PAPER_NOVELTY_MIN_TX5", "8"), 8):
+            reasons.append("tx5")
+        if f["quant"] < _num(os.getenv("PAPER_NOVELTY_MIN_QUANT", "55"), 55):
+            reasons.append("quant")
+        if f["delta"] < -5:
+            reasons.append("delta")
+        if f["volume_accel"] < 1.0:
+            reasons.append("volume_accel")
+        if f["buy_sell"] < 1.0:
+            reasons.append("buy_sell")
+        if not (0.0 <= f["price_5m"] <= 60):
+            reasons.append("5m_extreme")
+        if not (-30 <= f["price_1h"] <= 250):
+            reasons.append("1h_extreme")
+
+    if score < spec.threshold:
+        reasons.append("score_below_threshold")
+    return not reasons, reasons
+
 
 
 def _model_score(candidate, spec, regime):
@@ -267,6 +466,29 @@ def _model_score(candidate, spec, regime):
             + 0.10 * _clip(1 - abs(f["price_5m"] - 4) / 15)
         )
         return _clip(score - negative_penalty, 0, 100)
+    if spec.score_kind == "extended":
+        extension_strength = max(
+            _clip((f["price_5m"] - 15.0) / 45.0),
+            _clip((f["price_1h"] - 40.0) / 210.0),
+        )
+        score = 100 * (
+            0.24 * _clip(f["quant"] / 140)
+            + 0.18 * _clip(f["delta"] / 100)
+            + 0.18 * _clip((f["volume_accel"] - 1) / 4)
+            + 0.18 * _clip((f["buy_sell"] - 1) / 2)
+            + 0.10 * _clip(f["tx5"] / 100)
+            + 0.12 * extension_strength
+        )
+        return _clip(score, 0, 100)
+    if spec.score_kind == "novelty":
+        score = (
+            0.45 * f["name_novelty_score"]
+            + 20.0 * _clip(f["quant"] / 120)
+            + 12.5 * _clip(max(f["delta"], 0) / 60)
+            + 12.5 * _clip(max(f["volume_accel"] - 1, 0) / 3)
+            + 10.0 * _clip(max(f["buy_sell"] - 1, 0) / 1.5)
+        )
+        return _clip(score, 0, 100)
     if spec.score_kind == "anti_chase":
         extension_penalty = 0.0
         if f["price_5m"] > 9:
@@ -290,6 +512,7 @@ def _candidate_row(candidate, regime, scores, data_quality=None):
         "timestamp": now.isoformat(),
         "date": now.date().isoformat(),
         "symbol": candidate.get("symbol", ""),
+        "name": candidate.get("name", ""),
         "token_address": candidate.get("token_address", ""),
         "state": candidate.get("momentum_state", ""),
         "discovery_source": candidate.get("discovery_source", ""),
@@ -355,7 +578,10 @@ def _close_position(
     _append_csv(TRADE_FILE, {
         "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
         "action": "SELL", "symbol": position.get("symbol", ""),
+        "name": position.get("name", ""),
         "token_address": position.get("token_address", ""), "reason": reason,
+        "name_novelty_score": position.get("name_novelty_score", ""),
+        "name_novelty_flags": position.get("name_novelty_flags", ""),
         "entry_time": position.get("entry_time", ""), "entry_price": entry_price,
         "exit_price": exit_price, "size_usdc": size,
         "raw_return_pct": round(raw_return, 8), "estimated_cost_pct": round(cost_pct, 8),
@@ -369,6 +595,238 @@ def _close_position(
         "data_quality_flags": position.get("data_quality_flags", ""),
         "equity_after": round(equity, 8),
     })
+
+
+def _record_staged_partial(model, position, exit_price, now, stage_key, fraction):
+    """Record a virtual scale-out without ending the paper trade."""
+    if position.get(stage_key):
+        return
+    entry_price = _num(position.get("entry_price"))
+    if entry_price <= 0:
+        return
+    raw_return = ((exit_price - entry_price) / entry_price) * 100.0
+    cost_pct = max(0.0, 100.0 - _num(position.get("roundtrip_pct"), 100.0))
+    net_return = raw_return - cost_pct
+    fraction = max(0.0, min(fraction, _num(position.get("remaining_fraction"), 1.0)))
+    tranche_size = _num(position.get("size_usdc")) * fraction
+    pnl = tranche_size * net_return / 100.0
+    position["staged_realized_pnl"] = _num(position.get("staged_realized_pnl")) + pnl
+    position["remaining_fraction"] = max(
+        0.0,
+        _num(position.get("remaining_fraction"), 1.0) - fraction,
+    )
+    position[stage_key] = True
+    _append_csv(TRADE_FILE, {
+        "timestamp": now.isoformat(), "date": now.date().isoformat(),
+        "model": "staged_runner", "action": "PARTIAL_SELL",
+        "symbol": position.get("symbol", ""), "name": position.get("name", ""),
+        "token_address": position.get("token_address", ""),
+        "reason": stage_key.upper(), "entry_time": position.get("entry_time", ""),
+        "entry_price": entry_price, "exit_price": exit_price,
+        "size_usdc": round(tranche_size, 8),
+        "raw_return_pct": round(raw_return, 8),
+        "estimated_cost_pct": round(cost_pct, 8),
+        "net_return_pct": round(net_return, 8),
+        "realized_pnl_usd": round(pnl, 8),
+        "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
+        "remaining_fraction": round(_num(position.get("remaining_fraction")), 8),
+        "roundtrip_preflight_pct": position.get("roundtrip_pct", ""),
+        "entry_regime": position.get("regime", ""),
+        "name_novelty_score": position.get("name_novelty_score", ""),
+        "name_novelty_flags": position.get("name_novelty_flags", ""),
+        "exit_quote_status": "STAGED_MARK_CONSERVATIVE_COST",
+        "exit_value_usdc": "",
+        "helius_status": position.get("helius_status", "UNKNOWN"),
+        "data_quality_flags": position.get("data_quality_flags", ""),
+        "equity_after": (
+            _num(model.get("starting_equity"))
+            + _num(model.get("realized_pnl"))
+        ),
+    })
+
+
+def _close_staged_position(
+    model,
+    position,
+    exit_price,
+    reason,
+    now,
+    exit_value_usdc=None,
+    exit_quote_status="MARK_FALLBACK",
+):
+    """Close the remaining staged-runner tranche and score the whole trade."""
+    entry_price = _num(position.get("entry_price"))
+    size = _num(position.get("size_usdc"))
+    remaining_fraction = _num(position.get("remaining_fraction"), 1.0)
+    remaining_size = size * remaining_fraction
+    raw_return = ((exit_price - entry_price) / entry_price * 100) if entry_price > 0 else 0.0
+
+    if exit_value_usdc is not None and remaining_size > 0:
+        remaining_net_return = (
+            (_num(exit_value_usdc) - remaining_size) / remaining_size * 100.0
+        )
+        cost_pct = raw_return - remaining_net_return
+    else:
+        cost_pct = max(0.0, 100.0 - _num(position.get("roundtrip_pct"), 100.0))
+        remaining_net_return = raw_return - cost_pct
+
+    remaining_pnl = remaining_size * remaining_net_return / 100.0
+    partial_pnl = _num(position.get("staged_realized_pnl"))
+    total_pnl = partial_pnl + remaining_pnl
+    weighted_return = total_pnl / size * 100.0 if size > 0 else 0.0
+
+    model["realized_pnl"] = _num(model.get("realized_pnl")) + total_pnl
+    model["completed"] = int(model.get("completed", 0)) + 1
+    if total_pnl > 0:
+        model["wins"] = int(model.get("wins", 0)) + 1
+    elif total_pnl < 0:
+        model["losses"] = int(model.get("losses", 0)) + 1
+
+    equity = _num(model.get("starting_equity")) + _num(model.get("realized_pnl"))
+    model["peak_equity"] = max(_num(model.get("peak_equity"), equity), equity)
+    peak = _num(model.get("peak_equity"), equity)
+    drawdown = ((peak - equity) / peak * 100) if peak > 0 else 0.0
+    model["max_drawdown_pct"] = max(_num(model.get("max_drawdown_pct")), drawdown)
+    model["position"] = None
+
+    _append_csv(TRADE_FILE, {
+        "timestamp": now.isoformat(), "date": now.date().isoformat(),
+        "model": "staged_runner", "action": "SELL",
+        "symbol": position.get("symbol", ""), "name": position.get("name", ""),
+        "token_address": position.get("token_address", ""), "reason": reason,
+        "entry_time": position.get("entry_time", ""), "entry_price": entry_price,
+        "exit_price": exit_price, "size_usdc": size,
+        "raw_return_pct": round(raw_return, 8),
+        "estimated_cost_pct": round(cost_pct, 8),
+        "net_return_pct": round(weighted_return, 8),
+        "realized_pnl_usd": round(total_pnl, 8),
+        "staged_partial_pnl_usd": round(partial_pnl, 8),
+        "remaining_fraction_closed": round(remaining_fraction, 8),
+        "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
+        "roundtrip_preflight_pct": position.get("roundtrip_pct", ""),
+        "entry_regime": position.get("regime", ""),
+        "name_novelty_score": position.get("name_novelty_score", ""),
+        "name_novelty_flags": position.get("name_novelty_flags", ""),
+        "exit_quote_status": exit_quote_status,
+        "exit_value_usdc": (
+            round(_num(exit_value_usdc), 8)
+            if exit_value_usdc is not None else ""
+        ),
+        "helius_status": position.get("helius_status", "UNKNOWN"),
+        "data_quality_flags": position.get("data_quality_flags", ""),
+        "equity_after": round(equity, 8),
+    })
+
+
+def _manage_staged_position(
+    model,
+    spec,
+    candidates_by_token,
+    price_lookup,
+    exit_value_lookup,
+    now,
+):
+    position = model.get("position")
+    if not position:
+        return
+
+    price, candidate = _current_price(position, candidates_by_token, price_lookup)
+    if price <= 0:
+        return
+
+    entry_price = _num(position.get("entry_price"))
+    raw_return = ((price - entry_price) / entry_price * 100) if entry_price > 0 else 0.0
+    position["peak_return_pct"] = max(_num(position.get("peak_return_pct")), raw_return)
+    position.setdefault("remaining_fraction", 1.0)
+    position.setdefault("staged_realized_pnl", 0.0)
+    try:
+        age = (now - datetime.fromisoformat(position["entry_time"])).total_seconds() / 60.0
+    except Exception:
+        age = 0.0
+
+    stage1_pct = _num(os.getenv("PAPER_STAGE1_TAKE_PCT", "15"), 15)
+    stage2_pct = _num(os.getenv("PAPER_STAGE2_TAKE_PCT", "30"), 30)
+    stage1_fraction = _num(os.getenv("PAPER_STAGE1_FRACTION", "0.25"), 0.25)
+    stage2_fraction = _num(os.getenv("PAPER_STAGE2_FRACTION", "0.25"), 0.25)
+
+    if raw_return >= stage1_pct:
+        _record_staged_partial(
+            model, position, price, now, "stage1_done", stage1_fraction
+        )
+    if raw_return >= stage2_pct:
+        _record_staged_partial(
+            model, position, price, now, "stage2_done", stage2_fraction
+        )
+
+    decay, decay_reasons = _dynamic_decay(candidate)
+    if age >= spec.grace_minutes and decay:
+        position["decay_confirmations"] = int(position.get("decay_confirmations", 0)) + 1
+    else:
+        position["decay_confirmations"] = 0
+
+    peak_ret = _num(position.get("peak_return_pct"))
+    profit_floor = None
+    if peak_ret >= 60:
+        profit_floor = max(30.0, peak_ret - 20.0)
+    elif peak_ret >= 30:
+        profit_floor = max(15.0, peak_ret - 15.0)
+    elif peak_ret >= 15:
+        profit_floor = max(5.0, peak_ret - 10.0)
+
+    reason = None
+    if raw_return <= spec.stop_pct:
+        reason = "STOP"
+    elif age >= spec.max_hold_minutes:
+        reason = "MAX_HOLD"
+    elif profit_floor is not None and raw_return <= profit_floor:
+        reason = f"STAGED_PROFIT_FLOOR:{profit_floor:.1f}"
+    elif (
+        not position.get("stage1_done")
+        and position["decay_confirmations"] >= int(
+            _num(os.getenv("PAPER_EXIT_CONFIRMATIONS", "2"), 2)
+        )
+    ):
+        reason = "MOMENTUM_DECAY:" + ",".join(decay_reasons)
+    elif not position.get("stage1_done") and age >= spec.grace_minutes and raw_return <= -2.0:
+        reason = "FAILED_MOMENTUM"
+
+    if reason:
+        exit_value = None
+        quote_status = "MARK_FALLBACK"
+        remaining_fraction = _num(position.get("remaining_fraction"), 1.0)
+        if exit_value_lookup and _num(position.get("entry_token_raw")) > 0 and remaining_fraction > 0:
+            try:
+                quote_position = dict(position)
+                quote_position["entry_token_raw"] = int(
+                    _num(position.get("entry_token_raw")) * remaining_fraction
+                )
+                exit_value = exit_value_lookup(quote_position)
+                if exit_value is not None and _num(exit_value) > 0:
+                    quote_status = "EXECUTABLE_JUPITER_REMAINDER"
+                else:
+                    exit_value = None
+                    quote_status = "EXIT_QUOTE_EMPTY"
+            except Exception as exc:
+                quote_status = "EXIT_QUOTE_ERROR:" + str(exc)[:80]
+        _close_staged_position(
+            model, position, price, reason, now,
+            exit_value_usdc=exit_value,
+            exit_quote_status=quote_status,
+        )
+    else:
+        _append_csv(DECISION_FILE, {
+            "timestamp": now.isoformat(), "date": now.date().isoformat(),
+            "model": "staged_runner", "action": "HOLD",
+            "symbol": position.get("symbol", ""),
+            "token_address": position.get("token_address", ""),
+            "score": "", "threshold": spec.threshold,
+            "reason": (
+                f"pnl={raw_return:+.3f};peak={peak_ret:+.3f};"
+                f"floor={profit_floor if profit_floor is not None else ''};"
+                f"remaining={_num(position.get('remaining_fraction'),1.0):.2f}"
+            ),
+            "regime": "", "roundtrip_pct": position.get("roundtrip_pct", ""),
+        })
 
 
 def _dynamic_decay(candidate):
@@ -534,11 +992,9 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         token = str(candidate.get("token_address") or "")
         if not token or token in open_tokens:
             continue
-        safe, _ = _safety_pass(candidate)
-        if spec.requires_risk_on and regime["name"] != "RISK_ON":
-            safe = False
-        if scores.get(name, 0.0) < spec.threshold:
-            safe = False
+        safe, _ = _model_safety_pass(
+            name, candidate, spec, regime, scores.get(name, 0.0)
+        )
         if not safe:
             continue
         last = str(last_entries.get(token) or "")
@@ -612,15 +1068,25 @@ def run_paper_research(
 
     for name, spec in MODEL_SPECS.items():
         model = state["models"][name]
-        _manage_position(
-            name,
-            model,
-            spec,
-            candidates_by_token,
-            price_lookup,
-            exit_value_lookup,
-            now,
-        )
+        if name == "staged_runner":
+            _manage_staged_position(
+                model,
+                spec,
+                candidates_by_token,
+                price_lookup,
+                exit_value_lookup,
+                now,
+            )
+        else:
+            _manage_position(
+                name,
+                model,
+                spec,
+                candidates_by_token,
+                price_lookup,
+                exit_value_lookup,
+                now,
+            )
         _manage_shadow_positions(
             name,
             model,
@@ -648,6 +1114,7 @@ def run_paper_research(
 
     normal_size = _num(settings.get("NORMAL_TRADE_SIZE_USDC", 1.5), 1.5)
     early_size = _num(settings.get("EARLY_ACCEL_TRADE_SIZE_USDC", 0.75), 0.75)
+    probe_size = _num(os.getenv("PAPER_PROBE_TRADE_SIZE_USDC", "0.75"), 0.75)
 
     ranked_by_model = {
         name: sorted(scored, key=lambda item: item[1][name], reverse=True)
@@ -655,6 +1122,8 @@ def run_paper_research(
     }
 
     for name, spec in MODEL_SPECS.items():
+        if name == "staged_runner":
+            continue
         _add_shadow_positions(
             name,
             state["models"][name],
@@ -674,17 +1143,13 @@ def run_paper_research(
 
         for candidate, scores in ranked_by_model[name]:
             score = scores.get(name, 0.0)
-            safe, reasons = _safety_pass(candidate)
-            if spec.requires_risk_on and regime["name"] != "RISK_ON":
-                safe = False
-                reasons.append("regime_not_risk_on")
-            if score < spec.threshold:
-                safe = False
-                reasons.append("score_below_threshold")
+            safe, reasons = _model_safety_pass(
+                name, candidate, spec, regime, score
+            )
             if not safe:
                 continue
 
-            size = early_size if spec.size_key == "EARLY" else normal_size
+            size = (early_size if spec.size_key == "EARLY" else probe_size if spec.size_key == "PROBE" else normal_size)
             token = str(candidate.get("token_address") or "")
             key = f"{token}|{size:.8f}"
             nominations.setdefault(
@@ -780,7 +1245,7 @@ def run_paper_research(
         if reasons:
             continue
 
-        size = early_size if spec.size_key == "EARLY" else normal_size
+        size = (early_size if spec.size_key == "EARLY" else probe_size if spec.size_key == "PROBE" else normal_size)
         samples = list(integrity.get("samples") or [])
         chosen_sample = (
             min(
@@ -791,9 +1256,13 @@ def run_paper_research(
             else {}
         )
         entry_token_raw = int(_num(chosen_sample.get("token_raw")))
+        novelty = _name_novelty(candidate)
         position = {
             "symbol": candidate.get("symbol", ""),
+            "name": candidate.get("name", ""),
             "token_address": str(candidate.get("token_address") or ""),
+            "name_novelty_score": novelty["name_novelty_score"],
+            "name_novelty_flags": novelty["novelty_flags"],
             "entry_time": now.isoformat(),
             "entry_price": _num(candidate.get("price_usd")),
             "size_usdc": size,
@@ -813,7 +1282,10 @@ def run_paper_research(
             "model": name,
             "action": "BUY",
             "symbol": position["symbol"],
+            "name": position.get("name", ""),
             "token_address": position["token_address"],
+            "name_novelty_score": position.get("name_novelty_score", ""),
+            "name_novelty_flags": position.get("name_novelty_flags", ""),
             "reason": "MODEL_ENTRY",
             "entry_time": now.isoformat(),
             "entry_price": position["entry_price"],
@@ -1095,6 +1567,7 @@ def campaign_summary(write_files=True):
     models.sort(
         key=lambda x: (
             x["stable_positive_holdout"],
+            x["all"]["n"] >= 12,
             x["holdout_30pct"]["avg_net_return_pct"],
             min(x["holdout_30pct"]["profit_factor"], 10.0),
             -x["holdout_30pct"]["max_drawdown_pct"],
