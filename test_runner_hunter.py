@@ -16,6 +16,26 @@ class RunnerHunterTests(unittest.TestCase):
         ok,reasons=lab._model_safety_pass("runner_hunter",c,spec,{"name":"NEUTRAL"},score)
         self.assertTrue(ok, reasons)
 
+    def test_diy_whale_early_organic_flow(self):
+        c = dict(momentum_state="BUILDING", price_usd=.0001, liquidity=90000,
+                 volume_5m=18000, buys_5m=80, sells_5m=25,
+                 volume_acceleration=3.5, buy_sell_ratio_5m=3.2,
+                 score_delta=30, price_5m=4, price_1h=12, quant_score_raw=95)
+        spec = lab.MODEL_SPECS["diy_whale"]
+        score = lab._model_score(c, spec, {"name":"NEUTRAL"})
+        ok, reasons = lab._model_safety_pass("diy_whale", c, spec, {"name":"NEUTRAL"}, score)
+        self.assertTrue(ok, reasons)
+
+    def test_diy_whale_rejects_illiquid(self):
+        c = dict(price_usd=.0001, liquidity=2000, volume_5m=18000,
+                 buys_5m=80, sells_5m=25, volume_acceleration=3.5,
+                 buy_sell_ratio_5m=3.2, score_delta=30, price_5m=4,
+                 price_1h=12, quant_score_raw=95)
+        spec = lab.MODEL_SPECS["diy_whale"]
+        ok, reasons = lab._model_safety_pass("diy_whale", c, spec, {"name":"NEUTRAL"}, 100)
+        self.assertFalse(ok)
+        self.assertIn("liquidity_lt_50k", reasons)
+
     def test_low_liquidity_rejected(self):
         c = dict(momentum_state="SURGING",price_usd=.001,liquidity=100,
                  volume_5m=25000,buys_5m=100,sells_5m=20,
