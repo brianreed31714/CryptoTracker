@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261009-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "004534ec1da1126db20f159f65b892d6c31e363a",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Approved paper-only research release: Balanced EV benchmark + Runner Hunter momentum sleeve + DIY Whale early-organic-flow sleeve, each independently tracked in paper research lab; EOD three-sleeve scorecard. LIVE_TRADING=false remains authoritative in .env.config. No real orders. Restart trader to import updated paper_research_lab_v11_10.py."
+}
