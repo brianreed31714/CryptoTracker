@@ -161,6 +161,8 @@ MODEL_SPECS = {
     "extended_probe": ModelSpec(62, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="extended"),
     "staged_runner": ModelSpec(58, 98.5, -6, 10, 15, 12, 120, score_kind="balanced"),
     "novelty_probe": ModelSpec(58, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="novelty"),
+    "runner_hunter": ModelSpec(55, 97.0, -7, 4, 12, 9, 90, size_key="PROBE", score_kind="runner_hunter"),
+    "diy_whale": ModelSpec(56, 97.0, -8, 12, 15, 10, 180, size_key="PROBE", score_kind="diy_whale"),
 }
 
 
@@ -347,6 +349,46 @@ def _safety_pass(candidate):
 
 def _model_safety_pass(name, candidate, spec, regime, score):
     """Paper-only eligibility; existing control models retain their old gates."""
+    if name == "diy_whale":
+        # Early organic discovery only. Never generate orders to manufacture
+        # demand or treat our own hypothetical price impact as profit.
+        f = _features(candidate)
+        reasons = []
+        if _num(candidate.get("price_usd")) <= 0:
+            reasons.append("missing_price")
+        if f["liquidity"] < 50000:
+            reasons.append("liquidity_lt_50k")
+        if f["volume_5m"] < 3500 or f["tx5"] < 15:
+            reasons.append("activity_too_low")
+        if f["buy_sell"] < 1.10 or f["volume_accel"] < 1.10:
+            reasons.append("organic_flow_unconfirmed")
+        if not (-5 <= f["price_5m"] <= 12) or not (-15 <= f["price_1h"] <= 35):
+            reasons.append("not_early_accumulation")
+        if score < spec.threshold:
+            reasons.append("score_below_threshold")
+        return not reasons, reasons
+
+    if name == "runner_hunter":
+        f = _features(candidate)
+        reasons = []
+        if str(candidate.get("momentum_state") or "").upper() != "SURGING":
+            reasons.append("not_surging")
+        if _num(candidate.get("price_usd")) <= 0:
+            reasons.append("missing_price")
+        if f["liquidity"] < 20000:
+            reasons.append("liquidity_lt_20k")
+        if f["volume_5m"] < 5000 or f["tx5"] < 12:
+            reasons.append("activity_too_low")
+        if f["volume_accel"] < 1.15 or f["buy_sell"] < 1.05:
+            reasons.append("flow_not_confirmed")
+        if f["delta"] <= 0:
+            reasons.append("not_accelerating")
+        if not (1 <= f["price_5m"] <= 100) or not (-20 <= f["price_1h"] <= 350):
+            reasons.append("outside_runner_band")
+        if score < spec.threshold:
+            reasons.append("score_below_threshold")
+        return not reasons, reasons
+
     if name not in {"extended_probe", "novelty_probe"}:
         safe, reasons = _safety_pass(candidate)
         if spec.requires_risk_on and regime["name"] != "RISK_ON":
@@ -466,6 +508,29 @@ def _model_score(candidate, spec, regime):
             + 0.10 * _clip(1 - abs(f["price_5m"] - 4) / 15)
         )
         return _clip(score - negative_penalty, 0, 100)
+    if spec.score_kind == "diy_whale":
+        # Focus on early organic flow, not artificially moving the price.
+        score = 100 * (
+            0.25 * _clip((f["volume_accel"] - 1) / 2.5)
+            + 0.23 * _clip((f["buy_sell"] - 1) / 1.5)
+            + 0.18 * _clip(f["tx5"] / 75)
+            + 0.16 * _clip(f["quant"] / 110)
+            + 0.10 * _clip(max(f["delta"], 0) / 50)
+            + 0.08 * _clip(1 - abs(f["price_5m"] - 3) / 15)
+        )
+        return _clip(score, 0, 100)
+    if spec.score_kind == "runner_hunter":
+        # Intentionally no generic price-extension penalty: test momentum
+        # continuation separately from balanced_ev, with explicit safety gates.
+        score = 100 * (
+            0.22 * _clip(f["delta"] / 70)
+            + 0.25 * _clip((f["volume_accel"] - 1) / 4)
+            + 0.20 * _clip((f["buy_sell"] - 1) / 2)
+            + 0.15 * _clip(f["tx5"] / 80)
+            + 0.10 * _clip(f["price_5m"] / 40)
+            + 0.08 * _clip(f["quant"] / 120)
+        )
+        return _clip(score, 0, 100)
     if spec.score_kind == "extended":
         extension_strength = max(
             _clip((f["price_5m"] - 15.0) / 45.0),
@@ -1468,6 +1533,21 @@ def daily_summary(report_date=None, write_files=True):
         ],
     }
 
+    # Dedicated three-sleeve scorecard; preserve zeros as no-trade evidence,
+    # never represent average trade return as daily portfolio return.
+    sleeve_names = ("balanced_ev", "runner_hunter", "diy_whale")
+    sleeve_rows = [next(r for r in results if r["model"] == name)
+                   for name in sleeve_names]
+    qualified = [r for r in sleeve_rows if r["completed"] >= 12]
+    summary["three_sleeve_comparison"] = {
+        "models": sleeve_rows,
+        "leader": max(qualified, key=lambda r: r["avg_net_return_pct"])["model"]
+                  if qualified else None,
+        "note": "Average net trade return is NOT daily portfolio return. "
+                "Compare capital-normalized equity changes separately; "
+                "no-trade sleeves have insufficient evidence.",
+    }
+
     if write_files:
         SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
         (SUMMARY_DIR / f"{report_date}.json").write_text(
@@ -1490,6 +1570,15 @@ def daily_summary(report_date=None, write_files=True):
                 f"{row['realized_pnl_usd']:+.4f} | "
                 f"{row['profit_factor']:.2f} |"
             )
+        md.extend(["", "## Three-sleeve comparison",
+                   "",
+                   "| Sleeve | Entries | Closed | Win rate | Avg trade net | Max DD | Realized PnL |",
+                   "|---|---:|---:|---:|---:|---:|---:|"])
+        for r in sleeve_rows:
+            md.append(f"| {r['model']} | {r['entries']} | {r['completed']} | "
+                      f"{r['win_rate_pct']:.1f}% | {r['avg_net_return_pct']:+.2f}% | "
+                      f"{r['max_drawdown_pct']:.2f}% | ${r['realized_pnl_usd']:+.2f} |")
+        md.extend(["", summary["three_sleeve_comparison"]["note"]])
         md.extend([
             "",
             "No live promotion occurs automatically. "
