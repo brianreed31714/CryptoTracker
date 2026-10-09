@@ -161,6 +161,7 @@ MODEL_SPECS = {
     "extended_probe": ModelSpec(62, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="extended"),
     "staged_runner": ModelSpec(58, 98.5, -6, 10, 15, 12, 120, score_kind="balanced"),
     "novelty_probe": ModelSpec(58, 97.0, -6, 5, 10, 10, 60, size_key="PROBE", score_kind="novelty"),
+    "runner_hunter": ModelSpec(55, 97.0, -7, 4, 12, 9, 90, size_key="PROBE", score_kind="runner_hunter"),
 }
 
 
@@ -347,6 +348,27 @@ def _safety_pass(candidate):
 
 def _model_safety_pass(name, candidate, spec, regime, score):
     """Paper-only eligibility; existing control models retain their old gates."""
+    if name == "runner_hunter":
+        f = _features(candidate)
+        reasons = []
+        if str(candidate.get("momentum_state") or "").upper() != "SURGING":
+            reasons.append("not_surging")
+        if _num(candidate.get("price_usd")) <= 0:
+            reasons.append("missing_price")
+        if f["liquidity"] < 20000:
+            reasons.append("liquidity_lt_20k")
+        if f["volume_5m"] < 5000 or f["tx5"] < 12:
+            reasons.append("activity_too_low")
+        if f["volume_accel"] < 1.15 or f["buy_sell"] < 1.05:
+            reasons.append("flow_not_confirmed")
+        if f["delta"] <= 0:
+            reasons.append("not_accelerating")
+        if not (1 <= f["price_5m"] <= 100) or not (-20 <= f["price_1h"] <= 350):
+            reasons.append("outside_runner_band")
+        if score < spec.threshold:
+            reasons.append("score_below_threshold")
+        return not reasons, reasons
+
     if name not in {"extended_probe", "novelty_probe"}:
         safe, reasons = _safety_pass(candidate)
         if spec.requires_risk_on and regime["name"] != "RISK_ON":
@@ -466,6 +488,18 @@ def _model_score(candidate, spec, regime):
             + 0.10 * _clip(1 - abs(f["price_5m"] - 4) / 15)
         )
         return _clip(score - negative_penalty, 0, 100)
+    if spec.score_kind == "runner_hunter":
+        # Intentionally no generic price-extension penalty: test momentum
+        # continuation separately from balanced_ev, with explicit safety gates.
+        score = 100 * (
+            0.22 * _clip(f["delta"] / 70)
+            + 0.25 * _clip((f["volume_accel"] - 1) / 4)
+            + 0.20 * _clip((f["buy_sell"] - 1) / 2)
+            + 0.15 * _clip(f["tx5"] / 80)
+            + 0.10 * _clip(f["price_5m"] / 40)
+            + 0.08 * _clip(f["quant"] / 120)
+        )
+        return _clip(score, 0, 100)
     if spec.score_kind == "extended":
         extension_strength = max(
             _clip((f["price_5m"] - 15.0) / 45.0),
