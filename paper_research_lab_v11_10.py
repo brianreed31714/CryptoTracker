@@ -1533,6 +1533,21 @@ def daily_summary(report_date=None, write_files=True):
         ],
     }
 
+    # Dedicated three-sleeve scorecard; preserve zeros as no-trade evidence,
+    # never represent average trade return as daily portfolio return.
+    sleeve_names = ("balanced_ev", "runner_hunter", "diy_whale")
+    sleeve_rows = [next(r for r in results if r["model"] == name)
+                   for name in sleeve_names]
+    qualified = [r for r in sleeve_rows if r["completed"] >= 12]
+    summary["three_sleeve_comparison"] = {
+        "models": sleeve_rows,
+        "leader": max(qualified, key=lambda r: r["avg_net_return_pct"])["model"]
+                  if qualified else None,
+        "note": "Average net trade return is NOT daily portfolio return. "
+                "Compare capital-normalized equity changes separately; "
+                "no-trade sleeves have insufficient evidence.",
+    }
+
     if write_files:
         SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
         (SUMMARY_DIR / f"{report_date}.json").write_text(
@@ -1555,6 +1570,15 @@ def daily_summary(report_date=None, write_files=True):
                 f"{row['realized_pnl_usd']:+.4f} | "
                 f"{row['profit_factor']:.2f} |"
             )
+        md.extend(["", "## Three-sleeve comparison",
+                   "",
+                   "| Sleeve | Entries | Closed | Win rate | Avg trade net | Max DD | Realized PnL |",
+                   "|---|---:|---:|---:|---:|---:|---:|"])
+        for r in sleeve_rows:
+            md.append(f"| {r['model']} | {r['entries']} | {r['completed']} | "
+                      f"{r['win_rate_pct']:.1f}% | {r['avg_net_return_pct']:+.2f}% | "
+                      f"{r['max_drawdown_pct']:.2f}% | ${r['realized_pnl_usd']:+.2f} |")
+        md.extend(["", summary["three_sleeve_comparison"]["note"]])
         md.extend([
             "",
             "No live promotion occurs automatically. "
