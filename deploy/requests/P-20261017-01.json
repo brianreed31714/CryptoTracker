@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261017-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "2c25e1efb0c8c5d3506a057d588895b942c490ea",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Helius credit safety sync. Deployment agent pulls latest main including supervisor Smart Money opt-in and Helius polling opt-in. Restart ONLY paper trader; do NOT start Smart Money or supervisor. LIVE_TRADING=false; HELIUS_ENABLED=0. Verify main commit, process health, and that Smart Money is stopped."
+}
