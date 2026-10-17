@@ -409,6 +409,9 @@ CAMPAIGN_FIELDS = [
 # ---------------------------------------------------------------------------
 
 def helius_recent_transactions(wallet: str) -> list[dict]:
+    # Explicit opt-in prevents accidental Helius credit exhaustion.
+    if os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip().lower() not in {"1", "true", "yes", "on"}:
+        return []
     url = HELIUS_TX_URL.format(wallet=wallet)
     response = requests.get(
         url,
