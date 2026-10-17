@@ -76,7 +76,9 @@ def cycle(notify=False):
     s = {}
     s["Deployment Agent"] = ensure("Deployment Agent", AGENT)
     s["Trader"] = ensure("Trader", trader)
-    s["Smart Money"] = ensure("Smart Money", SMART)
+    # Fail closed: monitoring must be explicitly enabled, never implicitly restarted.
+    smart_enabled = os.getenv("SMART_MONEY_MONITOR_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
+    s["Smart Money"] = ensure("Smart Money", SMART) if smart_enabled else "DISABLED (credit protection)"
     s["Dashboard"] = ensure("Dashboard", DASH, True)
     if notify:
         msg = ["CryptoTracker supervisor online.", f"Trader: {trader}"] + [f"{k}: {v}" for k,v in s.items()]
