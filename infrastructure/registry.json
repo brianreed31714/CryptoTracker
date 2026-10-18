@@ -65,7 +65,10 @@
       ],
       "health": {
         "type": "process"
-      }
+      },
+      "code_imports": [
+        "registry_contract"
+      ]
     },
     {
       "id": "trader",
@@ -91,7 +94,11 @@
       "health": {
         "type": "process_plus_snapshots",
         "artifact": "data/auto_snapshots"
-      }
+      },
+      "code_imports": [
+        "market_scanner",
+        "research_lab"
+      ]
     },
     {
       "id": "smart_money_rpc",
@@ -128,7 +135,10 @@
         "artifact": "SmartMoneyMonitor/data/smart_money_feed_health_v23.json",
         "max_age_seconds": 360,
         "success_status": "OK"
-      }
+      },
+      "code_imports": [
+        "smart_money_rpc"
+      ]
     },
     {
       "id": "dashboard",
@@ -198,7 +208,10 @@
       ],
       "health": {
         "type": "not_applicable"
-      }
+      },
+      "code_imports": [
+        "registry_contract"
+      ]
     },
     {
       "id": "market_scanner",
