@@ -44,6 +44,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+from infrastructure.registry_contract import release_preflight
 
 ROOT = Path(__file__).resolve().parent
 DEPLOY_DIR = ROOT / "deploy"
@@ -192,6 +193,8 @@ def validate_request(req: dict):
 
     comps = req.get("components") or []
     files = req.get("files") or {}
+    # Fail closed on the version-controlled infrastructure contract BEFORE any process stop.
+    release_preflight(ROOT, comps, files)
     if not comps:
         raise ValueError("No components requested.")
 
@@ -226,8 +229,12 @@ def pull_repo():
     dirty = run("git", "status", "--porcelain").stdout.strip()
     if dirty:
         raise RuntimeError("Local repo has uncommitted changes; deployment halted.")
-    run("git", "fetch", "--all")
-    run("git", "pull", "--ff-only")
+    # Pin the exact repository branch; local git pull can have multiple configured upstreams.
+    branch = run("git", "branch", "--show-current").stdout.strip()
+    if branch != "main":
+        raise RuntimeError("Deployment agent must run on main, not " + branch)
+    run("git", "fetch", "origin", "main")
+    run("git", "merge", "--ff-only", "origin/main")
 
 
 def taskkill_for_script(script_name: str):
