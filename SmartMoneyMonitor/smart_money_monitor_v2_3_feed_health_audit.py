@@ -91,7 +91,7 @@ FEED_HEALTH_FIELDS = [
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 load_dotenv(PROJECT_ROOT / ".env.config")
-load_dotenv(ENV_PATH, override=True)
+load_dotenv(ENV_PATH, override=False)  # secrets from .env; non-secret switches stay authoritative
 # Repository non-secret safety switch overrides stale local dotenv settings.
 HELIUS_REPO_DISABLED = str(dotenv_values(PROJECT_ROOT / ".env.config").get("HELIUS_ENABLED", "0")).strip() != "1"
 
