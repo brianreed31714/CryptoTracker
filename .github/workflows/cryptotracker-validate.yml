@@ -20,11 +20,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Smart Money test dependency
-        run: python -m pip install requests
+        run: python -m pip install requests python-dotenv
       - name: Validate credit-safe Smart Money observer
         run: |
           python -m py_compile SmartMoneyMonitor/solana_public_rpc_v23.py
           python -m py_compile SmartMoneyMonitor/smart_money_monitor_v2_2_1_campaign_strength.py
+          python -m py_compile SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py
           python -m unittest -v test_solana_public_rpc_v23
       - name: Compile protected Python files
         run: |
