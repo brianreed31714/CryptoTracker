@@ -171,5 +171,132 @@
     "Smart Money v2.3 heartbeat is more authoritative than Windows command-line discovery.",
     "Task installation mode is derived from current installer script; confirm on host before relying on it.",
     "Historical observed Smart Money PID 3096 is not a persistent identifier."
-  ]
+  ],
+  "external_services": [
+    {
+      "name": "Solana public RPC",
+      "mode": "read_only",
+      "component": "smart_money_rpc",
+      "endpoint": "https://api.mainnet-beta.solana.com",
+      "current_policy": "enabled; rate limited"
+    },
+    {
+      "name": "Robinhood Chain public RPC",
+      "mode": "read_only",
+      "component": "smart_money",
+      "endpoint": "https://rpc.mainnet.chain.robinhood.com",
+      "current_policy": "enabled for configured wallet"
+    },
+    {
+      "name": "DexScreener",
+      "mode": "market_data",
+      "component": "trader",
+      "endpoint": "https://api.dexscreener.com",
+      "current_policy": "trader scanner source"
+    },
+    {
+      "name": "OpenAI",
+      "mode": "analysis",
+      "component": "trader",
+      "endpoint": "service-configured",
+      "current_policy": "bounded analysis; secret local"
+    },
+    {
+      "name": "Pushover",
+      "mode": "notifications",
+      "component": "trader",
+      "endpoint": "https://api.pushover.net",
+      "current_policy": "optional; secret local"
+    },
+    {
+      "name": "Helius",
+      "mode": "paid_provider",
+      "component": "smart_money",
+      "endpoint": "service-configured",
+      "current_policy": "DISABLED by HELIUS_ENABLED=0 and SMART_MONEY_HELIUS_ENABLED=0"
+    },
+    {
+      "name": "Birdeye",
+      "mode": "paid_provider",
+      "component": "trader",
+      "endpoint": "service-configured",
+      "current_policy": "disabled in tracked config"
+    },
+    {
+      "name": "Token-X",
+      "mode": "on_demand",
+      "component": "trader",
+      "endpoint": "service-configured",
+      "current_policy": "on-demand only; no continuous influencer polling"
+    }
+  ],
+  "data_contracts": [
+    {
+      "producer": "smart_money",
+      "artifact": "SmartMoneyMonitor/data/smart_money_feed_health_v23.json",
+      "consumers": [
+        "dashboard",
+        "runtime_inventory"
+      ],
+      "freshness_seconds": 360
+    },
+    {
+      "producer": "smart_money",
+      "artifact": "SmartMoneyMonitor/data/smart_money_events_v22.csv",
+      "consumers": [
+        "trader",
+        "dashboard"
+      ],
+      "freshness_seconds": null,
+      "reason": "No new buys is a valid idle state"
+    },
+    {
+      "producer": "smart_money",
+      "artifact": "SmartMoneyMonitor/data/smart_money_campaigns_v22.csv",
+      "consumers": [
+        "trader",
+        "dashboard"
+      ],
+      "freshness_seconds": null
+    },
+    {
+      "producer": "trader",
+      "artifact": "data/auto_snapshots/",
+      "consumers": [
+        "dashboard"
+      ],
+      "freshness_seconds": null,
+      "reason": "Scanning pauses in position monitoring and risk lock"
+    },
+    {
+      "producer": "trader",
+      "artifact": "data/crypto_eod_report_state.json",
+      "consumers": [
+        "daily_review"
+      ],
+      "freshness_seconds": null
+    },
+    {
+      "producer": "deployment_agent",
+      "artifact": "deploy/state/active_release.json",
+      "consumers": [
+        "supervisor",
+        "runtime_inventory"
+      ],
+      "freshness_seconds": null
+    },
+    {
+      "producer": "supervisor",
+      "artifact": "deploy/state/supervisor.log",
+      "consumers": [
+        "runtime_inventory"
+      ],
+      "freshness_seconds": null
+    }
+  ],
+  "observation_policy": {
+    "process_log_identity": "Only match hidden commandline PIDs with a supervisor launch record and matching process creation timestamp",
+    "runtime_reports": "Local ignored files; never publish raw command lines or secret values",
+    "github_green_means": "Repository validation only; never a live Windows deployment acknowledgement"
+  }
 }
