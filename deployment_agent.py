@@ -428,6 +428,9 @@ def scan_once():
             done = processed_requests().get(pid)
             if done and done.get("status") in {"DEPLOYED", "ROLLED_BACK"}:
                 continue
+            if (done and done.get("status") == "VALIDATION_FAILED"
+                    and str(done.get("commit") or "") == str(req.get("commit") or "")):
+                continue
 
             # Migration guard for deployments completed by the older agent,
             # which marked the tracked request file locally instead of using
@@ -446,7 +449,14 @@ def scan_once():
                 )
                 continue
 
-            deploy(path, req)
+            try:
+                deploy(path, req)
+            except Exception as exc:
+                # Invalid registry/blobs are rejected BEFORE the process stop.
+                # Do not retry the unchanged request every polling cycle.
+                log(f"{pid}: validation/deployment BLOCKED before process change: {exc}")
+                mark_processed(pid, "VALIDATION_FAILED", commit=req.get("commit"), error=str(exc))
+                push("CryptoTracker Deployment BLOCKED", f"{pid}: {exc}")
 
 
 def main():
