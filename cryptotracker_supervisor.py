@@ -5,11 +5,14 @@ from datetime import datetime
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
+from project_process_control import stop_project_services, project_services
 
 ROOT = Path(__file__).resolve().parent
 STATE_DIR = ROOT / "deploy" / "state"
 ACTIVE_MANIFEST = STATE_DIR / "active_release.json"
 LOG_FILE = STATE_DIR / "supervisor.log"
+RESTART_REQUEST = STATE_DIR / "restart_services.request"
+RESTART_RESULT = STATE_DIR / "restart_services.result"
 load_dotenv(ROOT / ".env.config")
 load_dotenv(ROOT / ".env", override=True)
 CHECK_SECONDS = int(os.getenv("SUPERVISOR_CHECK_SECONDS", "60"))
@@ -71,6 +74,27 @@ def ensure(name, rel, dashboard=False):
     log(f"Started {name}: {rel} pid={pid}")
     return f"STARTED pid={pid}"
 
+def handle_restart_request():
+    if not RESTART_REQUEST.exists():
+        return
+    request = RESTART_REQUEST.read_text(encoding="utf-8").strip()
+    if not request:
+        raise RuntimeError("Empty restart request")
+    log(f"Controlled restart requested: {request}")
+    stopped = stop_project_services("crypto")
+    log(f"Stopped project service PIDs: {stopped}")
+    # Refuse to start any service if cleanup was incomplete.
+    if project_services("crypto"):
+        raise RuntimeError("Duplicate project services still running")
+    cycle(False)
+    # Confirm expected trader is running, not just that spawning returned a PID.
+    trader = active_trader()
+    if not running(trader):
+        raise RuntimeError("Trading engine not running after controlled restart")
+    RESTART_RESULT.write_text(request + "|OK",encoding="utf-8")
+    RESTART_REQUEST.unlink(missing_ok=True)
+    log("Controlled restart verified")
+
 def cycle(notify=False):
     trader = active_trader()
     s = {}
@@ -92,8 +116,17 @@ def main():
         log(f"Initial startup error: {exc}")
         push("CryptoTracker Startup FAILED", str(exc))
     while True:
-        try: cycle(False)
-        except Exception as exc: log(f"Supervisor cycle error: {exc}")
+        try:
+            if RESTART_REQUEST.exists():
+                handle_restart_request()
+            else:
+                cycle(False)
+        except Exception as exc:
+            log(f"Supervisor cycle error: {exc}")
+            if RESTART_REQUEST.exists():
+                request = RESTART_REQUEST.read_text(encoding="utf-8").strip()
+                RESTART_RESULT.write_text(request + "|ERROR|" + str(exc)[:300], encoding="utf-8")
+                RESTART_REQUEST.unlink(missing_ok=True)
         time.sleep(max(15, CHECK_SECONDS))
 
 if __name__ == "__main__": main()
