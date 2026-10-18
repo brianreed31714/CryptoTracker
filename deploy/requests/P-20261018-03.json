@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261018-03",
+  "status": "READY_TO_DEPLOY",
+  "commit": "e577c01f4d8197b6da910366f4dc0ee0d3502d83",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Sync validated GPT-6 Luna and Smart Money v2.3 public-RPC code and settings. Preserve LIVE_TRADING=false and HELIUS_ENABLED=0; restart paper trader using existing deployment agent. Smart Money monitor requires a separate controlled supervisor task restart using restart_smartmoney_v23.ps1 to load updated process code, then validate SmartMoneyMonitor/data/smart_money_feed_health_v23.json. Do not claim Smart Money healthy until that report is fresh and OK."
+}
