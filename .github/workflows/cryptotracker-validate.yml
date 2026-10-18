@@ -7,6 +7,7 @@ on:
       - "*.py"
       - "research/**/*.py"
       - "SmartMoneyMonitor/**/*.py"
+      - "restart_smartmoney_v23.ps1"
       - ".github/workflows/cryptotracker-validate.yml"
   pull_request:
   workflow_dispatch:
