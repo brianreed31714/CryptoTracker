@@ -4,7 +4,7 @@ import json, os, re, subprocess, sys, time
 from datetime import datetime
 from pathlib import Path
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 from project_process_control import stop_project_services, project_services
 
 ROOT = Path(__file__).resolve().parent
@@ -71,6 +71,9 @@ def ensure(name, rel, dashboard=False):
     time.sleep(GRACE_SECONDS)
     if running(rel): return "RUNNING"
     pid = start(rel, dashboard)
+    time.sleep(2)
+    if not running(rel):
+        raise RuntimeError(f"{name} process exited immediately: {rel}")
     log(f"Started {name}: {rel} pid={pid}")
     return f"STARTED pid={pid}"
 
@@ -91,18 +94,27 @@ def handle_restart_request():
     trader = active_trader()
     if not running(trader):
         raise RuntimeError("Trading engine not running after controlled restart")
+    smart_script, smart_enabled = smart_money_settings()
+    if smart_enabled and not running(smart_script):
+        raise RuntimeError("Smart Money monitor did not survive controlled restart")
     RESTART_RESULT.write_text(request + "|OK",encoding="utf-8")
     RESTART_REQUEST.unlink(missing_ok=True)
     log("Controlled restart verified")
+
+def smart_money_settings():
+    config = dotenv_values(ROOT / ".env.config")
+    script = str(config.get("SUPERVISOR_SMART_MONEY_SCRIPT") or SMART).strip()
+    enabled = str(config.get("SMART_MONEY_MONITOR_ENABLED", os.getenv("SMART_MONEY_MONITOR_ENABLED", "0"))).strip().lower() in {"1", "true", "yes", "on"}
+    return script, enabled
 
 def cycle(notify=False):
     trader = active_trader()
     s = {}
     s["Deployment Agent"] = ensure("Deployment Agent", AGENT)
     s["Trader"] = ensure("Trader", trader)
-    # Fail closed: monitoring must be explicitly enabled, never implicitly restarted.
-    smart_enabled = os.getenv("SMART_MONEY_MONITOR_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
-    s["Smart Money"] = ensure("Smart Money", SMART) if smart_enabled else "DISABLED (credit protection)"
+    # Re-read repository config each cycle, so a safe opt-in is effective after git pull.
+    smart_script, smart_enabled = smart_money_settings()
+    s["Smart Money"] = ensure("Smart Money", smart_script) if smart_enabled else "DISABLED (credit protection)"
     s["Dashboard"] = ensure("Dashboard", DASH, True)
     if notify:
         msg = ["CryptoTracker supervisor online.", f"Trader: {trader}"] + [f"{k}: {v}" for k,v in s.items()]
