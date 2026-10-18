@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "project": "CryptoTracker",
+  "platform": "Windows",
+  "mode": "PAPER_ONLY",
+  "registry_policy": "fail_closed_before_process_change",
+  "settings_file": ".env.config",
+  "local_secrets_file": ".env",
+  "runtime_manifest": "deploy/state/active_release.json",
+  "inventory_output": "deploy/state/infrastructure_inventory.json",
+  "safety": {
+    "tracked_settings": {
+      "LIVE_TRADING": "false",
+      "HELIUS_ENABLED": "0",
+      "SMART_MONEY_HELIUS_ENABLED": "0"
+    },
+    "effective_settings_must_not_enable": [
+      "LIVE_TRADING",
+      "HELIUS_ENABLED",
+      "SMART_MONEY_HELIUS_ENABLED"
+    ],
+    "trader_source_markers": [
+      "LIVE_TRADING"
+    ]
+  },
+  "scheduled_tasks": [
+    {
+      "name": "CryptoTracker Supervisor",
+      "installer": "install_cryptotracker_startup.ps1",
+      "script": "cryptotracker_supervisor.py",
+      "trigger": "at_logon",
+      "run_level": "highest",
+      "host_verified": false
+    }
+  ],
+  "components": [
+    {
+      "id": "supervisor",
+      "role": "service",
+      "entrypoint": "cryptotracker_supervisor.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": "cryptotracker_supervisor.py",
+      "source_files": [
+        "cryptotracker_supervisor.py",
+        "project_process_control.py"
+      ],
+      "health": {
+        "type": "process"
+      }
+    },
+    {
+      "id": "deployment_agent",
+      "role": "service",
+      "entrypoint": "deployment_agent.py",
+      "managed_by": "supervisor",
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": "deployment_agent.py",
+      "source_files": [
+        "deployment_agent.py"
+      ],
+      "health": {
+        "type": "process"
+      }
+    },
+    {
+      "id": "trader",
+      "role": "trading_engine",
+      "entrypoint": "auto_trader_with_alerts_v11_10_research_fairness.py",
+      "entrypoint_resolution": "active_manifest_then_supervisor_fallback",
+      "manifest_key": "trader",
+      "managed_by": "supervisor",
+      "depends_on": [
+        "smart_money"
+      ],
+      "dependency_optional": [
+        "smart_money"
+      ],
+      "deployment_component": "trader",
+      "script_pattern": "auto_trader_with_alerts_*.py",
+      "source_files": [
+        "auto_trader_with_alerts_v11_10_research_fairness.py",
+        "paper_research_lab_v11_10.py",
+        "publish_daily_evidence.py"
+      ],
+      "health": {
+        "type": "process_plus_snapshots",
+        "artifact": "data/auto_snapshots"
+      }
+    },
+    {
+      "id": "smart_money_rpc",
+      "role": "library",
+      "entrypoint": "SmartMoneyMonitor/solana_public_rpc_v23.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "SmartMoneyMonitor/solana_public_rpc_v23.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
+    },
+    {
+      "id": "smart_money",
+      "role": "observer",
+      "entrypoint": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+      "entrypoint_resolution": "tracked_config",
+      "config_key": "SUPERVISOR_SMART_MONEY_SCRIPT",
+      "managed_by": "supervisor",
+      "depends_on": [
+        "smart_money_rpc"
+      ],
+      "deployment_component": "smart_money",
+      "script_pattern": "smart_money_monitor_*.py",
+      "source_files": [
+        "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py"
+      ],
+      "health": {
+        "type": "json_heartbeat",
+        "artifact": "SmartMoneyMonitor/data/smart_money_feed_health_v23.json",
+        "max_age_seconds": 360,
+        "success_status": "OK"
+      }
+    },
+    {
+      "id": "dashboard",
+      "role": "readonly_dashboard",
+      "entrypoint": "cryptotracker_dashboard_v11_8_2.py",
+      "managed_by": "supervisor",
+      "depends_on": [
+        "trader",
+        "smart_money"
+      ],
+      "deployment_component": "dashboard",
+      "script_pattern": "cryptotracker_dashboard_*.py",
+      "source_files": [
+        "cryptotracker_dashboard_v11_8_2.py",
+        "smart_money_dashboard_health.py"
+      ],
+      "health": {
+        "type": "process_plus_dependency_health"
+      }
+    },
+    {
+      "id": "daily_review",
+      "role": "scheduled_job",
+      "entrypoint": "run_daily_model_review.bat",
+      "managed_by": null,
+      "depends_on": [
+        "trader"
+      ],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "run_daily_model_review.bat",
+        "daily_model_review.py",
+        "build_daily_review_bundle.py"
+      ],
+      "health": {
+        "type": "evidence_only"
+      }
+    }
+  ],
+  "runtime_notes": [
+    "Active trader is determined by local manifest and observed processes, not solely by the example entrypoint.",
+    "Smart Money v2.3 heartbeat is more authoritative than Windows command-line discovery.",
+    "Task installation mode is derived from current installer script; confirm on host before relying on it.",
+    "Historical observed Smart Money PID 3096 is not a persistent identifier."
+  ]
+}
