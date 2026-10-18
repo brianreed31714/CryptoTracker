@@ -42,6 +42,13 @@ jobs:
           assert isinstance(slot, int) and slot > 0, f"Unexpected slot: {slot}"
           print("Public Solana RPC read-only getSlot OK:", slot)
           PY
+      - name: Check Windows restart helper syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("restart_smartmoney_v23.ps1", [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { throw ($errors | Out-String) }
       - name: Compile protected Python files
         run: |
           python -m py_compile paper_research_lab_v11_10.py
