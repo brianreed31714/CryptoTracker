@@ -41,7 +41,7 @@ from typing import Any, Optional
 
 import requests
 import statistics
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +90,10 @@ FEED_HEALTH_FIELDS = [
 ]
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-load_dotenv(ENV_PATH)
+load_dotenv(PROJECT_ROOT / ".env.config")
+load_dotenv(ENV_PATH, override=True)
+# Repository non-secret safety switch overrides stale local dotenv settings.
+HELIUS_REPO_DISABLED = str(dotenv_values(PROJECT_ROOT / ".env.config").get("HELIUS_ENABLED", "0")).strip() != "1"
 
 HELIUS_API_KEY = os.getenv("HELIUS_API_KEY", "").strip()
 
@@ -535,6 +538,8 @@ CAMPAIGN_FIELDS = [
 # ---------------------------------------------------------------------------
 
 def helius_recent_transactions(wallet: str) -> list[dict]:
+    if HELIUS_REPO_DISABLED or os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip() != "1":
+        raise RuntimeError("Helius access disabled by repository configuration")
     url = HELIUS_TX_URL.format(wallet=wallet)
     response = requests.get(
         url,
@@ -1885,7 +1890,12 @@ def bootstrap_or_process_robinhood_trader(
 
 def process_trader(trader: Trader, state: dict) -> int:
     chain = (trader.chain or "solana").lower()
+    if chain == "solana" and os.getenv("SMART_MONEY_SOLANA_PUBLIC_RPC_ENABLED", "0").strip() == "1":
+        from solana_public_rpc_v23 import process_wallet
+        return process_wallet(trader, state, record_buy, save_state)
     if chain == "solana":
+        if HELIUS_REPO_DISABLED or os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip() != "1":
+            raise RuntimeError("Solana monitor requires public RPC opt-in; Helius disabled")
         if not HELIUS_API_KEY:
             raise RuntimeError(
                 f"HELIUS_API_KEY is required for Solana trader {trader.name}"
@@ -1915,18 +1925,18 @@ def main() -> None:
         for t in traders
     )
 
-    if has_solana and not HELIUS_API_KEY:
+    if has_solana and not HELIUS_API_KEY and os.getenv("SMART_MONEY_SOLANA_PUBLIC_RPC_ENABLED", "0").strip() != "1" and not HELIUS_REPO_DISABLED and os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip() == "1":
         raise RuntimeError(
             f"HELIUS_API_KEY is missing. Add it to {ENV_PATH}"
         )
 
     print("=" * 80)
-    print("CryptoTracker Smart Money Monitor v2.2.1 CAMPAIGN STRENGTH")
-    print("SOLANA/HELIUS + ROBINHOOD CHAIN DIRECT RPC")
+    print("CryptoTracker Smart Money Monitor v2.3 PUBLIC RPC + FEED HEALTH")
+    print("SOLANA PUBLIC RPC + ROBINHOOD CHAIN DIRECT RPC")
     print("OBSERVATION ONLY - THIS SCRIPT CANNOT PLACE TRADES")
     print("=" * 80)
     print(f"Project root      : {PROJECT_ROOT}")
-    print(f"Helius            : {'configured' if HELIUS_API_KEY else 'not configured'}")
+    print(f"Helius            : {'DISABLED BY CONFIG' if HELIUS_REPO_DISABLED else 'opt-in only'}")
     print(
         f"Robinhood RPC     : "
         f"{'enabled' if has_robinhood else 'not used'}"
