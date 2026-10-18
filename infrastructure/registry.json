@@ -55,7 +55,9 @@
       "role": "service",
       "entrypoint": "deployment_agent.py",
       "managed_by": "supervisor",
-      "depends_on": [],
+      "depends_on": [
+        "registry_contract"
+      ],
       "deployment_component": null,
       "script_pattern": "deployment_agent.py",
       "source_files": [
@@ -73,7 +75,9 @@
       "manifest_key": "trader",
       "managed_by": "supervisor",
       "depends_on": [
-        "smart_money"
+        "smart_money",
+        "market_scanner",
+        "research_lab"
       ],
       "dependency_optional": [
         "smart_money"
@@ -82,7 +86,6 @@
       "script_pattern": "auto_trader_with_alerts_*.py",
       "source_files": [
         "auto_trader_with_alerts_v11_10_research_fairness.py",
-        "paper_research_lab_v11_10.py",
         "publish_daily_evidence.py"
       ],
       "health": {
@@ -164,13 +167,91 @@
       "health": {
         "type": "evidence_only"
       }
+    },
+    {
+      "id": "registry_contract",
+      "role": "library",
+      "entrypoint": "infrastructure/registry_contract.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "infrastructure/registry_contract.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
+    },
+    {
+      "id": "runtime_inventory",
+      "role": "read_only_audit",
+      "entrypoint": "infrastructure/runtime_inventory.py",
+      "managed_by": null,
+      "depends_on": [
+        "registry_contract"
+      ],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "infrastructure/runtime_inventory.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
+    },
+    {
+      "id": "market_scanner",
+      "role": "library",
+      "entrypoint": "market_scanner_2.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "market_scanner_2.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
+    },
+    {
+      "id": "research_lab",
+      "role": "paper_research_library",
+      "entrypoint": "paper_research_lab_v11_10.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "paper_research_lab_v11_10.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
+    },
+    {
+      "id": "runner_prototype",
+      "role": "shadow_research_only",
+      "entrypoint": "research/runner_sleeve.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": [
+        "research/runner_sleeve.py"
+      ],
+      "health": {
+        "type": "not_applicable"
+      }
     }
   ],
   "runtime_notes": [
     "Active trader is determined by local manifest and observed processes, not solely by the example entrypoint.",
     "Smart Money v2.3 heartbeat is more authoritative than Windows command-line discovery.",
     "Task installation mode is derived from current installer script; confirm on host before relying on it.",
-    "Historical observed Smart Money PID 3096 is not a persistent identifier."
+    "Historical observed Smart Money PID 3096 is not a persistent identifier.",
+    "Balanced EV, Runner Hunter and DIY Whale are research-model variants within paper_research_lab_v11_10.py, not three separately supervised trading processes."
   ],
   "external_services": [
     {
