@@ -82,8 +82,11 @@ def classify_swap(tx, wallet):
             "spend_amount":cost, "estimated_spend_usd":cost}
 
 def fetch_transaction(signature):
+    # Solana RPC error -32015 occurs when a transaction's version exceeds
+    # maxSupportedTransactionVersion. Point Farm Capital uses version 1.
+    # This is a read-only query; changing the version does not send a trade.
     return rpc("getTransaction", [signature, {"encoding":"jsonParsed",
-                  "commitment":"confirmed", "maxSupportedTransactionVersion":0}])
+                  "commitment":"confirmed", "maxSupportedTransactionVersion":1}])
 
 def process_wallet(trader, state, record_buy, save_state):
     wallet = trader.wallet
