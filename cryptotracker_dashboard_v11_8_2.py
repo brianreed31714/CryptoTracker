@@ -11,6 +11,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
+from smart_money_dashboard_health import smart_money_status
 
 st.set_page_config(
     page_title="CryptoTracker Control Center",
@@ -1215,9 +1216,9 @@ completed, realized, deployed, day_return_pct, wins, losses = daily_trade_metric
 st.markdown("### System Status")
 d1,d2,d3,d4 = st.columns(4)
 
-def dep_card(col, name, proc=None, fixed_state=None, detail=""):
+def dep_card(col, name, proc=None, fixed_state=None, detail="", fixed_css=None):
     if fixed_state:
-        state, css = fixed_state, "info"
+        state, css = fixed_state, fixed_css or "info"
     elif proc:
         state, css = "RUNNING", "run"
         detail = detail or f"PID {proc.get('pid', '—')}"
@@ -1288,7 +1289,23 @@ dep_card(
     fixed_state="ON-DEMAND",
     detail="queried only for top quant candidates; 13-influencer polling OFF",
 )
-dep_card(d4, "Smart Money / Whale", smart_proc, detail=proc_detail(smart_proc))
+# v2.3 has an authoritative per-cycle heartbeat. Windows often hides
+# the scheduled-task child's command line, making process-only detection wrong.
+# A stale heartbeat must not be displayed as RUNNING.
+smart_health = smart_money_status(SMART_DIR / "smart_money_feed_health_v23.json")
+if smart_health is not None:
+    dep_card(
+        d4, "Smart Money / Whale",
+        fixed_state=smart_health["state"],
+        fixed_css=smart_health["css"],
+        detail=smart_health["detail"],
+    )
+    if smart_health["state"] in {"DEGRADED", "ERROR"} and smart_health["last_error"]:
+        with st.expander("Smart Money feed error", expanded=False):
+            st.caption(smart_health["last_error"])
+else:
+    # Legacy v2.1/v2.2 installations do not emit the v2.3 heartbeat.
+    dep_card(d4, "Smart Money / Whale", smart_proc, detail=proc_detail(smart_proc))
 
 if social_proc:
     st.warning(
@@ -1566,6 +1583,6 @@ if not scorecard.empty:
     ]
     st.dataframe(sc[score_cols], hide_index=True, use_container_width=True, height=220)
 
-st.caption("Read-only V11.8.2 dashboard. CryptoTracker and Smart Money Monitor remain independent background processes.")
+st.caption("Read-only V11.8.2 dashboard (Smart Money v2.3 heartbeat). CryptoTracker and Smart Money Monitor remain independent background processes.")
 time.sleep(refresh)
 st.rerun()
