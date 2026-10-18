@@ -450,7 +450,7 @@ NON-SECRET CONFIG:
 """
     try:
         client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        r=client.responses.create(model=MODEL,input=prompt)
+        r=client.responses.create(model=MODEL,reasoning={"effort":"high"},input=prompt)
         text=(getattr(r,"output_text","") or "").strip()
         text=re.sub(r"^```(?:json)?\s*","",text)
         text=re.sub(r"\s*```$","",text)
