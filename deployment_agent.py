@@ -177,6 +177,19 @@ def validate_trader_capabilities(path: Path):
         )
 
 
+def validate_release_blob(commit: str, rel: str):
+    """Do not activate a file whose code differs from its approved commit."""
+    approved = run("git", "rev-parse", f"{commit}:{rel}", check=False)
+    current = run("git", "rev-parse", f"HEAD:{rel}", check=False)
+    if approved.returncode or current.returncode:
+        raise ValueError(f"Cannot verify approved release blob: {rel}")
+    if approved.stdout.strip() != current.stdout.strip():
+        raise ValueError(
+            f"Approved release file changed since {commit}: {rel}; "
+            "new deployment approval is required."
+        )
+
+
 def validate_request(req: dict):
     if req.get("status") != "READY_TO_DEPLOY":
         raise ValueError("Request is not READY_TO_DEPLOY.")
@@ -204,6 +217,7 @@ def validate_request(req: dict):
         if comp == "trader":
             validate_trader_capabilities(validated[comp])
         py_compile.compile(str(validated[comp]), doraise=True)
+        validate_release_blob(commit, str(validated[comp].relative_to(ROOT)).replace("\\", "/"))
 
         # Compile versioned local dependencies referenced by protected traders.
         if comp == "trader":
