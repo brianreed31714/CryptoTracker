@@ -1,7 +1,7 @@
 """Offline safety tests for the read-only Solana public RPC observer."""
 import unittest
 from unittest.mock import patch
-from SmartMoneyMonitor.solana_public_rpc_v23 import classify_swap, process_wallet, rpc
+from SmartMoneyMonitor.solana_public_rpc_v23 import classify_swap, process_wallet, rpc, fetch_transaction
 from SmartMoneyMonitor import smart_money_monitor_v2_3_feed_health_audit as monitor
 
 WALLET = "watched-wallet"
@@ -66,6 +66,20 @@ class PublicRPCTests(unittest.TestCase):
             with patch("SmartMoneyMonitor.solana_public_rpc_v23.process_wallet",return_value=0) as call:
                 self.assertEqual(monitor.process_trader(trader,{}),0)
                 call.assert_called_once()
+
+    def test_version_one_transactions_are_supported(self):
+        # Regression: Point Farm Capital triggered Solana RPC error -32015
+        # because the request declared maxSupportedTransactionVersion=0.
+        with patch("SmartMoneyMonitor.solana_public_rpc_v23.rpc",
+                   return_value=tx()) as request:
+            result = fetch_transaction("version-one-sig")
+        self.assertEqual(classify_swap(result, WALLET)["token_mint"], "TOKEN")
+        request.assert_called_once()
+        method, params = request.call_args.args
+        self.assertEqual(method, "getTransaction")
+        self.assertEqual(params[0], "version-one-sig")
+        self.assertEqual(params[1]["maxSupportedTransactionVersion"], 1)
+        self.assertEqual(params[1]["encoding"], "jsonParsed")
 
     def test_rpc_never_accepts_helius_url(self):
         with patch.dict("os.environ",{"SMART_MONEY_SOLANA_RPC_URL":
