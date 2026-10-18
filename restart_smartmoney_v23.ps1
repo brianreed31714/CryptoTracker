@@ -36,35 +36,10 @@ Write-Host "Restarting scheduled task: $taskName"
 Stop-ScheduledTask -TaskName $taskName
 Start-Sleep -Seconds 5
 
-# Stop ONLY the Smart Money v2.3 Python process so the updated RPC code
-# is loaded. Do not stop the trader, dashboard, or unrelated Python processes.
+# Stop ONLY the Smart Money v2.3 Python process, forcing the updated
+# read-only RPC code to reload. Do not interrupt the trader or dashboard.
 $oldMonitors = @(Get-CimInstance Win32_Process | Where-Object {
-  $_.Name -match '^python(w)?(\.exe)?
-
-$healthPath = Join-Path $root 'SmartMoneyMonitor\data\smart_money_feed_health_v23.json'
-$deadline = (Get-Date).AddMinutes(5)
-while ((Get-Date) -lt $deadline) {
-  Start-Sleep -Seconds 5
-  $process = @(Get-CimInstance Win32_Process | Where-Object {
-    $_.Name -match '^python(w)?(\.exe)?$' -and
-    $_.CommandLine -like '*smart_money_monitor_v2_3_feed_health_audit.py*'
-  })
-  if ($process.Count -gt 0 -and (Test-Path $healthPath)) {
-    $item = Get-Item $healthPath
-    if ($item.LastWriteTime -gt $started) {
-      $health = Get-Content $healthPath -Raw | ConvertFrom-Json
-      Write-Host "Monitor process(es): $($process.Count); feed health: $($health.status)"
-      Write-Host "Wallet checks: $($health.successful_wallet_checks)/$($health.tracked_wallets)"
-      if ($health.status -eq 'OK') {
-        Write-Host 'Smart Money v2.3 is running with healthy public RPC feeds.' -ForegroundColor Green
-        exit 0
-      }
-      throw "Smart Money feed health is $($health.status): $($health.last_error)"
-    }
-  }
-}
-throw 'No fresh healthy Smart Money feed report within 5 minutes. Inspect deploy/state/supervisor.log and SmartMoneyMonitor/data/smart_money_feed_health_v23.json.'
- -and
+  $_.Name -match '^python(w)?(\.exe)?$' -and
   $_.CommandLine -like '*smart_money_monitor_v2_3_feed_health_audit.py*'
 })
 foreach ($monitor in $oldMonitors) {
