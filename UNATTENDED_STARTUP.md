@@ -1,20 +1,27 @@
-# CryptoTracker Unattended Reboot Recovery
+# CryptoTracker unattended startup (tracked installer behavior)
 
-One long-running supervisor keeps the deployment agent, current trader, Smart Money Monitor, and dashboard alive.
+The current `install_cryptotracker_startup.ps1` registers the
+**CryptoTracker Supervisor** scheduled task at **user logon**, with a
+30-second delay, a Highest run level and Interactive logon type.
+**It does not ask for a Windows password or start before logon.**
+An older version of this document incorrectly described boot-time,
+password-based startup.
 
-Install:
-1. Pull the latest GitHub changes.
-2. Open PowerShell as Administrator.
-3. From the CryptoTracker folder run:
-   powershell -ExecutionPolicy Bypass -File .\install_cryptotracker_startup.ps1
-4. Enter your Windows account password when prompted. A Windows Hello PIN is not the same as the account password.
+The supervisor launches the deployment agent, active trader, Smart Money
+v2.3 monitor and the read-only dashboard independently. Smart Money's
+configured entrypoint is `SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py`;
+the trader is selected from local active-release manifest when present.
+Process command lines may be invisible to non-elevated Windows sessions.
 
-The scheduled task is named CryptoTracker Supervisor and starts about one minute after Windows boots.
-It runs under your Windows account even when you are not logged in, so Git credentials, OneDrive paths, and .env access remain available.
+Installer changes Windows tasks and should not be run during routine
+testing. A running task is not proof that every dependent process is
+healthy. For host verification use the read-only infrastructure collector:
 
-Optional .env.config settings:
-SUPERVISOR_CHECK_SECONDS=60
-SUPERVISOR_RESTART_GRACE_SECONDS=20
-SUPERVISOR_BOOT_DELAY_SECONDS=45
-SUPERVISOR_SMART_MONEY_SCRIPT=SmartMoneyMonitor/smart_money_monitor_v2_2_1_campaign_strength.py
-SUPERVISOR_DASHBOARD_SCRIPT=cryptotracker_dashboard_v11_8_2.py
+```powershell
+python -m infrastructure.registry_contract --local-safety
+python -m infrastructure.runtime_inventory --write-local
+```
+
+See [operations / deployment gates](infrastructure/OPERATIONS.md) for
+safety invariants, evidence and recovery. Maintain paper-only trading
+and disabled Helius paid polling.
