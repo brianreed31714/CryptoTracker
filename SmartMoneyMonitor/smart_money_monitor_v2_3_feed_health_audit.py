@@ -1891,7 +1891,10 @@ def bootstrap_or_process_robinhood_trader(
 def process_trader(trader: Trader, state: dict) -> int:
     chain = (trader.chain or "solana").lower()
     if chain == "solana" and os.getenv("SMART_MONEY_SOLANA_PUBLIC_RPC_ENABLED", "0").strip() == "1":
-        from solana_public_rpc_v23 import process_wallet
+        try:
+            from SmartMoneyMonitor.solana_public_rpc_v23 import process_wallet
+        except ModuleNotFoundError:
+            from solana_public_rpc_v23 import process_wallet
         return process_wallet(trader, state, record_buy, save_state)
     if chain == "solana":
         if HELIUS_REPO_DISABLED or os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip() != "1":
