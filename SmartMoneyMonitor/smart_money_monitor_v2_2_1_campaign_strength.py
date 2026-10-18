@@ -62,7 +62,8 @@ CAMPAIGNS_CSV = DATA_DIR / "smart_money_campaigns_v22.csv"
 WALLET_SCORECARD_CSV = DATA_DIR / "wallet_scorecard_v22.csv"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-load_dotenv(ENV_PATH)
+load_dotenv(PROJECT_ROOT / ".env.config")
+load_dotenv(ENV_PATH, override=True)
 
 HELIUS_API_KEY = os.getenv("HELIUS_API_KEY", "").strip()
 
@@ -1762,7 +1763,12 @@ def bootstrap_or_process_robinhood_trader(
 
 def process_trader(trader: Trader, state: dict) -> int:
     chain = (trader.chain or "solana").lower()
+    if chain == "solana" and os.getenv("SMART_MONEY_SOLANA_PUBLIC_RPC_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}:
+        from solana_public_rpc_v23 import process_wallet
+        return process_wallet(trader, state, record_buy, save_state)
     if chain == "solana":
+        if os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip().lower() not in {"1", "true", "yes", "on"}:
+            return 0
         if not HELIUS_API_KEY:
             raise RuntimeError(
                 f"HELIUS_API_KEY is required for Solana trader {trader.name}"
@@ -1791,7 +1797,7 @@ def main() -> None:
         for t in traders
     )
 
-    if has_solana and not HELIUS_API_KEY:
+    if has_solana and not HELIUS_API_KEY and os.getenv("SMART_MONEY_SOLANA_PUBLIC_RPC_ENABLED", "0").strip().lower() not in {"1", "true", "yes", "on"} and os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}:
         raise RuntimeError(
             f"HELIUS_API_KEY is missing. Add it to {ENV_PATH}"
         )
