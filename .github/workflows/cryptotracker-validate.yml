@@ -26,7 +26,22 @@ jobs:
           python -m py_compile SmartMoneyMonitor/solana_public_rpc_v23.py
           python -m py_compile SmartMoneyMonitor/smart_money_monitor_v2_2_1_campaign_strength.py
           python -m py_compile SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py
+          python -m py_compile cryptotracker_supervisor.py
           python -m unittest -v test_solana_public_rpc_v23
+          python - <<'PY'
+          from cryptotracker_supervisor import smart_money_settings
+          script, enabled = smart_money_settings()
+          assert enabled and script.endswith("smart_money_monitor_v2_3_feed_health_audit.py")
+          print("Smart Money supervisor opt-in OK")
+          PY
+      - name: Public Solana RPC live connectivity (read only)
+        run: |
+          python - <<'PY'
+          from SmartMoneyMonitor.solana_public_rpc_v23 import rpc
+          slot = rpc("getSlot", [{"commitment": "confirmed"}])
+          assert isinstance(slot, int) and slot > 0, f"Unexpected slot: {slot}"
+          print("Public Solana RPC read-only getSlot OK:", slot)
+          PY
       - name: Compile protected Python files
         run: |
           python -m py_compile paper_research_lab_v11_10.py
