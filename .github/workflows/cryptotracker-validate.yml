@@ -2,7 +2,7 @@ name: CryptoTracker Python Validation
 
 on:
   push:
-    branches: [main, feature/runner-paper-sleeve]
+    branches: [main, feature/runner-paper-sleeve, feature/paper-goal-metrics-20261019]
     paths:
       - "*.py"
       - "research/**/*.py"
@@ -73,3 +73,15 @@ jobs:
           assert len(lab.MODEL_SPECS) >= 10
           print("models", sorted(lab.MODEL_SPECS))
           PY
+
+  paper-goal-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify paper-only 1pct target calculations
+        run: python -m unittest -v test_paper_goal_scorecard
+      - name: Compile paper research
+        run: python -m py_compile paper_research_lab_v11_10.py research/paper_goal_scorecard.py
