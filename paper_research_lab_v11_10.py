@@ -1508,7 +1508,22 @@ def daily_summary(report_date=None, write_files=True):
         reverse=True,
     )
 
+    from research.paper_goal_scorecard import goal_scorecard
+    starting_equities = {
+        name: _num(((_load_state(_num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15)).get("models") or {}).get(name) or {}).get("starting_equity"), _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+        for name in ("balanced_ev", "runner_hunter", "diy_whale")
+    }
+    goal_metrics = goal_scorecard(TRADE_FILE, report_date, starting_equities)
+    for row in results:
+        if row["model"] in goal_metrics["sleeves"]:
+            row["goal_1pct_daily"] = goal_metrics["sleeves"][row["model"]]
+            # The previous value compounds percentage returns on each trade and
+            # is not a portfolio drawdown; replace it with realized-equity DD.
+            row["trade_compounded_drawdown_pct_legacy"] = row["max_drawdown_pct"]
+            row["max_drawdown_pct"] = row["goal_1pct_daily"]["daily_realized_equity_drawdown_pct"]
     summary = {
+        "goal_1pct_daily": goal_metrics,
+        "portfolio_metrics_caveat": "1% target measured on realized equity only; mark-to-market portfolio return unavailable.", 
         "date": report_date,
         "generated_at": datetime.now().isoformat(),
         "ranking_basis": (
@@ -1578,6 +1593,23 @@ def daily_summary(report_date=None, write_files=True):
             md.append(f"| {r['model']} | {r['entries']} | {r['completed']} | "
                       f"{r['win_rate_pct']:.1f}% | {r['avg_net_return_pct']:+.2f}% | "
                       f"{r['max_drawdown_pct']:.2f}% | ${r['realized_pnl_usd']:+.2f} |")
+        md.extend(["", "## 1% daily goal — realized-equity proxy (not portfolio return)", "",
+                   "| Sleeve | Daily realized-equity return | Daily target | Hit? | Since inception realized-equity return | Compounded target since first observed entry | Gap (USD) | Realized-equity DD since inception |",
+                   "|---|---:|---:|---|---:|---:|---:|---:|"])
+        for key, score in goal_metrics["sleeves"].items():
+            def fmt(value):
+                return f"{value:+.2f}%" if value is not None else "N/A"
+            md.append(
+                f"| {key} | {fmt(score['daily_realized_equity_return_pct'])} | +1.00% | "
+                f"{score['daily_goal_met_on_realized_basis']} | "
+                f"{fmt(score['since_inception_realized_equity_return_pct'])} | "
+                f"{fmt(score['since_inception_compounded_1pct_daily_target_pct'])} | "
+                f"{score['since_inception_gap_vs_target_usd']} | "
+                f"{fmt(score['since_inception_realized_equity_drawdown_pct'])} |"
+            )
+        md.extend(["", "**Warning:** These are completed-trade realized-equity measurements, "
+                   "not mark-to-market portfolio returns. Open-position losses are excluded. "
+                   "The target compounds 1% per calendar day, not per trade."])
         md.extend(["", summary["three_sleeve_comparison"]["note"]])
         md.extend([
             "",
@@ -1667,7 +1699,24 @@ def campaign_summary(write_files=True):
         ),
         reverse=True,
     )
+    from research.paper_goal_scorecard import goal_scorecard
+    # Include inactive calendar days in the 1%-per-day target; using the
+    # most recent SELL date would silently skip days with no realized exits.
+    through_date = datetime.now().date().isoformat()
+    state = _load_state(_num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+    starts = {
+        name: _num(((state.get("models") or {}).get(name) or {}).get("starting_equity"), _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+        for name in ("balanced_ev", "runner_hunter", "diy_whale")
+    }
+    goal_metrics = goal_scorecard(TRADE_FILE, through_date, starts)
+    for item in models:
+        name = item["model"]
+        if name in goal_metrics["sleeves"]:
+            item["goal_1pct_daily"] = goal_metrics["sleeves"][name]
+            item["all"]["trade_compounded_drawdown_pct_legacy"] = item["all"]["max_drawdown_pct"]
+            item["all"]["max_drawdown_pct"] = goal_metrics["sleeves"][name]["since_inception_realized_equity_drawdown_pct"]
     summary = {
+        "goal_1pct_daily": goal_metrics,
         "generated_at": datetime.now().isoformat(),
         "split": "chronological_70_30",
         "minimum_completed_for_promotion_review": 30,
@@ -1765,6 +1814,17 @@ def eod_summary_text(report_date=None):
             f"{wins}W/{losses}L"
         ),
         f"Avg trade: {avg_trade:+.2f}% | Median: {median_trade:+.2f}%",
+        (
+            "1%/day goal (realized-only): "
+            + " | ".join(
+                f"{key}: day "
+                f"{(value.get('daily_realized_equity_return_pct') if value.get('daily_realized_equity_return_pct') is not None else float('nan')):+.2f}%"
+                f", inception "
+                f"{(value.get('since_inception_realized_equity_return_pct') if value.get('since_inception_realized_equity_return_pct') is not None else float('nan')):+.2f}%"
+                f", target {value.get('since_inception_compounded_1pct_daily_target_pct')}%"
+                for key, value in daily.get("goal_1pct_daily", {}).get("sleeves", {}).items()
+            )
+        ),
         f"Holdout: {holdout_n} trades | {holdout_avg:+.2f}% avg",
         promotion_text,
     ])
