@@ -1700,8 +1700,9 @@ def campaign_summary(write_files=True):
         reverse=True,
     )
     from research.paper_goal_scorecard import goal_scorecard
-    all_dates = [str(r.get("date") or r.get("timestamp") or "")[:10] for r in rows]
-    through_date = max(all_dates) if all_dates else datetime.now().date().isoformat()
+    # Include inactive calendar days in the 1%-per-day target; using the
+    # most recent SELL date would silently skip days with no realized exits.
+    through_date = datetime.now().date().isoformat()
     state = _load_state(_num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
     starts = {
         name: _num(((state.get("models") or {}).get(name) or {}).get("starting_equity"), _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
