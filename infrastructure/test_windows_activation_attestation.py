@@ -53,7 +53,7 @@ class AttestationTests(unittest.TestCase):
         duplicate["components"]["trader"]["process"]["pids"] = [1, 2]
         cases.append(duplicate)
         wrong = good_snapshot()
-        wrong["components"]["geo_feed"]["script_version"]["state"] = "MISMATCH"
+        wrong["components"]["dashboard"]["script_version"]["state"] = "MISMATCH"
         cases.append(wrong)
         unproven = good_snapshot()
         unproven["components"]["trader"]["process"].pop("started_utc")
