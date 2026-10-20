@@ -217,6 +217,13 @@ def publish_daily_evidence(report_date=None):
     counts["improvement_diagnostics.json"] = "generated"
     counts["improvement_diagnostics.md"] = "generated"
 
+    # Prospective shadow variants are marked explicitly as UNPRICED marks.
+    # They never place orders or claim simulated returns are executable.
+    from research.paper_shadow_experiments import generate as generate_shadow
+    generate_shadow(PAPER_DIR / "shadow_trades.csv", report_date, destination)
+    counts["shadow_experiments.json"] = "generated"
+    counts["shadow_experiments.md"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
