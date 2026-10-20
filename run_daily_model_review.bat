@@ -40,6 +40,9 @@ echo.
 echo To approve in ChatGPT, use:
 echo   Approve P-YYYYMMDD-NN
 echo.
+rem Read-only one-shot Windows evidence; cannot change review success.
+python -m infrastructure.windows_activation_attestation --notify
+if errorlevel 1 echo CryptoTracker Windows attestation unavailable; model review still complete.
 exit /b 0
 
 :fail
