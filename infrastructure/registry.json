@@ -61,7 +61,10 @@
       "deployment_component": null,
       "script_pattern": "deployment_agent.py",
       "source_files": [
-        "deployment_agent.py"
+        "deployment_agent.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py",
+        "infrastructure/runtime_inventory.py"
       ],
       "health": {
         "type": "process"
@@ -172,7 +175,9 @@
       "source_files": [
         "run_daily_model_review.bat",
         "daily_model_review.py",
-        "build_daily_review_bundle.py"
+        "build_daily_review_bundle.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py"
       ],
       "health": {
         "type": "evidence_only"
@@ -204,7 +209,9 @@
       "deployment_component": null,
       "script_pattern": null,
       "source_files": [
-        "infrastructure/runtime_inventory.py"
+        "infrastructure/runtime_inventory.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py"
       ],
       "health": {
         "type": "not_applicable"
@@ -285,7 +292,8 @@
     "Smart Money v2.3 heartbeat is more authoritative than Windows command-line discovery.",
     "Task installation mode is derived from current installer script; confirm on host before relying on it.",
     "Historical observed Smart Money PID 3096 is not a persistent identifier.",
-    "Balanced EV, Runner Hunter and DIY Whale are research-model variants within paper_research_lab_v11_10.py, not three separately supervised trading processes."
+    "Balanced EV, Runner Hunter and DIY Whale are research-model variants within paper_research_lab_v11_10.py, not three separately supervised trading processes.",
+    "Non-disruptive CryptoTracker host attestation is read-only and confirms source sync, process identity/start time for supervisor/agent/trader/dashboard, Smart Money v2.3 fresh healthy feed heartbeat, and a post-sync crypto EOD send record; these do NOT attest in-memory source digest, a wallet swap, or device Pushover delivery. Results are stored under ignored deploy/state and sanitized status is published to an isolated private branch cryptotracker-host-status (disable with CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED=0); no crypto trade settings, local checkout or supervisor processes changed. Running deployment agent must be reloaded through separately approved host action to adopt new monitoring hook."
   ],
   "external_services": [
     {

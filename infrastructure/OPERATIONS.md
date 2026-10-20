@@ -84,3 +84,28 @@ When a status is incorrect, compare its data source with producer output before 
 ## Updating the contract
 
 Any change that adds, renames, retires, or reconnects a component must update `registry.json`, source ownership, dependencies, data/provider contracts, negative tests, and this document in the same release. The registry is checked on every main-branch change affecting infrastructure and on deployment preflight. CI branch-protection settings must be verified separately; a GitHub Action cannot guarantee branch blocking without repository rules.
+
+## Read-only Windows activation and Pushover attestation (October 19, 2026)
+
+The Windows CryptoTracker deployment agent now has a read-only activation probe (`infrastructure/windows_activation_attestation.py`) after its existing approved Git fast-forward/request scan. The next successfully completed daily model-review batch also triggers a one-shot local probe. This code **does not activate or restart** any service, perform a wallet swap, change execution settings, or publish raw runtime data. The existing in-memory agent must separately reload once to adopt the new recurring polling hook; a code commit alone cannot make that happen.
+
+Evidence stages:
+- `UNVERIFIED`: local Git revision, source integrity or remote-main match not positively established.
+- `CODE_SYNCED_RUNTIME_UNVERIFIED`: expected Git source reached the host, but runtime process identities/start times, expected script basenames, or Smart Money heartbeat are missing.
+- `CODE_SYNCED_PROCESS_OBSERVED`: one or two samples of expected supervisor, deployment agent, trader and dashboard with exact Windows process start times; additionally requires a **HEALTHY Smart Money v2.3 feed heartbeat**. A heartbeat can verify Smart Money feed health when CIM hides its process command line, without claiming a verified Smart Money PID.
+- `HOST_PROCESSES_STABLE_SOURCE_ONLY`: 3 separated samples (minimum 20 seconds apart), same identified process starts and a continuously healthy Smart Money heartbeat. This does **not** prove an in-memory code digest or correct trading.
+- `EOD_EXECUTION_VERIFIED`: after source sync and process stability, the paper-mode trader's `data/crypto_eod_report_state.json` records a successful EOD Pushover-send attempt (`last_sent_date` plus timezone-aware `sent_at` no earlier than sync). This is a *recorded crypto EOD notification*, **not** device delivery, validated model-review results or a successful token swap.
+
+The local ignored receipt is `deploy/state/activation_attestation.json`. Attestation status is published to the **private**, separately maintained Git branch `cryptotracker-host-status`, file `status.json`. This allows ChatGPT to inspect host-reported status remotely without routine PowerShell scripts. Only an explicit allowlist is shared: revision, timestamp, source-synced, host-process-stable, post-sync-EOD-recorded, and coarse status. Never publish runtime PIDs, wallet/mint addresses, secret keys, account balances, full command lines, raw logs or positions. Stale remote timestamps remain stale and must never be presented as current host health.
+
+The branch is updated via Git plumbing with **non-force pushes only** to the dedicated status ref. No `git checkout`, `git reset`, `git pull`, `git commit` to main, or modification to the checked-out trading worktree is permitted. Unexpected preexisting branch contents, auth failures or concurrent pushes fail closed. Set `CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED=0` to disable this remote status signal without changing local observations.
+
+CryptoTracker's existing Pushover deploy credentials (local private config) are reused. Notifications clearly distinguish code synchronized from recorded EOD send; only HTTP 200 / API `status=1` marks `API_ACCEPTED`. The Pushover API accepting a message is not proof the user's device received it. Failed messages may be retried without duplicating successful ones.
+
+Windows bootstrap check after the new code reaches the PC:
+
+```powershell
+python -m infrastructure.windows_activation_attestation --notify
+```
+
+This is read-only with respect to trading and scheduled tasks and writes only the ignored local receipt plus a sanitized remote status update. It is not proof the trader, deployment agent, or dashboard has loaded changed in-memory code. To bootstrap unattended 60-second polling, the existing deployment agent still requires one **separately safely attributed and approved** reload; do not restart the trader or another project just for diagnostics. `LIVE_TRADING=false`, `HELIUS_ENABLED=0`, and `SMART_MONEY_HELIUS_ENABLED=0` remain mandatory.
