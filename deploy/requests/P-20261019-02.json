@@ -1,0 +1,16 @@
+{
+  "proposal_id": "P-20261019-02",
+  "status": "PENDING_HOST_VERIFICATION",
+  "commit": "319b6f2108919eadf8eb297cf5da8be4422ae7dc",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "requires_prior_release": "P-20261019-01",
+  "ci_verification": "All three GitHub Actions checks passed for PR #8: CryptoTracker Python Validation, Supervisor restart safety tests, Infrastructure registry contract.",
+  "approval_scope": "User approved carefully testing and deploying proposed CryptoTracker improvements on 2026-10-19. Never enable live swaps or increase trade size.",
+  "note": "STAGED NON-ACTIVE request. Deployment agent only acts on READY_TO_DEPLOY. First verify prior request P-20261019-01 was processed on actual Windows host with code provenance, sustained trader/supervisor/Smart Money health and fresh paper-only reports. Confirm release blob and complete dependency provenance, no dirty repo, CI green, allowlist preflight, no duplicate restart. Then update this request to READY_TO_DEPLOY only if controls still valid; one controlled restart and post-release evidence check. This release enables paper-only read-only daily diagnostics and unpriced isolated shadow variants, not live orders; baselines unchanged. If host evidence unavailable, keep PENDING and record blocker instead of asking user to run routine reconciliation commands."
+}
