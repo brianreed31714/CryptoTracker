@@ -1593,6 +1593,23 @@ def daily_summary(report_date=None, write_files=True):
             md.append(f"| {r['model']} | {r['entries']} | {r['completed']} | "
                       f"{r['win_rate_pct']:.1f}% | {r['avg_net_return_pct']:+.2f}% | "
                       f"{r['max_drawdown_pct']:.2f}% | ${r['realized_pnl_usd']:+.2f} |")
+        md.extend(["", "## 1% daily goal — realized-equity proxy (not portfolio return)", "",
+                   "| Sleeve | Daily realized-equity return | Daily target | Hit? | Since inception realized-equity return | Compounded target since first observed entry | Gap (USD) | Realized-equity DD since inception |",
+                   "|---|---:|---:|---|---:|---:|---:|---:|"])
+        for key, score in goal_metrics["sleeves"].items():
+            def fmt(value):
+                return f"{value:+.2f}%" if value is not None else "N/A"
+            md.append(
+                f"| {key} | {fmt(score['daily_realized_equity_return_pct'])} | +1.00% | "
+                f"{score['daily_goal_met_on_realized_basis']} | "
+                f"{fmt(score['since_inception_realized_equity_return_pct'])} | "
+                f"{fmt(score['since_inception_compounded_1pct_daily_target_pct'])} | "
+                f"{score['since_inception_gap_vs_target_usd']} | "
+                f"{fmt(score['since_inception_realized_equity_drawdown_pct'])} |"
+            )
+        md.extend(["", "**Warning:** These are completed-trade realized-equity measurements, "
+                   "not mark-to-market portfolio returns. Open-position losses are excluded. "
+                   "The target compounds 1% per calendar day, not per trade."])
         md.extend(["", summary["three_sleeve_comparison"]["note"]])
         md.extend([
             "",
