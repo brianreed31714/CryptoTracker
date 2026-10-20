@@ -10,7 +10,7 @@ import csv
 import json
 import math
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 SLEEVES = ("balanced_ev", "runner_hunter", "diy_whale")
@@ -116,7 +116,6 @@ def _cooldown_opportunities(all_rows, through_date, model):
                     blocked[minutes].append(_trade_key(r))
     return {str(k): {
         "observed_reentries_after_loss": len(v),
-        "trade_keys": v[:20],
         "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
     } for k, v in blocked.items()}
 
@@ -239,8 +238,8 @@ def render_markdown(audit):
         day = row["daily"]
         all_ = row["inception"]
         avg = all_["avg_net_return_per_trade_pct"]
-        lines.append(f"| {name} | {day['completed']} | \${day['net_pnl_usd']:+.4f} | {all_['completed']} | \${all_['net_pnl_usd']:+.4f} | {avg:+.2f}% |" if avg is not None else
-                     f"| {name} | {day['completed']} | \${day['net_pnl_usd']:+.4f} | {all_['completed']} | \${all_['net_pnl_usd']:+.4f} | N/A |")
+        lines.append(f"| {name} | {day['completed']} | ${day['net_pnl_usd']:+.4f} | {all_['completed']} | ${all_['net_pnl_usd']:+.4f} | {avg:+.2f}% |" if avg is not None else
+                     f"| {name} | {day['completed']} | ${day['net_pnl_usd']:+.4f} | {all_['completed']} | ${all_['net_pnl_usd']:+.4f} | N/A |")
     lines.extend(["", "## Investigation flags", ""])
     for name, row in audit["sleeves"].items():
         ex = row["execution"]
@@ -252,7 +251,7 @@ def render_markdown(audit):
             f"{len(ex['stops_exceeding_threshold_by_more_than_3pp'])} severe stop overruns; "
             f"{pc['losing_exits_after_at_least_8pct_observed_peak']} gains-to-loss reversals; "
             f"{cd['60']['observed_reentries_after_loss']} observed reentries within 60m of a loss; "
-            f"RISK_OFF {off['completed']} completed exits / \${off['net_pnl_usd']:+.4f} inception."
+            f"RISK_OFF {off['completed']} completed exits / ${off['net_pnl_usd']:+.4f} inception."
         )
     lines.extend(["", "## Evaluation policy", "",
                   "Risk-off exclusions and cooldown counts are retrospective selection diagnostics, not backtests.",
