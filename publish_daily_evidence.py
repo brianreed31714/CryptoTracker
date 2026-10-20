@@ -195,6 +195,16 @@ def publish_daily_evidence(report_date=None):
         destination / "campaign_summary.json",
     )
 
+    # Audits describe simulated execution and history reconciliation; they
+    # never modify the trader, its positions, or its decision thresholds.
+    from research.paper_quality_audit import csv_rows, audit_paper_day
+    quality = audit_paper_day(csv_rows(raw / "paper_trades.csv"), report_date, PUBLISHED_ROOT)
+    (destination / "quality_audit.json").write_text(
+        json.dumps(quality, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    counts["quality_audit.json"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
