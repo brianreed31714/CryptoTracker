@@ -1032,6 +1032,12 @@ def _manage_shadow_positions(name, model, spec, candidates_by_token, price_looku
         if not reason:
             kept.append(position)
             continue
+        # Experimental cooldowns observe their OWN earlier shadow losses.
+        # This is a raw-price loss proxy, not a net/executed loss.
+        if name.startswith("xp_") and raw_return < 0:
+            model.setdefault("shadow_last_loss", {})[
+                str(position.get("token_address") or "")
+            ] = now.isoformat()
         _append_csv(SHADOW_TRADE_FILE, {
             "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
             "action": "SELL", "symbol": position.get("symbol", ""),
@@ -1044,9 +1050,20 @@ def _manage_shadow_positions(name, model, spec, candidates_by_token, price_looku
     model["shadow_positions"] = kept
 
 
-def _add_shadow_positions(name, model, spec, ranked, regime, now):
-    max_open = max(1, int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5)))
-    cooldown = max(0.0, _num(os.getenv("PAPER_RESEARCH_SHADOW_REENTRY_MINUTES", "60"), 60))
+def _add_shadow_positions(
+    name, model, spec, ranked, regime, now,
+    *, source_name=None, policy_gate=None, max_open_override=None,
+    cooldown_override=None,
+):
+    max_open = max(
+        1, int(max_open_override) if max_open_override is not None
+        else int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5))
+    )
+    cooldown = (
+        max(0.0, float(cooldown_override))
+        if cooldown_override is not None
+        else max(0.0, _num(os.getenv("PAPER_RESEARCH_SHADOW_REENTRY_MINUTES", "60"), 60))
+    )
     positions = list(model.get("shadow_positions") or [])
     open_tokens = {str(p.get("token_address") or "") for p in positions}
     last_entries = model.setdefault("shadow_last_entry", {})
@@ -1057,10 +1074,11 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         token = str(candidate.get("token_address") or "")
         if not token or token in open_tokens:
             continue
+        source = source_name or name
         safe, _ = _model_safety_pass(
-            name, candidate, spec, regime, scores.get(name, 0.0)
+            source, candidate, spec, regime, scores.get(source, 0.0)
         )
-        if not safe:
+        if not safe or (policy_gate is not None and not policy_gate(candidate)):
             continue
         last = str(last_entries.get(token) or "")
         if last:
@@ -1073,7 +1091,7 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         position = {
             "symbol": candidate.get("symbol", ""), "token_address": token,
             "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
-            "score": scores.get(name, 0.0), "peak_return_pct": 0.0,
+            "score": scores.get(source_name or name, 0.0), "peak_return_pct": 0.0,
             "regime": regime["name"], "decay_confirmations": 0,
         }
         positions.append(position)
@@ -1187,6 +1205,60 @@ def run_paper_research(
         name: sorted(scored, key=lambda item: item[1][name], reverse=True)
         for name in MODEL_SPECS
     }
+
+    # Separate raw-mark-only shadow experiments. No quotes, trades, or changes
+    # to baseline model parameters are caused by this section.
+    if _bool_env("PAPER_SHADOW_EXPERIMENTS_ENABLED", True):
+        from research.paper_shadow_experiments import (
+            VARIANTS, effective_spec, eligible, qualifies_flow,
+            update_confirmation,
+        )
+        experimental_models = state.setdefault("experiments", {})
+        shadow_price_cache = {}
+
+        def cached_shadow_price(token):
+            if token not in shadow_price_cache:
+                shadow_price_cache[token] = (
+                    price_lookup(token) if price_lookup else {}
+                )
+            return shadow_price_cache[token]
+
+        for variant in VARIANTS:
+            base_spec = MODEL_SPECS[variant.base]
+            variant_spec = effective_spec(variant, base_spec)
+            study = experimental_models.setdefault(variant.name, {
+                "shadow_positions": [], "shadow_last_entry": {},
+                "shadow_last_loss": {}, "confirmation_state": {},
+            })
+            _manage_shadow_positions(
+                variant.name, study, variant_spec, candidates_by_token,
+                cached_shadow_price, now,
+            )
+            if variant.confirmations > 1:
+                for candidate, scores in scored:
+                    token = str(candidate.get("token_address") or "")
+                    if not token:
+                        continue
+                    okay, _ = _model_safety_pass(
+                        variant.base, candidate, base_spec, regime,
+                        scores.get(variant.base, 0.0),
+                    )
+                    update_confirmation(
+                        study, token, now,
+                        okay and qualifies_flow(candidate),
+                    )
+            _add_shadow_positions(
+                variant.name, study, variant_spec,
+                ranked_by_model[variant.base], regime, now,
+                source_name=variant.base,
+                policy_gate=lambda candidate, v=variant, s=study: eligible(
+                    v, s, candidate, regime, now
+                ),
+                max_open_override=1,
+                # Compare optional loss cooldowns without an overriding
+                # blanket 60-minute cooldown on ALL entries.
+                cooldown_override=0,
+            )
 
     for name, spec in MODEL_SPECS.items():
         if name == "staged_runner":
