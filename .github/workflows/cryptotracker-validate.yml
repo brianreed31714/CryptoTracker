@@ -81,7 +81,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify paper-only 1pct target calculations
-        run: python -m unittest -v test_paper_goal_scorecard test_paper_quality_audit
+      - name: Verify paper-only goals, execution quality and improvement diagnostics
+        run: python -m unittest -v test_paper_goal_scorecard test_paper_quality_audit test_crypto_improvement_diagnostics
       - name: Compile paper research
-        run: python -m py_compile paper_research_lab_v11_10.py research/paper_goal_scorecard.py research/paper_quality_audit.py publish_daily_evidence.py
+        run: python -m py_compile paper_research_lab_v11_10.py research/paper_goal_scorecard.py research/paper_quality_audit.py research/crypto_improvement_diagnostics.py publish_daily_evidence.py
