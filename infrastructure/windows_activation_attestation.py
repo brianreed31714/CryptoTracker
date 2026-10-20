@@ -60,20 +60,20 @@ def _code_clean(root: Path) -> bool:
     try:
         res = subprocess.run(
             ["git", "-C", str(root), "diff", "--quiet", "--",
-             "infrastructure", "cryptotracker_deployment_agent.py",
+             "infrastructure", "deployment_agent.py",
              "cryptotracker_supervisor.py", "run_daily_model_review.bat",
              "sync_proposals_to_git.py", "build_daily_review_bundle.py",
              "daily_model_review.py", "proposal_registry.py",
-             "publish_supporting_evidence.py", "build_daily_review_bundle.py"],
+             "publish_daily_evidence.py", "build_daily_review_bundle.py"],
             timeout=10, capture_output=True,
         )
         staged = subprocess.run(
             ["git", "-C", str(root), "diff", "--cached", "--quiet", "--",
-             "infrastructure", "cryptotracker_deployment_agent.py",
+             "infrastructure", "deployment_agent.py",
              "cryptotracker_supervisor.py", "run_daily_model_review.bat",
              "sync_proposals_to_git.py", "build_daily_review_bundle.py",
              "daily_model_review.py", "proposal_registry.py",
-             "publish_supporting_evidence.py", "build_daily_review_bundle.py"],
+             "publish_daily_evidence.py", "build_daily_review_bundle.py"],
             timeout=10, capture_output=True,
         )
         return res.returncode == staged.returncode == 0
@@ -302,7 +302,7 @@ def main() -> int:
             raise RuntimeError("Windows required for host attestation")
         notifier = None
         if args.notify:
-            from cryptotracker_deployment_agent import push_attestation
+            from deployment_agent import push_attestation
             notifier = push_attestation
         receipt = poll(args.root, expected_sha=args.expect, notify=notifier)
         # Output intentionally excludes PIDs, task history, user paths, logs and secrets.
