@@ -205,6 +205,18 @@ def publish_daily_evidence(report_date=None):
     )
     counts["quality_audit.json"] = "generated"
 
+    # Automated research diagnostics are read-only and aggregate-only.
+    # They publish with the ordinary EOD evidence; no manual reconciliation.
+    from research.crypto_improvement_diagnostics import generate
+    improvement = generate(
+        PAPER_DIR / "paper_trades.csv",
+        report_date,
+        destination,
+        float(os.getenv("PAPER_STARTING_EQUITY_USDC", "15")),
+    )
+    counts["improvement_diagnostics.json"] = "generated"
+    counts["improvement_diagnostics.md"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
