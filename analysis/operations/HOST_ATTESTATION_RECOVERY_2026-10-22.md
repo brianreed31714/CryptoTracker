@@ -20,3 +20,9 @@ If Windows-origin proof of prior request processing and running versions is abse
 
 ## Known limitation
 This repository cannot remotely attest to an agent that is stopped, lacks the attestation hook, or cannot push Git objects. An independent host-side signal or one-time authorized bootstrap is necessary in that case.
+
+## 2026-10-22 confirmed root cause and fix
+- Windows-host Git plumbing used Python `subprocess.run(..., text=True)` for `git mktree` stdin. Windows newline conversion stored a filename literally named `status.json` plus a carriage return, making standard GitHub `status.json` fetches return 404 despite a successful push.
+- Windows directly executed the read-only attestor and pushed `5232215e5a8ec2a9436d8c52a621376c85b49dee`: `CODE_SYNCED_PROCESS_OBSERVED`, `source_code_synced=true`, `processes_stable=false`, `post_sync_eod_verified=false`. Independent GitHub tree inspection confirmed the malformed filename.
+- [PR #11](https://github.com/brianreed31714/CryptoTracker/pull/11) merged as `ec3b4d059118ff06ec15ff26de9366915cbe3a0a`, after all three project CI checks passed. It sends byte-mode Git stdin, strictly accepts only an exact single-file legacy branch for fast-forward repair, and forces a one-time host-status republish upon loading the new source.
+- **Still required:** confirm Windows checkout synchronizes merged main, perform a separately gated deployment-agent-only process reload (never all-services restart), verify repeated healthy host attestation and fresh post-sync EOD proof. The source-level merge is not Windows activation confirmation.
