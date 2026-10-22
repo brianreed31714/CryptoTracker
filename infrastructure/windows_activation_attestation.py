@@ -264,8 +264,11 @@ def poll(root: Path, *, observation: dict | None = None,
     # Dedicated non-main Git branch makes this proof independently readable
     # in GitHub/ChatGPT, without committing into the trading checkout. Never
     # publish process IDs, account data or raw receipt contents.
+    # One-time republish after fixing Windows mktree CRLF filename corruption.
+    # The version suffix invalidates only the old publication cache key;
+    # it does not reset process observations or trigger a service restart.
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
-                  str(report.get("verified_review_date") or ""))
+                  str(report.get("verified_review_date") or "") + ":status-file-v2")
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
     enabled = os.getenv("STOCKTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
