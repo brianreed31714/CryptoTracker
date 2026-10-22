@@ -102,8 +102,10 @@ def publish(root: Path, report: dict) -> str:
         if _git(root, ["rev-parse", "--verify", "FETCH_HEAD"]) != parent:
             raise RuntimeError("Remote status changed before fetch")
         # Never overwrite other files on a preexisting unrelated status branch.
-        content = _git(root, ["ls-tree", "--name-only", "FETCH_HEAD"]).splitlines()
-        if content != [OUTPUT_FILE]:
+        # -z retains legacy carriage returns embedded in tree filenames.
+        content = _git(root, ["ls-tree", "-z", "--name-only", "FETCH_HEAD"]).split("\x00")
+        content = [name for name in content if name]
+        if content not in ([OUTPUT_FILE], [OUTPUT_FILE + "\r"]):
             raise RuntimeError("Existing status branch is not a single-file attestation branch")
 
     data = json.dumps(payload, sort_keys=True, indent=2, allow_nan=False) + "\n"
