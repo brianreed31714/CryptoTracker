@@ -19,6 +19,26 @@ class ProcessControlTests(unittest.TestCase):
             self.assertEqual({p for p,_ in ctl.project_services("stock")},{10,14,16})
             self.assertEqual({p for p,_ in ctl.project_services("crypto")},{11,15,17})
 
+    def test_crypto_agent_not_masked_by_stock_agent(self):
+        lines = [
+            "python stocktracker_deployment_agent.py",
+            "python C:\\\\StockTracker\\\\stocktracker_deployment_agent.py",
+        ]
+        self.assertFalse(ctl.exact_script_running(lines, "deployment_agent.py"))
+        lines.append("python deployment_agent.py")
+        self.assertTrue(ctl.exact_script_running(lines, "deployment_agent.py"))
+
+    def test_bounded_script_identity_for_other_services(self):
+        self.assertFalse(ctl.exact_script_running(
+            ["python foo-cryptotracker_dashboard_v11_8_2.py.bak"],
+            "cryptotracker_dashboard_v11_8_2.py"))
+        self.assertTrue(ctl.exact_script_running(
+            ["python -m streamlit run C:\\\\CryptoTracker\\\\cryptotracker_dashboard_v11_8_2.py"],
+            "cryptotracker_dashboard_v11_8_2.py"))
+        self.assertTrue(ctl.exact_script_running(
+            ["python C:\\\\CryptoTracker\\\\auto_trader_with_alerts_v11_10_research_fairness.py"],
+            "auto_trader_with_alerts_v11_10_research_fairness.py"))
+
     def test_false_substring_not_matched(self):
         with patch.object(ctl,"_processes",return_value=[
             {"ProcessId":100,"CommandLine":"python my_momentum_trader_v1_10_runtime_audit.py.backup"},
