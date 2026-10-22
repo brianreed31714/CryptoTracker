@@ -33,7 +33,7 @@ def exact_script_running(command_lines, basename):
     script = Path(basename).name
     if not script.endswith(".py"):
         raise ValueError("Expected a Python script basename")
-    pattern = re.compile(r"(?i)(?<![\\w.-])" + re.escape(script) + r"(?![\\w.-])")
+    pattern = re.compile(r"(?i)(?<![\w.-])" + re.escape(script) + r"(?![\w.-])")
     return any(pattern.search(command or "") is not None for command in command_lines)
 
 
