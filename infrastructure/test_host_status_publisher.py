@@ -1,6 +1,7 @@
 """No-network tests: GitHub status branch must never touch main or leak local data."""
 from __future__ import annotations
 import json
+import subprocess
 import tempfile
 import unittest
 from datetime import datetime, timezone, timedelta
@@ -103,6 +104,56 @@ class HostSignalTests(unittest.TestCase):
                     publisher.publish(Path(temp), sample())
             self.assertNotIn("push", calls)
             self.assertNotIn("hash-object", calls)
+
+
+    def test_git_stdin_preserves_lf_bytes_on_windows(self):
+        """Git mktree input must not pass through Python universal newline mode."""
+        result = subprocess.CompletedProcess(args=["git"], returncode=0,
+                                             stdout=b"abc123\\n", stderr=b"")
+        with patch.object(publisher.subprocess, "run", return_value=result) as run:
+            output = publisher._git(Path("test"), ["mktree"],
+                                    data="100644 blob " + "a"*40 + "\\tstatus.json\\n")
+        self.assertEqual(output, "abc123")
+        kwargs = run.call_args.kwargs
+        self.assertEqual(kwargs["input"], ("100644 blob " + "a"*40
+                                          + "\\tstatus.json\\n").encode("utf-8"))
+        self.assertNotIn("text", kwargs)
+        self.assertFalse(kwargs["input"].endswith(b"\\r\\n"))
+
+    def test_exact_legacy_carriage_return_name_can_repair_by_fast_forward(self):
+        """Only the previously corrupted single-file branch may be migrated."""
+        with tempfile.TemporaryDirectory() as temp:
+            called = []
+            def fake_git(root, args, data=None):
+                called.append((args, data))
+                if args[:2] == ["branch", "--show-current"]:
+                    return "main"
+                if args[0] == "ls-remote":
+                    return "a"*40 + "\\trefs/heads/cryptotracker-host-status"
+                if args[0] == "fetch":
+                    return ""
+                if args[0] == "rev-parse":
+                    return "a"*40
+                if args[0] == "ls-tree":
+                    self.assertIn("-z", args)
+                    return "status.json\\r\\x00"
+                if args[0] == "hash-object":
+                    return "b"*40
+                if args[0] == "mktree":
+                    return "c"*40
+                if "commit-tree" in args:
+                    return "d"*40
+                if args[0] == "push":
+                    return ""
+                raise AssertionError(f"Unexpected Git operation: {args}")
+            with patch.object(publisher, "_git", side_effect=fake_git):
+                result = publisher.publish(Path(temp), sample())
+            self.assertEqual(result, "d"*40)
+            self.assertTrue(any("-p" in args and "a"*40 in args
+                                for args, _ in called if "commit-tree" in args))
+            tree_data = next(data for args, data in called if args[0] == "mktree")
+            self.assertEqual(tree_data, "100644 blob " + "b"*40 + "\\tstatus.json\\n")
+            self.assertTrue(any(args[0] == "push" for args, _ in called))
 
     def test_status_published_once_per_transition_without_any_real_network(self):
         with tempfile.TemporaryDirectory() as temp:
