@@ -73,13 +73,13 @@ def sanitized(report: dict) -> dict:
 def _git(root: Path, args: list[str], *, data: str | None = None) -> str:
     cmd = ["git", "-C", str(root), *args]
     try:
-        res = subprocess.run(cmd, input=data, text=True, capture_output=True, timeout=35)
+        res = subprocess.run(cmd, input=(data.encode("utf-8") if data is not None else None), capture_output=True, timeout=35)
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise RuntimeError("Git host-status publishing unavailable") from None
     if res.returncode != 0:
         # Exception text can contain remote URLs or authorization diagnostics.
         raise RuntimeError("Git host-status command rejected")
-    return res.stdout.strip()
+    return res.stdout.decode("utf-8").strip()
 
 
 def publish(root: Path, report: dict) -> str:
