@@ -50,10 +50,12 @@ def active_trader():
     return str(max(files, key=key).relative_to(ROOT)).replace("\\","/")
 
 def command_lines():
-    ps = ("Get-CimInstance Win32_Process | " 
-          "Where-Object {$_.Name -match '^(python|pythonw)(\\.exe)?
+    ps = ("Get-CimInstance Win32_Process | "
+          "Where-Object { $_.Name -in @('python.exe', 'pythonw.exe') -and $_.CommandLine } | "
+          "Select-Object -ExpandProperty CommandLine")
     r = subprocess.run(["powershell","-NoProfile","-Command",ps], text=True, capture_output=True)
     return [x.strip() for x in r.stdout.splitlines() if x.strip()] if r.returncode == 0 else []
+
 
 def running(marker):
     return exact_script_running(command_lines(), marker)
