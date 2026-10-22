@@ -23,6 +23,20 @@ def _matches(command, patterns):
     # Match exact versioned Python basenames, not arbitrary path substrings.
     return any(re.search(r"(?i)(?<![\w.])"+pattern+r"(?![\w.])",command) for pattern in patterns)
 
+def exact_script_running(command_lines, basename):
+    """Match a Python script basename, never a suffix of another script name.
+
+    The StockTracker filename stocktracker_deployment_agent.py must not
+    masquerade as CryptoTracker's deployment_agent.py.
+    """
+    import re
+    script = Path(basename).name
+    if not script.endswith(".py"):
+        raise ValueError("Expected a Python script basename")
+    pattern = re.compile(r"(?i)(?<![\\w.-])" + re.escape(script) + r"(?![\\w.-])")
+    return any(pattern.search(command or "") is not None for command in command_lines)
+
+
 def project_services(project):
     patterns = ({
         "stock": [r"momentum_trader_v[\w.\-]*\.py",r"xom_geo_feed_v[\w.\-]*\.py",r"momentum_dashboard_v[\w.\-]*\.py"],
