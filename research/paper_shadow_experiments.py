@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import csv
 import json
+import math
+import re
 from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +24,8 @@ class Variant:
     loss_cooldown_minutes: int = 0
     runner_activate_pct: float | None = None
     trail_pct: float | None = None
+    novelty_policy: str = "ANY"
+    require_organic_flow: bool = False
 
 
 VARIANTS = (
@@ -36,6 +40,13 @@ VARIANTS = (
     Variant("xp_diy_control", "diy_whale"),
     Variant("xp_diy_neutral_only", "diy_whale", risk_policy="NEUTRAL_ONLY"),
     Variant("xp_diy_riskoff_strict", "diy_whale", risk_policy="STRICT_RISK_OFF"),
+    # Pre-registered prospective tests. Score 12 is an experimental
+    # threshold, NOT a validated alpha signal or reason to place orders.
+    Variant("xp_diy_name12", "diy_whale", novelty_policy="SCORE12"),
+    Variant("xp_diy_organic_flow", "diy_whale", require_organic_flow=True),
+    Variant("xp_diy_name12_flow", "diy_whale", novelty_policy="SCORE12", require_organic_flow=True),
+    Variant("xp_diy_raunchy", "diy_whale", novelty_policy="RAUNCHY"),
+    Variant("xp_diy_raunchy_flow", "diy_whale", novelty_policy="RAUNCHY", require_organic_flow=True),
 )
 VARIANT_NAMES = frozenset(v.name for v in VARIANTS)
 
@@ -89,6 +100,75 @@ def qualifies_flow(candidate):
     )
 
 
+
+# Deliberately transparent keyword heuristics; not NLP and not measured alpha.
+# Coin compounds such as "FARTCOIN" and "CUMROCKET" are intentional matches.
+# Some linguistic false positives/negatives remain and should be audited.
+_NAME_PATTERNS = {
+    "sexual": re.compile(
+        r"sex(?!ton)|sexy|porn|xxx|nsfw|nude|naked|dick|cock(?!roach)|"
+        r"pussy|tits|boob|cum(?!ber|ulat)|jizz|horny|boner|dildo|milf|"
+        r"sperm|orgasm|slut|whore|onlyfans|fap|thot",
+        re.IGNORECASE,
+    ),
+    "profanity": re.compile(
+        r"fuck|fuk|fck|shit|bitch|cunt|bastard|wtf|damn|piss|motherf|stfu|bullshit",
+        re.IGNORECASE,
+    ),
+    "toilet": re.compile(
+        r"fart|poop|toilet|diarrhea|turd|peepee|puke|vomit|shart|butt(?!on|er)",
+        re.IGNORECASE,
+    ),
+}
+
+
+def name_categories(candidate):
+    """Classify known-at-observation name/symbol text, never future outcomes."""
+    raw = " ".join(str(candidate.get(key) or "") for key in ("name", "symbol"))
+    if not raw.strip():
+        return ()
+    return tuple(category for category, pattern in _NAME_PATTERNS.items()
+                 if pattern.search(raw))
+
+
+def qualifies_diy_organic_flow(candidate):
+    """Fixed, prospective *stricter* DIY flow hypothesis, not an order trigger.
+
+    No future observations, whale classifications or post-entry prices.
+    Missing volume, price or buy-side counts conservatively fail.
+    """
+    buys = _num(candidate.get("buys_5m"))
+    sells = _num(candidate.get("sells_5m"))
+    return (
+        _num(candidate.get("price_usd")) > 0
+        and _num(candidate.get("liquidity")) >= 50_000
+        and _num(candidate.get("volume_5m")) >= 5_000
+        and buys >= 10
+        and buys + sells >= 15
+        and _num(candidate.get("buy_sell_ratio_5m")) >= 1.4
+        and _num(candidate.get("volume_acceleration")) >= 1.4
+    )
+
+
+def novelty_metadata(candidate):
+    """Return research-only fields logged at shadow entry/exit."""
+    details = candidate.get("paper_name_novelty")
+    score = None
+    if isinstance(details, dict):
+        try:
+            value = float(details.get("name_novelty_score"))
+            if math.isfinite(value):
+                score = value
+        except (TypeError, ValueError):
+            pass
+    return {
+        "name": str(candidate.get("name") or ""),
+        "name_novelty_score": score,
+        "name_category_flags": "|".join(name_categories(candidate)),
+        "organic_flow_at_entry": qualifies_diy_organic_flow(candidate),
+        "novelty_study_version": "NOVELTY_FLOW_V1_20261022",
+    }
+
 def risk_allows(variant, candidate, regime):
     if variant.risk_policy == "ANY":
         return True
@@ -110,6 +190,17 @@ def risk_allows(variant, candidate, regime):
 
 
 def eligible(variant, state, candidate, regime, now):
+    if variant.novelty_policy == "SCORE12":
+        value = novelty_metadata(candidate)["name_novelty_score"]
+        if value is None or value < 12:
+            return False
+    elif variant.novelty_policy == "RAUNCHY":
+        if not name_categories(candidate):
+            return False
+    elif variant.novelty_policy != "ANY":
+        return False
+    if variant.require_organic_flow and not qualifies_diy_organic_flow(candidate):
+        return False
     if not risk_allows(variant, candidate, regime):
         return False
     token = str(candidate.get("token_address") or "")
@@ -164,6 +255,10 @@ def summarize(shadow_csv, report_date):
             "raw_mark_win_rate_pct": round(100 * wins / len(returns), 3) if returns else None,
             "raw_mark_profit_factor": round(positive / negative, 4) if negative else None,
             "sample_qualified_for_preliminary_review": len(sells) >= 30,
+            "novelty_policy": variant.novelty_policy,
+            "stricter_organic_flow_required": variant.require_organic_flow,
+            "entry_name_metadata_observed": sum(bool(r.get("name") or r.get("symbol")) for r in sells),
+            "raunchy_category_exits": sum(bool(r.get("name_category_flags")) for r in sells),
             "promotable": False,
         }
     return {
@@ -173,8 +268,19 @@ def summarize(shadow_csv, report_date):
         "not_mark_to_market_portfolio_returns": True,
         "source_present": source.is_file(),
         "variants": metrics,
+        "novelty_study": {
+            "status": "PROSPECTIVE_UNPRICED_SHADOW_NO_AUTOPROMOTION",
+            "control": "xp_diy_control",
+            "variants": [v.name for v in VARIANTS
+                         if v.base == "diy_whale" and
+                         (v.novelty_policy != "ANY" or v.require_organic_flow)],
+            "minimum_preliminary_exits_per_arm": 30,
+            "comparability_note": "Different variants select different entries; raw-mark averages are not paired causal uplifts.",
+            "unavailable": ["executable fill costs", "open-position MTM", "true organic-wallet attribution"],
+        },
         "limitations": [
-            "No Jupiter execution, price impact, priority fee, gas, failed-swap, or portfolio-equity modeling in raw shadow trades.",
+            "Score >=12 and stricter flow cutoffs are predeclared hypotheses, not retrospectively optimized thresholds.",
+            "Raunchy categories use transparent heuristic name/symbol matches; audit ambiguous and false-positive names.",            "No Jupiter execution, price impact, priority fee, gas, failed-swap, or portfolio-equity modeling in raw shadow trades.",
             "Missing-price positions remain open; no false profit from stale quotes.",
             "30 completed exits is only preliminary, never sufficient to promote to a live account.",
             "Counterfactual profits require prospective validation with executable quote-based fill modeling.",
