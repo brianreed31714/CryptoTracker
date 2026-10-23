@@ -1046,6 +1046,11 @@ def _manage_shadow_positions(name, model, spec, candidates_by_token, price_looku
             "exit_price": price, "net_return_pct": round(raw_return, 8),
             "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
             "entry_regime": position.get("regime", ""),
+            "name": position.get("name", ""),
+            "name_novelty_score": position.get("name_novelty_score") if position.get("name_novelty_score") is not None else "",
+            "name_category_flags": position.get("name_category_flags", ""),
+            "organic_flow_at_entry": position.get("organic_flow_at_entry", ""),
+            "novelty_study_version": position.get("novelty_study_version", ""),
         })
     model["shadow_positions"] = kept
 
@@ -1055,6 +1060,8 @@ def _add_shadow_positions(
     *, source_name=None, policy_gate=None, max_open_override=None,
     cooldown_override=None,
 ):
+    from research.paper_shadow_experiments import novelty_metadata
+
     max_open = max(
         1, int(max_open_override) if max_open_override is not None
         else int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5))
@@ -1093,6 +1100,7 @@ def _add_shadow_positions(
             "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
             "score": scores.get(source_name or name, 0.0), "peak_return_pct": 0.0,
             "regime": regime["name"], "decay_confirmations": 0,
+            **novelty_metadata(candidate),
         }
         positions.append(position)
         open_tokens.add(token)
@@ -1103,6 +1111,11 @@ def _add_shadow_positions(
             "reason": "SHADOW_MULTI_CANDIDATE", "entry_time": now.isoformat(),
             "entry_price": position["entry_price"], "exit_price": "",
             "net_return_pct": "", "peak_return_pct": "", "entry_regime": regime["name"],
+            "name": position.get("name", ""),
+            "name_novelty_score": position.get("name_novelty_score") if position.get("name_novelty_score") is not None else "",
+            "name_category_flags": position.get("name_category_flags", ""),
+            "organic_flow_at_entry": position.get("organic_flow_at_entry", ""),
+            "novelty_study_version": position.get("novelty_study_version", ""),
         })
     model["shadow_positions"] = positions
 
