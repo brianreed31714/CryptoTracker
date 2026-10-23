@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-22",
+  "models": {
+    "balanced_ev": {
+      "completed": 4,
+      "entries": 4,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 1,
+      "over_5pct_estimated_execution_cost_exits": 0,
+      "risk_off_entries": 0,
+      "severe_net_loss_below_minus_20pct": 0,
+      "tokens_with_repeated_loss_exits": {},
+      "unavailable_helius_exits": 4
+    },
+    "diy_whale": {
+      "completed": 14,
+      "entries": 14,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 5,
+      "over_5pct_estimated_execution_cost_exits": 1,
+      "risk_off_entries": 8,
+      "severe_net_loss_below_minus_20pct": 0,
+      "tokens_with_repeated_loss_exits": {
+        "GNE7e774tkGyxMMzP36ofhNuRrUZ15H4e1LE1xekpump": 2,
+        "HsprHxBRgiVaQdRf3TnKNuZZtaX9JUSPgMFdAkk6pump": 2
+      },
+      "unavailable_helius_exits": 14
+    },
+    "runner_hunter": {
+      "completed": 7,
+      "entries": 7,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 1,
+      "over_5pct_estimated_execution_cost_exits": 2,
+      "risk_off_entries": 0,
+      "severe_net_loss_below_minus_20pct": 1,
+      "tokens_with_repeated_loss_exits": {
+        "HqaUT1abZq6WkeRpCYD7yHNdcxgu6biXejNkeJUNpump": 2
+      },
+      "unavailable_helius_exits": 7
+    }
+  },
+  "paper_only": true,
+  "reconciliation": {
+    "previous_publication": "2026-10-20",
+    "status": "inconclusive_missing_intermediate_publication"
+  }
+}
