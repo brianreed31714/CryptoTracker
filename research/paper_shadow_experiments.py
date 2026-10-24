@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
 import math
 import re
 from dataclasses import dataclass, replace
@@ -229,32 +230,97 @@ def effective_spec(variant, base_spec):
     return replace(base_spec, **changes) if changes else base_spec
 
 
+def _raw_mark_return(row):
+    """Parse only finite observed shadow price marks; missing is NOT zero."""
+    try:
+        value = float(row.get("net_return_pct"))
+        return value if math.isfinite(value) else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _entry_key(row):
+    """Correlate observed BUY/SELL rows without guessing missing identifiers."""
+    mint = str(row.get("token_address") or "").strip()
+    entered = str(row.get("entry_time") or "").strip()
+    return (mint, entered) if mint and entered else None
+
+
+def _row_date(row):
+    return str(row.get("date") or row.get("timestamp") or "")[:10]
+
+
 def summarize(shadow_csv, report_date):
-    """Only compare raw shadow marks to raw shadow marks, never to executable paper."""
+    """Read-only prospective shadow diagnostics; never executable P&L.
+
+    Zero rows are *not* evidence of zero qualifying opportunities: the
+    source may be stale or the new trader version may not be active.
+    """
     source = Path(shadow_csv)
     rows = []
     if source.is_file():
-        with source.open(newline="", encoding="utf-8") as f:
-            rows = list(csv.DictReader(f))
+        with source.open(newline="", encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream))
     metrics = {}
+    novelty_arm_names = frozenset(
+        v.name for v in VARIANTS
+        if v.base == "diy_whale" and
+        (v.novelty_policy != "ANY" or v.require_organic_flow)
+    )
     for variant in VARIANTS:
-        sells = [r for r in rows if r.get("model") == variant.name
-                 and r.get("action") == "SELL"
-                 and str(r.get("date") or r.get("timestamp") or "")[:10] <= report_date]
-        day = [r for r in sells
-               if str(r.get("date") or r.get("timestamp") or "")[:10] == report_date]
-        returns = [_num(r.get("net_return_pct")) for r in sells]
-        wins = sum(x > 0 for x in returns)
+        observed = [r for r in rows if r.get("model") == variant.name
+                    and _row_date(r) and _row_date(r) <= report_date]
+        buys = [r for r in observed if r.get("action") == "BUY"]
+        sells = [r for r in observed if r.get("action") == "SELL"]
+        day_buys = [r for r in buys if _row_date(r) == report_date]
+        day_sells = [r for r in sells if _row_date(r) == report_date]
+        valid = [(r, value) for r in sells
+                 if (value := _raw_mark_return(r)) is not None]
+        returns = [value for _, value in valid]
         positive = sum(x for x in returns if x > 0)
         negative = -sum(x for x in returns if x < 0)
+        entry_counts = Counter(k for r in buys if (k := _entry_key(r)) is not None)
+        exit_counts = Counter(k for r in sells if (k := _entry_key(r)) is not None)
+        unmatched_entries = sum(max(count - exit_counts[key], 0)
+                                for key, count in entry_counts.items())
+        unmatched_exits = sum(max(count - entry_counts[key], 0)
+                              for key, count in exit_counts.items())
+        unkeyed = sum(_entry_key(r) is None for r in buys + sells)
+        versioned = sum(r.get("novelty_study_version") == "NOVELTY_FLOW_V1_20261022"
+                        for r in observed)
+        if not observed:
+            status = "NO_ROWS_ACTIVATION_UNVERIFIED"
+        elif variant.name in novelty_arm_names and versioned != len(observed):
+            status = "MISSING_OR_MIXED_NOVELTY_VERSION_UNVERIFIED"
+        else:
+            status = "SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION"
+        observed_dates = sorted({_row_date(r) for r in observed})
         metrics[variant.name] = {
             "control": variant.base,
+            "n_entries_today": len(day_buys),
+            "n_entries_since_first_observed": len(buys),
             "n_completed_since_first_observed": len(sells),
-            "n_completed_today": len(day),
+            "n_completed_today": len(day_sells),
+            "n_valid_raw_mark_exits": len(valid),
+            "n_invalid_raw_mark_exits": len(sells) - len(valid),
+            "n_negative_raw_mark_exits": sum(x < 0 for x in returns),
+            "n_unclosed_observed_entries": unmatched_entries,
+            "n_unmatched_exit_rows": unmatched_exits,
+            "n_rows_missing_entry_identifiers": unkeyed,
+            "n_distinct_mints_closed": len({str(r.get("token_address"))
+                                            for r in sells if r.get("token_address")}),
+            "first_observed_date": observed_dates[0] if observed_dates else None,
+            "last_observed_date": observed_dates[-1] if observed_dates else None,
+            "row_observation_status": status,
+            "novelty_study_versioned_rows": versioned,
             "raw_mark_avg_return_per_exit_pct": round(sum(returns) / len(returns), 4) if returns else None,
-            "raw_mark_win_rate_pct": round(100 * wins / len(returns), 3) if returns else None,
+            "raw_mark_win_rate_pct": round(100 * sum(x > 0 for x in returns) / len(returns), 3) if returns else None,
             "raw_mark_profit_factor": round(positive / negative, 4) if negative else None,
-            "sample_qualified_for_preliminary_review": len(sells) >= 30,
+            "sample_qualified_for_preliminary_review": (
+                len(valid) >= 30 and len(valid) == len(sells)
+                and unmatched_exits == 0 and unkeyed == 0
+                and status == "SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION"
+            ),
             "novelty_policy": variant.novelty_policy,
             "stricter_organic_flow_required": variant.require_organic_flow,
             "entry_name_metadata_observed": sum(bool(r.get("name") or r.get("symbol")) for r in sells),
@@ -267,22 +333,25 @@ def summarize(shadow_csv, report_date):
         "not_executable_net_returns": True,
         "not_mark_to_market_portfolio_returns": True,
         "source_present": source.is_file(),
+        "source_rows_observed": len(rows),
+        "host_runtime_activation_verified": False,
         "variants": metrics,
         "novelty_study": {
             "status": "PROSPECTIVE_UNPRICED_SHADOW_NO_AUTOPROMOTION",
             "control": "xp_diy_control",
-            "variants": [v.name for v in VARIANTS
-                         if v.base == "diy_whale" and
-                         (v.novelty_policy != "ANY" or v.require_organic_flow)],
+            "variants": sorted(novelty_arm_names),
             "minimum_preliminary_exits_per_arm": 30,
             "comparability_note": "Different variants select different entries; raw-mark averages are not paired causal uplifts.",
             "unavailable": ["executable fill costs", "open-position MTM", "true organic-wallet attribution"],
         },
         "limitations": [
+            "Zero shadow rows cannot distinguish an inactive variant from no eligible candidates.",
+            "Row evidence proves observations were written, NOT that Windows trader digest or EOD activation was verified.",
             "Score >=12 and stricter flow cutoffs are predeclared hypotheses, not retrospectively optimized thresholds.",
-            "Raunchy categories use transparent heuristic name/symbol matches; audit ambiguous and false-positive names.",            "No Jupiter execution, price impact, priority fee, gas, failed-swap, or portfolio-equity modeling in raw shadow trades.",
+            "Raunchy categories use transparent heuristic name/symbol matches; audit ambiguous and false-positive names.",
+            "No Jupiter execution, price impact, priority fee, gas, failed-swap, or portfolio-equity modeling in raw shadow trades.",
             "Missing-price positions remain open; no false profit from stale quotes.",
-            "30 completed exits is only preliminary, never sufficient to promote to a live account.",
+            "30 valid completed exits is only preliminary, never sufficient to promote to a live account.",
             "Counterfactual profits require prospective validation with executable quote-based fill modeling.",
         ],
     }
@@ -294,24 +363,27 @@ def render_markdown(report):
         "",
         "**UNPRICED shadow marks, no swaps. Neither net execution returns nor daily portfolio ROI.**",
         "",
-        "| Variant | Control | Closed today | Closed since observed | Avg raw mark/exit | Preliminary n>=30 |",
-        "|---|---|---:|---:|---:|---|",
+        "| Variant | Entry rows today | Exits today | Valid/total exits | Raw win rate | Avg raw mark/exit | Observation status |",
+        "|---|---:|---:|---:|---:|---:|---|",
     ]
     for name, row in report["variants"].items():
         avg = row["raw_mark_avg_return_per_exit_pct"]
+        win = row["raw_mark_win_rate_pct"]
+        avg_text = f"{avg:+.2f}%" if avg is not None else "N/A"
+        win_text = f"{win:.1f}%" if win is not None else "N/A"
         lines.append(
-            f"| {name} | {row['control']} | {row['n_completed_today']} | "
-            f"{row['n_completed_since_first_observed']} | "
-            f"{avg:+.2f}%" + " |" if avg is not None else
-            f"| {name} | {row['control']} | {row['n_completed_today']} | "
-            f"{row['n_completed_since_first_observed']} | N/A |"
+            f"| {name} | {row['n_entries_today']} | {row['n_completed_today']} | "
+            f"{row['n_valid_raw_mark_exits']}/{row['n_completed_since_first_observed']} | "
+            f"{win_text} | {avg_text} | {row['row_observation_status']} |"
         )
-        # append final col in both cases
-        lines[-1] += f" {'YES' if row['sample_qualified_for_preliminary_review'] else 'NO'} |"
-    lines.extend(["", "## Gate", "",
-                  "All baseline paper models remain unchanged; variants are isolated observations.",
-                  "No promotion from raw shadow returns. Require independent executable quotes, losses, liquidity, prospective 1% portfolio-goal accounting and drawdown validation.",
-                  ""])
+    lines.extend([
+        "", "## Evidence and safety gate", "",
+        "A zero entry or exit count is **not** evidence that the variant was activated or had no opportunities.",
+        "Invalid/missing price marks are excluded from return averages, counted separately, and cannot qualify for preliminary review.",
+        "All baseline paper models remain unchanged; variants are isolated observations.",
+        "No promotion from raw shadow returns. Require independent Windows host attestation, executable quotes, costs, open-position MTM, liquidity, and drawdown validation.",
+        "",
+    ])
     return "\n".join(lines)
 
 
