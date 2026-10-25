@@ -237,6 +237,13 @@ def publish_daily_evidence(report_date=None):
     counts["liquidation_mtm_readiness.json"] = "generated"
     counts["liquidation_mtm_readiness.md"] = "generated"
 
+    # Distinguish price-gap loss from estimated quote costs at STOP.
+    # Holding duration is never mislabeled as quote age.
+    from research.paper_stop_forensics import generate as generate_stop_audit
+    generate_stop_audit(raw / "paper_trades.csv", report_date, destination)
+    counts["stop_forensics.json"] = "generated"
+    counts["stop_forensics.md"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
