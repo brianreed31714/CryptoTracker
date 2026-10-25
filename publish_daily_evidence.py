@@ -224,6 +224,19 @@ def publish_daily_evidence(report_date=None):
     counts["shadow_experiments.json"] = "generated"
     counts["shadow_experiments.md"] = "generated"
 
+    # Read-only paper liquidation readiness. The private state and any raw
+    # Jupiter quote snapshot stay local; only sanitized per-sleeve aggregates
+    # are committed. Missing or stale quotes are explicitly UNAVAILABLE.
+    from research.paper_liquidation_mtm import generate as generate_mtm
+    generate_mtm(
+        PAPER_DIR / "state.json",
+        PAPER_DIR / "liquidation_quotes.json",
+        report_date,
+        destination,
+    )
+    counts["liquidation_mtm_readiness.json"] = "generated"
+    counts["liquidation_mtm_readiness.md"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
