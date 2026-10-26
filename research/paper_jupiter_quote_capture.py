@@ -33,11 +33,18 @@ class CaptureRejected(ValueError):
     """Fail closed; never reveal wallet, mint, API key or provider body."""
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        # Never forward the API key to a redirected host.
+        return None
+
+
 def _read_only_get(params, headers, timeout):
     # Constant HTTPS destination, GET only. Never accept a wallet/taker param.
     url = ORDER_URL + "?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers=headers, method="GET")
-    with urllib.request.urlopen(request, timeout=timeout) as response:
+    opener = urllib.request.build_opener(_NoRedirect)
+    with opener.open(request, timeout=timeout) as response:
         if response.status != 200:
             raise CaptureRejected("QUOTE_HTTP_NOT_SUCCESS")
         raw = response.read(65537)
