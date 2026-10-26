@@ -1,0 +1,48 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 0,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "diy_whale": {
+      "all_completed_exits": 1,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "runner_hunter": {
+      "all_completed_exits": 0,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-10-25",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
