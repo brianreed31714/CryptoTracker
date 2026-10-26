@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from research.paper_jupiter_quote_capture import (
-    CaptureRejected, USDC_MINT, capture,
+    CaptureRejected, USDC_MINT, capture, _NoRedirect,
 )
 from research.paper_liquidation_mtm import assess
 
@@ -58,6 +58,10 @@ class QuoteCaptureTests(unittest.TestCase):
         return capture(self.state_path, self.output, api_key=key,
                        enabled=enabled, http_get=get or self.get,
                        clock=lambda: self.now)
+
+    def test_redirect_handler_refuses_external_key_forwarding(self):
+        self.assertIsNone(_NoRedirect().redirect_request(
+            None, None, 302, "redirect", {}, "https://example.org/steal"))
 
     def test_opt_in_quote_only_and_mtm_contract(self):
         with patch.dict(os.environ, {"LIVE_TRADING": "false"}):
