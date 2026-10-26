@@ -250,7 +250,8 @@
         "research/crypto_improvement_diagnostics.py",
         "research/paper_shadow_experiments.py",
         "research/paper_liquidation_mtm.py",
-        "research/paper_stop_forensics.py"
+        "research/paper_stop_forensics.py",
+        "research/paper_jupiter_quote_capture.py"
       ],
       "health": {
         "type": "not_applicable"
@@ -353,6 +354,13 @@
       "component": "trader",
       "endpoint": "service-configured",
       "current_policy": "on-demand only; no continuous influencer polling"
+    },
+    {
+      "name": "Jupiter Swap V2 quote-only",
+      "mode": "opt_in_read_only",
+      "component": "research_lab",
+      "endpoint": "https://api.jup.ag/swap/v2/order",
+      "current_policy": "Default disabled; GET without taker; no transaction, no signing or execution; raw snapshots local only"
     }
   ],
   "data_contracts": [
@@ -417,6 +425,15 @@
         "runtime_inventory"
       ],
       "freshness_seconds": null
+    },
+    {
+      "producer": "research_lab",
+      "artifact": "data/paper_research/liquidation_quotes.json",
+      "consumers": [
+        "research_lab"
+      ],
+      "freshness_seconds": 120,
+      "reason": "Optional private quote-only snapshot; never publish raw mint or API key; source must match current paper state cycle"
     }
   ],
   "observation_policy": {
