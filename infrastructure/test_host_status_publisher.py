@@ -40,6 +40,24 @@ class HostSignalTests(unittest.TestCase):
         self.assertIn("broker_trade_health_verified", clean)
         self.assertNotIn("fingerprint", clean)
 
+    def test_health_reasons_are_allowlisted_and_stability_samples_bounded(self):
+        data = sample("CODE_SYNCED_RUNTIME_UNVERIFIED")
+        data["reasons"] = [
+            "PROCESS_UNVERIFIED_TRADER", "SMART_MONEY_HEARTBEAT_NOT_HEALTHY",
+            "PROCESS_UNVERIFIED_TRADER", "SECRET_OPENAI_KEY",
+            "PROCESS_UNVERIFIED_PRIVATE_PATH", {"token": "SECRET"},
+        ]
+        data["consecutive_observations"] = 2
+        public = publisher.sanitized(data)
+        self.assertEqual(public["process_health_reason_codes"],
+                         ["PROCESS_UNVERIFIED_TRADER", "SMART_MONEY_HEARTBEAT_NOT_HEALTHY"])
+        self.assertEqual(public["process_stability_samples"], 2)
+        self.assertNotIn("SECRET", json.dumps(public))
+        data["consecutive_observations"] = True
+        self.assertEqual(publisher.sanitized(data)["process_stability_samples"], 0)
+        data["consecutive_observations"] = 5000
+        self.assertEqual(publisher.sanitized(data)["process_stability_samples"], 0)
+
     def test_reject_unknown_status_sha_date_or_timezone(self):
         for key, val in [
             ("state", "POSITION_OPEN_SECRET"), ("git_head", "f" * 8),
@@ -185,6 +203,34 @@ class HostSignalTests(unittest.TestCase):
             self.assertEqual(tree_data, "100644 blob " + "b"*40 + "\tstatus.json\n")
             self.assertTrue(any(args[0] == "push" for args, _ in called))
 
+    def test_process_failure_reason_change_republishes_without_restart(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            calls = []
+            def record(root, report):
+                calls.append(publisher.sanitized(report)["process_health_reason_codes"])
+                return "a" * 40
+            observed_supervisor = {
+                "process": {"state": "OBSERVED", "pids": [100],
+                            "started_utc": (T0-timedelta(minutes=15)).isoformat(),
+                            "script": "cryptotracker_supervisor.py"},
+                "script_version": {"state": "MATCHED"},
+            }
+            with patch.object(attest, "git_head", return_value=HEAD), \
+                 patch.object(attest, "_head", return_value=HEAD), \
+                 patch.object(attest, "_code_clean", return_value=True):
+                for minute, components in (
+                    (0, {}),
+                    (1, {"supervisor": observed_supervisor}),
+                    (2, {"supervisor": observed_supervisor}),
+                ):
+                    attest.poll(root, observation={"components": components},
+                                clock=T0+timedelta(minutes=minute),
+                                remote_publish=record)
+            self.assertEqual(len(calls), 2)
+            self.assertIn("PROCESS_UNVERIFIED_SUPERVISOR", calls[0])
+            self.assertNotIn("PROCESS_UNVERIFIED_SUPERVISOR", calls[1])
+
     def test_status_published_once_per_transition_without_any_real_network(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -208,6 +254,7 @@ class HostSignalTests(unittest.TestCase):
                         root, observation={"components": observations},
                         clock=T0+timedelta(minutes=minutes), remote_publish=record)
             self.assertEqual(calls, ["CODE_SYNCED_PROCESS_OBSERVED",
+                                     "CODE_SYNCED_PROCESS_OBSERVED",
                                      "HOST_PROCESSES_STABLE_SOURCE_ONLY"])
             self.assertEqual(receipt["remote_publish"], "PUBLISHED")
             self.assertEqual(receipt["remote_key"].split(":")[0], HEAD)

@@ -25,6 +25,31 @@ STATES = {
     "EOD_EXECUTION_VERIFIED",
 }
 
+# Public host-status reports expose only these predeclared, non-sensitive
+# diagnostic codes. Never publish raw exceptions, paths, PIDs, or log text.
+PROCESS_REASON = re.compile(
+    r"^(?:PROCESS_UNVERIFIED|START_TIME_UNVERIFIED|SCRIPT_VERSION_UNVERIFIED)"
+    r"_(?:SUPERVISOR|DEPLOYMENT_AGENT|TRADER|DASHBOARD)$"
+)
+SAFE_PROCESS_REASONS = frozenset({"SMART_MONEY_HEARTBEAT_NOT_HEALTHY"})
+
+
+def safe_process_reasons(report: dict) -> list[str]:
+    raw = report.get("reasons")
+    if not isinstance(raw, list):
+        return []
+    return sorted({
+        value for value in raw
+        if isinstance(value, str)
+        and (PROCESS_REASON.fullmatch(value) or value in SAFE_PROCESS_REASONS)
+    })
+
+
+def stability_samples(report: dict) -> int:
+    value = report.get("consecutive_observations")
+    return value if type(value) is int and 0 <= value <= 3 else 0
+
+
 
 def sanitized(report: dict) -> dict:
     if not isinstance(report, dict):
@@ -59,6 +84,8 @@ def sanitized(report: dict) -> dict:
         "state": state,
         "source_code_synced": report.get("code_synced") is True,
         "processes_stable": report.get("processes_stable") is True,
+        "process_health_reason_codes": safe_process_reasons(report),
+        "process_stability_samples": stability_samples(report),
         "post_sync_eod_verified": report.get("eod_execution_verified") is True,
         "in_memory_trader_digest_verified": False,
         "broker_trade_health_verified": False,
