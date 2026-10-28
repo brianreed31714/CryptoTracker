@@ -63,13 +63,44 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
         report["preliminary_sample"] = "MODELED"
     # Quotes must be independent timestamp-matched entry AND exit executable
     # observations; a raw mark or a historical spot price is not a fill quote.
-    quote_by_trade = {q.get("trade_id"): q for q in quotes if isinstance(q, dict)}
-    if all((q := quote_by_trade.get(t.get("trade_id"))) and
-           q.get("independent_entry_quote_verified") is True and
-           q.get("independent_exit_quote_verified") is True and
-           q.get("priority_fees_verified") is True and
-           q.get("slippage_modeled") is True
-           for t in matching):
+    # Require pre-trade/pre-exit quotes, not future information or undated
+    # flags. Thirty seconds is a research freshness contract, not a live
+    # trading threshold. Quotes still yield MODELED, never actual fills.
+    quote_by_trade = {}
+    duplicates = set()
+    for q in quotes:
+        if not isinstance(q, dict) or not q.get("trade_id"):
+            continue
+        key = q["trade_id"]
+        if key in quote_by_trade:
+            duplicates.add(key)
+        quote_by_trade[key] = q
+
+    def matched_quote(t):
+        trade_id = t.get("trade_id")
+        if not trade_id or trade_id in duplicates:
+            return False
+        q = quote_by_trade.get(trade_id)
+        if not q or not all(q.get(field) is True for field in (
+            "independent_entry_quote_verified",
+            "independent_exit_quote_verified",
+            "priority_fees_verified",
+            "slippage_modeled",
+        )):
+            return False
+        entry = _utc(t.get("entered_at_utc"))
+        exit_at = _utc(t.get("exited_at_utc"))
+        entry_quote = _utc(q.get("entry_quote_at_utc"))
+        exit_quote = _utc(q.get("exit_quote_at_utc"))
+        if not all((entry, exit_at, entry_quote, exit_quote)):
+            return False
+        if not (stamp <= entry <= exit_at <= now):
+            return False
+        return (0 <= (entry - entry_quote).total_seconds() <= 30 and
+                0 <= (exit_at - exit_quote).total_seconds() <= 30)
+
+    if len({t.get("trade_id") for t in matching}) == len(matching) and all(
+            matched_quote(t) for t in matching):
         report["executable_net"] = "MODELED"
     else:
         report["reasons"].append("MATCHED_EXECUTABLE_QUOTES_INCOMPLETE")
