@@ -24,7 +24,8 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
     if arm not in ARMS:
         raise ValueError("Unknown pre-registered arm")
     report = {"arm": arm, "runtime": "UNVERIFIED", "trade_provenance": "MISSING",
-              "executable_net": "MISSING", "preliminary_sample": "UNVERIFIED",
+              "executable_net": "MISSING", "quote_evidence": "MISSING",
+              "preliminary_sample": "UNVERIFIED",
               "valid_post_activation_exits": 0, "reasons": []}
     a = activation if isinstance(activation, dict) else {}
     stamp = _utc(a.get("activated_at_utc"))
@@ -63,12 +64,13 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
         return report
     report["trade_provenance"] = "HOST_CLAIM_ONLY"
     if len(matching) >= 30:
-        report["preliminary_sample"] = "MODELED"
+        report["reasons"].append("SAMPLE_THRESHOLD_MET_BUT_RUNTIME_UNVERIFIED")
     # Quotes must be independent timestamp-matched entry AND exit executable
     # observations; a raw mark or a historical spot price is not a fill quote.
     # Require pre-trade/pre-exit quotes, not future information or undated
     # flags. Thirty seconds is a research freshness contract, not a live
-    # trading threshold. Quotes still yield MODELED, never actual fills.
+    # trading threshold. Self-asserted quote flags are not independent
+    # validation of quote provenance, fee economics, or executable net P/L.
     quote_by_trade = {}
     duplicates = set()
     for q in quotes:
@@ -99,12 +101,15 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
             return False
         if not (stamp <= entry <= exit_at <= now):
             return False
-        return (0 <= (entry - entry_quote).total_seconds() <= 30 and
+        return (stamp <= entry_quote <= entry and
+                stamp <= exit_quote <= exit_at and
+                0 <= (entry - entry_quote).total_seconds() <= 30 and
                 0 <= (exit_at - exit_quote).total_seconds() <= 30)
 
     if len({t.get("trade_id") for t in matching}) == len(matching) and all(
             matched_quote(t) for t in matching):
-        report["executable_net"] = "MODELED"
+        report["quote_evidence"] = "HOST_CLAIM_ONLY"
+        report["reasons"].append("INDEPENDENT_QUOTE_AND_COST_VALIDATOR_NOT_CONNECTED")
     else:
         report["reasons"].append("MATCHED_EXECUTABLE_QUOTES_INCOMPLETE")
     return report
