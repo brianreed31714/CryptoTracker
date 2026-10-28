@@ -236,6 +236,19 @@ def poll(root: Path, *, observation: dict | None = None,
     except (ValueError, TypeError, OSError, RuntimeError):
         report = advance(root, previous, {}, head="", upstream="", clean=False, clock=stamp)
         report["reasons"] = ["HOST_INVENTORY_UNAVAILABLE"]
+    # Collect sanitized disk evidence from the same Windows observation.
+    # These hashes are explicitly NOT in-memory process attestation.
+    try:
+        from infrastructure.host_evidence_collector import collect_host_evidence
+        from infrastructure.registry_contract import validate_registry
+        registry = validate_registry(root, check_local_safety=True)
+        dep_files = ("paper_research_lab_v11_10.py", "publish_daily_evidence.py") if registry["project"] == "CryptoTracker" else ("daily_model_review.py",)
+        disk = collect_host_evidence(root, snapshot, dependencies=dep_files)
+    except (OSError, RuntimeError, ValueError, KeyError, UnboundLocalError):
+        disk = {"disk_code_sha256": None, "disk_dependencies_sha256": None,
+                "process_identity_observed": False, "loaded_code_verified": False,
+                "loaded_dependencies_verified": False}
+    report["disk_evidence"] = disk
     # Every distinct commit gets a CODE_SYNCED notice after positive source
     # integrity; a later EOD verification gets a second distinct notice.
     # Do not send repeated notices for each 60-second polling interval.
@@ -268,10 +281,11 @@ def poll(root: Path, *, observation: dict | None = None,
     # The version suffix invalidates only the old publication cache key;
     # it does not reset process observations or trigger a service restart.
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
-                  str(report.get("verified_review_date") or "") + ":status-file-v2")
+                  str(report.get("verified_review_date") or "") + ":" +
+                  str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":status-file-v3")
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
-    enabled = os.getenv("STOCKTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
+    enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
         "0", "false", "no", "off")
     if report["code_synced"] and remote_publish is not None and enabled:
         if remote_key == previous.get("remote_key"):
