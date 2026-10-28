@@ -3,6 +3,7 @@
 from __future__ import annotations
 import csv
 import json
+import math
 from datetime import date
 from pathlib import Path
 
@@ -22,14 +23,38 @@ def scorecard(rows, *, as_of=None, target_pct=TARGET_DAILY_PCT):
     Consecutive observed days only; no invented daily returns on missing dates.
     """
     as_of = as_of or date.today().isoformat()
+    if date.fromisoformat(as_of).isoformat() != as_of:
+        raise ValueError("as_of must be an ISO calendar date")
     out = {"as_of": as_of, "target_daily_pct": target_pct, "paper_only": True, "sleeves": {}}
     for model in SLEEVES:
-        points = sorted((r for r in rows if r.get("model") == model and r.get("date") and r.get("equity") not in (None, "")), key=lambda r: r["date"])
         by_date = {}
-        for row in points:
-            equity = _float(row["equity"])
-            if equity is not None and equity > 0:
-                by_date[row["date"]] = equity
+        conflicting_dates = set()
+        excluded_future_rows = 0
+        excluded_invalid_rows = 0
+        for row in rows:
+            if not isinstance(row, dict) or row.get("model") != model:
+                continue
+            day = row.get("date")
+            try:
+                if not isinstance(day, str) or date.fromisoformat(day).isoformat() != day:
+                    raise ValueError("invalid date")
+            except ValueError:
+                excluded_invalid_rows += 1
+                continue
+            if day > as_of:
+                excluded_future_rows += 1
+                continue
+            equity = _float(row.get("equity"))
+            if equity is None or not math.isfinite(equity) or equity <= 0:
+                excluded_invalid_rows += 1
+                continue
+            if day in conflicting_dates:
+                continue
+            if day in by_date and by_date[day] != equity:
+                conflicting_dates.add(day)
+                del by_date[day]
+                continue
+            by_date[day] = equity
         dates = sorted(by_date)
         daily = []
         for prev, cur in zip(dates, dates[1:]):
@@ -49,6 +74,9 @@ def scorecard(rows, *, as_of=None, target_pct=TARGET_DAILY_PCT):
             "first_equity_date": dates[0] if dates else None,
             "latest_equity_date": dates[-1] if dates else None,
             "stale": not dates or dates[-1] != as_of,
+            "excluded_future_rows": excluded_future_rows,
+            "excluded_invalid_rows": excluded_invalid_rows,
+            "conflicting_equity_dates": sorted(conflicting_dates),
             "daily_portfolio_return_pct": daily[-1]["return_pct"] if daily and daily[-1]["date"]==as_of else None,
             "daily_target_gap_pp": daily[-1]["gap_pp"] if daily and daily[-1]["date"]==as_of else None,
             "since_inception_portfolio_return_pct": round(inception,4) if inception is not None else None,
