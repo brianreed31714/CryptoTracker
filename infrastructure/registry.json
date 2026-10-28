@@ -31,6 +31,14 @@
       "trigger": "at_logon",
       "run_level": "highest",
       "host_verified": false
+    },
+    {
+      "name": "CryptoTracker Daily Review",
+      "installer": "install_cryptotracker_daily_review.ps1",
+      "script": "run_daily_model_review.bat",
+      "trigger": "daily_18_05_pacific",
+      "run_level": "highest",
+      "host_verified": false
     }
   ],
   "components": [
@@ -187,7 +195,8 @@
         "infrastructure/eod_evidence_gate.py",
         "test_eod_evidence_gate.py",
         "infrastructure/eod_send_observation.py",
-        "test_eod_send_observation.py"
+        "test_eod_send_observation.py",
+        "install_cryptotracker_daily_review.ps1"
       ],
       "health": {
         "type": "evidence_only"
