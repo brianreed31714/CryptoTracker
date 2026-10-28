@@ -4,6 +4,9 @@ These tests do not register scheduled tasks or interact with trading processes.
 """
 import json
 import unittest
+from datetime import datetime, timezone
+
+from infrastructure.completed_crypto_day import completed_pacific_day
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -42,6 +45,23 @@ class DailyReviewSchedulerContractTests(unittest.TestCase):
                         "proposal_registry.py publish", "sync_proposals_to_git.py"):
             self.assertIn(command, self.batch)
         self.assertGreaterEqual(self.batch.lower().count("if errorlevel 1 goto :fail"), 4)
+
+    def test_scheduled_review_uses_completed_day_not_current_partial_day(self):
+        self.assertIn("python -m infrastructure.completed_crypto_day", self.batch)
+        self.assertIn("if not defined REVIEWDATE goto :fail", self.batch)
+        self.assertNotIn("Get-Date -Format yyyy-MM-dd", self.batch)
+        self.assertEqual(completed_pacific_day(
+            datetime(2026, 10, 29, 1, 5, tzinfo=timezone.utc)), "2026-10-27")
+
+    def test_selector_handles_pacific_dst_boundaries(self):
+        self.assertEqual(completed_pacific_day(
+            datetime(2026, 3, 9, 1, 5, tzinfo=timezone.utc)), "2026-03-07")
+        self.assertEqual(completed_pacific_day(
+            datetime(2026, 11, 2, 2, 5, tzinfo=timezone.utc)), "2026-10-31")
+
+    def test_selector_rejects_naive_clock(self):
+        with self.assertRaises(ValueError):
+            completed_pacific_day(datetime(2026, 10, 28, 18, 5))
 
     def test_task_is_not_misrepresented_as_pushover_delivery(self):
         source = self.installer.lower()
