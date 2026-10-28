@@ -479,10 +479,15 @@ def scan_once():
     # Never reload or stop trading, Smart Money, or dashboard processes.
     if os.name == "nt":
         try:
-            from infrastructure.windows_activation_attestation import poll
-            poll(ROOT, notify=push_attestation)
+            # Importing poll() in a long-running agent caches the old module
+            # after Git sync. The bounded child always loads the new on-disk
+            # attestation without restarting trader/dashboard/feed processes.
+            from infrastructure.fresh_attestation_runner import run_fresh_host_attestation
+            evidence = run_fresh_host_attestation(ROOT)
+            if evidence["status"] != "HOST_CLAIM_ONLY":
+                log("Windows attestation unavailable: " + evidence.get("reason", "UNVERIFIED"))
         except Exception:
-            log("CryptoTracker Windows attestation unavailable (details redacted)")
+            log("Windows attestation runner unavailable (details redacted)")
 
 
 def main():
