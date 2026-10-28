@@ -51,13 +51,26 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
     for row in trades:
         if not isinstance(row, dict) or row.get("arm") != arm or row.get("event") != "EXIT":
             continue
+        entry = _utc(row.get("entered_at_utc"))
         when = _utc(row.get("exited_at_utc"))
-        if (when is not None and stamp <= when <= now and
+        trade_id = row.get("trade_id")
+        if (entry is not None and when is not None and
+                stamp <= entry <= when <= now and
+                isinstance(trade_id, str) and bool(trade_id.strip()) and
                 row.get("loaded_code_digest") == loaded and
                 row.get("loaded_dependency_digest") == deps and
                 row.get("activation_id") == a.get("activation_id") and
                 a.get("activation_id")):
             matching.append(row)
+    # Never inflate the sample with repeated EXIT records for one trade.
+    # Reject every conflicting duplicate rather than trusting the first row.
+    counts = {}
+    for row in matching:
+        trade_id = row["trade_id"]
+        counts[trade_id] = counts.get(trade_id, 0) + 1
+    if any(count > 1 for count in counts.values()):
+        report["reasons"].append("DUPLICATE_TRADE_IDS_EXCLUDED")
+        matching = [row for row in matching if counts[row["trade_id"]] == 1]
     report["valid_post_activation_exits"] = len(matching)
     if not matching:
         report["reasons"].append("NO_VERSION_MATCHED_POST_ACTIVATION_EXITS")
