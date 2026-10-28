@@ -87,9 +87,12 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
     quote_by_trade = {}
     duplicates = set()
     for q in quotes:
-        if not isinstance(q, dict) or not q.get("trade_id"):
+        if not isinstance(q, dict):
             continue
-        key = q["trade_id"]
+        key = q.get("trade_id")
+        # Malformed, unhashable IDs must never crash an EOD research audit.
+        if not isinstance(key, str) or not key.strip():
+            continue
         if key in quote_by_trade:
             duplicates.add(key)
         quote_by_trade[key] = q
@@ -99,7 +102,14 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
         if not trade_id or trade_id in duplicates:
             return False
         q = quote_by_trade.get(trade_id)
-        if not q or not all(q.get(field) is True for field in (
+        # A quote for another arm, activation, or loaded version cannot
+        # substantiate this trade, even as an unverified host claim.
+        if (not q or q.get("arm") != arm or
+                q.get("activation_id") != a.get("activation_id") or
+                q.get("loaded_code_digest") != loaded or
+                q.get("loaded_dependency_digest") != deps):
+            return False
+        if not all(q.get(field) is True for field in (
             "independent_entry_quote_verified",
             "independent_exit_quote_verified",
             "priority_fees_verified",
