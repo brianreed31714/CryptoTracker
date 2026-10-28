@@ -53,11 +53,31 @@ class ShadowProvenanceTests(unittest.TestCase):
 
     @staticmethod
     def good_quote():
-        return {"trade_id": "t1", "independent_entry_quote_verified": True,
+        return {"trade_id": "t1", "arm": ARMS[0],
+                "activation_id": "host-1",
+                "loaded_code_digest": D, "loaded_dependency_digest": E,
+                "independent_entry_quote_verified": True,
                 "independent_exit_quote_verified": True,
                 "priority_fees_verified": True, "slippage_modeled": True,
                 "entry_quote_at_utc": "2026-10-27T18:29:45Z",
                 "exit_quote_at_utc": "2026-10-27T18:59:50Z"}
+
+    def test_quote_from_other_arm_or_runtime_fails_closed(self):
+        for changes in ({"arm": ARMS[1]}, {"activation_id": "other-host"},
+                        {"loaded_code_digest": E},
+                        {"loaded_dependency_digest": D},
+                        {"arm": None}, {"activation_id": None}):
+            q = {**self.good_quote(), **changes}
+            report = self.run_gate(quotes=[q])
+            self.assertEqual(report["quote_evidence"], "MISSING")
+            self.assertEqual(report["executable_net"], "MISSING")
+
+    def test_malformed_quote_ids_cannot_crash_research_audit(self):
+        for bad_id in ({"trade": "t1"}, ["t1"], 12, None, ""):
+            q = {**self.good_quote(), "trade_id": bad_id}
+            report = self.run_gate(quotes=[q])
+            self.assertEqual(report["quote_evidence"], "MISSING")
+            self.assertEqual(report["executable_net"], "MISSING")
 
     def test_missing_quote_timestamps_fail_closed(self):
         q = self.good_quote()
