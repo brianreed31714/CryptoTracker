@@ -44,9 +44,12 @@ class ShadowProvenanceTests(unittest.TestCase):
         bad = {**self.exit, "loaded_code_digest": E}
         self.assertEqual(self.run_gate(trades=[bad])["trade_provenance"], "MISSING")
 
-    def test_independent_quotes_are_still_modeled(self):
+    def test_self_asserted_quote_flags_do_not_verify_executable_net(self):
         q = self.good_quote()
-        self.assertEqual(self.run_gate(quotes=[q])["executable_net"], "MODELED")
+        report = self.run_gate(quotes=[q])
+        self.assertEqual(report["quote_evidence"], "HOST_CLAIM_ONLY")
+        self.assertEqual(report["executable_net"], "MISSING")
+        self.assertIn("INDEPENDENT_QUOTE_AND_COST_VALIDATOR_NOT_CONNECTED", report["reasons"])
 
     @staticmethod
     def good_quote():
@@ -59,21 +62,31 @@ class ShadowProvenanceTests(unittest.TestCase):
     def test_missing_quote_timestamps_fail_closed(self):
         q = self.good_quote()
         q.pop("exit_quote_at_utc")
-        self.assertEqual(self.run_gate(quotes=[q])["executable_net"], "MISSING")
+        self.assertEqual(self.run_gate(quotes=[q])["quote_evidence"], "MISSING")
 
     def test_stale_and_future_quotes_fail_closed(self):
         for timestamp in ("2026-10-27T18:58:00Z",
                           "2026-10-27T19:00:01Z"):
             q = {**self.good_quote(), "exit_quote_at_utc": timestamp}
-            self.assertEqual(self.run_gate(quotes=[q])["executable_net"], "MISSING")
+            self.assertEqual(self.run_gate(quotes=[q])["quote_evidence"], "MISSING")
 
     def test_duplicate_trade_quote_fails_closed(self):
         q = self.good_quote()
-        self.assertEqual(self.run_gate(quotes=[q, q])["executable_net"], "MISSING")
+        self.assertEqual(self.run_gate(quotes=[q, q])["quote_evidence"], "MISSING")
 
-    def test_quote_before_activation_fails_closed(self):
-        q = {**self.good_quote(), "entry_quote_at_utc": "2026-10-27T17:59:59Z"}
-        self.assertEqual(self.run_gate(quotes=[q])["executable_net"], "MISSING")
+    def test_quote_before_activation_fails_closed_even_when_fresh(self):
+        near_activation = {**self.exit, "entered_at_utc": "2026-10-27T18:00:10Z"}
+        q = {**self.good_quote(), "entry_quote_at_utc": "2026-10-27T17:59:55Z"}
+        report = self.run_gate(trades=[near_activation], quotes=[q])
+        self.assertEqual(report["quote_evidence"], "MISSING")
+        self.assertEqual(report["executable_net"], "MISSING")
+
+    def test_thirty_host_claimed_exits_do_not_verify_sample(self):
+        trades = [{**self.exit, "trade_id": f"t{i}"} for i in range(30)]
+        report = self.run_gate(trades=trades)
+        self.assertEqual(report["valid_post_activation_exits"], 30)
+        self.assertEqual(report["preliminary_sample"], "UNVERIFIED")
+        self.assertIn("SAMPLE_THRESHOLD_MET_BUT_RUNTIME_UNVERIFIED", report["reasons"])
 
 
 if __name__ == "__main__":
