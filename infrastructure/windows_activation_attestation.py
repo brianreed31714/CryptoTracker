@@ -293,7 +293,12 @@ def poll(root: Path, *, observation: dict | None = None,
     # One-time republish after fixing Windows mktree CRLF filename corruption.
     # The version suffix invalidates only the old publication cache key;
     # it does not reset process observations or trigger a service restart.
+    # Re-publish only meaningful changes in bounded, allowlisted health codes
+    # or the three-sample stability sequence. No raw host diagnostics leave Windows.
+    from infrastructure.host_status_publisher import safe_process_reasons, stability_samples
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
+                  ",".join(safe_process_reasons(report)) + ":" +
+                  str(stability_samples(report)) + ":" +
                   str(report.get("verified_review_date") or "") + ":" +
                   str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":" +
                   str((report.get("local_eod_send_observation") or {}).get("review_date") or "") + ":" +
