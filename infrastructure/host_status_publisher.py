@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+from zoneinfo import ZoneInfo
 
 STATUS_BRANCH = "refs/heads/cryptotracker-host-status"
 OUTPUT_FILE = "status.json"
@@ -72,6 +73,28 @@ def sanitized(report: dict) -> dict:
         payload["disk_dependencies_sha256"] = dep_digest
     payload["process_identity_observed"] = disk.get("process_identity_observed") is True
     payload["loaded_dependencies_verified"] = False
+    # Local EOD state is a host claim only; it is neither an independent
+    # Pushover API receipt nor proof that a device displayed the message.
+    payload["local_eod_send_state"] = "MISSING_OR_INVALID"
+    payload["eod_device_delivery_verified"] = False
+    local = report.get("local_eod_send_observation") or {}
+    if isinstance(local, dict) and local.get("status") == "HOST_LOCAL_SEND_STATE_CLAIM":
+        day = local.get("review_date")
+        when = local.get("sent_at_utc")
+        try:
+            sent = datetime.fromisoformat(str(when).replace("Z", "+00:00"))
+            valid = (
+                isinstance(day, str) and DATE.fullmatch(day)
+                and datetime.fromisoformat(day).date().isoformat() == day
+                and sent.tzinfo is not None and sent <= stamp
+                and sent.astimezone(ZoneInfo("America/Los_Angeles")).date().isoformat() == day
+            )
+        except (ValueError, TypeError, OverflowError):
+            valid = False
+        if valid:
+            payload["local_eod_send_state"] = "HOST_LOCAL_CLAIM_ONLY"
+            payload["local_eod_send_date"] = day
+            payload["local_eod_send_at_utc"] = sent.astimezone(timezone.utc).isoformat()
     if payload["post_sync_eod_verified"]:
         day = report.get("verified_review_date")
         if not isinstance(day, str) or not DATE.fullmatch(day) or datetime.fromisoformat(day).date().isoformat() != day:

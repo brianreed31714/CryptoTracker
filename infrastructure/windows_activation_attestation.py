@@ -249,6 +249,13 @@ def poll(root: Path, *, observation: dict | None = None,
                 "process_identity_observed": False, "loaded_code_verified": False,
                 "loaded_dependencies_verified": False}
     report["disk_evidence"] = disk
+    # Publish only the date/timestamp of a locally recorded EOD send, even if
+    # it predates source sync. This is a claim, never provider/device proof.
+    try:
+        from infrastructure.eod_send_observation import inspect_local_eod_send
+        report["local_eod_send_observation"] = inspect_local_eod_send(root, now=stamp)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        report["local_eod_send_observation"] = {"status": "MISSING_OR_INVALID"}
     # Every distinct commit gets a CODE_SYNCED notice after positive source
     # integrity; a later EOD verification gets a second distinct notice.
     # Do not send repeated notices for each 60-second polling interval.
@@ -282,7 +289,8 @@ def poll(root: Path, *, observation: dict | None = None,
     # it does not reset process observations or trigger a service restart.
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
                   str(report.get("verified_review_date") or "") + ":" +
-                  str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":status-file-v3")
+                  str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":" +
+                  str((report.get("local_eod_send_observation") or {}).get("review_date") or "") + ":status-file-v4")
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
     enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
