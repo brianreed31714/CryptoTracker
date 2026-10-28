@@ -180,7 +180,8 @@ class AttestationTests(unittest.TestCase):
         import deployment_agent as agent
         source = inspect.getsource(agent.scan_once)
         self.assertIn('if os.name == "nt":', source)
-        self.assertIn("poll(ROOT, notify=push_attestation)", source)
+        self.assertIn("run_fresh_host_attestation(ROOT)", source)
+        self.assertNotIn("poll(ROOT, notify=push_attestation)", source)
         self.assertNotIn("stop_active(", source)
 
 
