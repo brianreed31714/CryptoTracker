@@ -1,0 +1,313 @@
+{
+  "additional_research": {
+    "balanced_ev": "Test 30/60/120-minute loss cooldown in parallel independent variants.",
+    "capital": "No scaling before adequate liquidity/slippage validation and stable prospective net portfolio returns.",
+    "diy_whale": "Test NEUTRAL-only versus strict RISK_OFF organic-flow criteria in prospectively isolated variants.",
+    "profit_capture": "Test stage exits and narrower trailing rules against the frozen baseline using executable exit estimates.",
+    "runner_hunter": "Test independently timed 2- and 3-confirmation continuation with future executable quotes."
+  },
+  "date": "2026-10-27",
+  "experiments_are": "historical diagnostics, not proven strategy changes",
+  "full_mark_to_market_available": false,
+  "goal_daily_portfolio_return_pct": 1.0,
+  "mode": "PAPER_READ_ONLY",
+  "promotion_allowed": false,
+  "sleeves": {
+    "balanced_ev": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 28
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 12
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 20
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": -2.6463,
+        "completed": 6,
+        "net_pnl_usd": -0.238165,
+        "profit_factor": 0.0516,
+        "valid_pnl_rows": 6,
+        "win_rate_pct": 16.6667
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": -1.58777,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [
+          {
+            "estimated_cost_pct": -1.02761081,
+            "timestamp": "2026-10-27T09:33:22.440294",
+            "token": "GATO"
+          },
+          {
+            "estimated_cost_pct": -1.34261173,
+            "timestamp": "2026-10-27T11:47:46.737967",
+            "token": "GATO"
+          },
+          {
+            "estimated_cost_pct": -1.9455546,
+            "timestamp": "2026-10-27T19:43:49.299695",
+            "token": "REMUS"
+          }
+        ],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 3,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": [
+          {
+            "configured_stop_pct": -5.0,
+            "net_return_pct": -8.4932,
+            "token": "\u2588\u2588\u2588WIF"
+          }
+        ]
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": 85.317,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 2,
+        "losing_exits_after_at_least_8pct_observed_peak": 0
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": 0.5496,
+        "completed": 170,
+        "net_pnl_usd": 1.40148573,
+        "profit_factor": 1.1975,
+        "valid_pnl_rows": 170,
+        "win_rate_pct": 42.9412
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": 0.5758,
+          "completed": 125,
+          "net_pnl_usd": 1.07955,
+          "profit_factor": 1.2756,
+          "valid_pnl_rows": 125,
+          "win_rate_pct": 41.6
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 0.167785,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -11.1857,
+          "completed": 1,
+          "net_pnl_usd": -0.167785,
+          "profit_factor": 0.0,
+          "valid_pnl_rows": 1,
+          "win_rate_pct": 0.0
+        }
+      }
+    },
+    "diy_whale": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 46
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 20
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 32
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": -3.9836,
+        "completed": 15,
+        "net_pnl_usd": -0.448159,
+        "profit_factor": 0.0851,
+        "valid_pnl_rows": 15,
+        "win_rate_pct": 26.6667
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": -2.98773,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [
+          {
+            "estimated_cost_pct": -1.91793311,
+            "timestamp": "2026-10-27T00:06:34.726276",
+            "token": "REMUS"
+          },
+          {
+            "estimated_cost_pct": 45.38082541,
+            "timestamp": "2026-10-27T00:22:55.000791",
+            "token": "CHICO"
+          },
+          {
+            "estimated_cost_pct": 8.03554986,
+            "timestamp": "2026-10-27T08:56:00.709726",
+            "token": "\u2588\u2588\u2588WIF"
+          },
+          {
+            "estimated_cost_pct": -0.64611056,
+            "timestamp": "2026-10-27T09:41:50.084291",
+            "token": "GATO"
+          },
+          {
+            "estimated_cost_pct": -1.55475778,
+            "timestamp": "2026-10-27T10:14:47.010415",
+            "token": "LMAO!"
+          },
+          {
+            "estimated_cost_pct": -0.82492986,
+            "timestamp": "2026-10-27T11:53:36.250433",
+            "token": "GATO"
+          }
+        ],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 6,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": [
+          {
+            "configured_stop_pct": -8.0,
+            "net_return_pct": -18.8996,
+            "token": "\u2588\u2588\u2588WIF"
+          },
+          {
+            "configured_stop_pct": -8.0,
+            "net_return_pct": -15.4964,
+            "token": "\u2588\u2588\u2588WIF"
+          }
+        ]
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": 68.805,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 10,
+        "losing_exits_after_at_least_8pct_observed_peak": 1
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": -1.2218,
+        "completed": 289,
+        "net_pnl_usd": -2.648184,
+        "profit_factor": 0.7721,
+        "valid_pnl_rows": 289,
+        "win_rate_pct": 43.9446
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": 0.7555,
+          "completed": 97,
+          "net_pnl_usd": 0.549634,
+          "profit_factor": 1.2695,
+          "valid_pnl_rows": 97,
+          "win_rate_pct": 49.4845
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 3.352569,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -2.4561,
+          "completed": 182,
+          "net_pnl_usd": -3.352569,
+          "profit_factor": 0.6446,
+          "valid_pnl_rows": 182,
+          "win_rate_pct": 39.5604
+        }
+      }
+    },
+    "runner_hunter": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 10
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 3
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 6
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": 2.1516,
+        "completed": 7,
+        "net_pnl_usd": 0.112961,
+        "profit_factor": 2.0539,
+        "valid_pnl_rows": 7,
+        "win_rate_pct": 14.2857
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": 0.75307,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [
+          {
+            "estimated_cost_pct": -0.5565256,
+            "timestamp": "2026-10-27T09:31:18.098119",
+            "token": "GATO"
+          },
+          {
+            "estimated_cost_pct": -3.03991203,
+            "timestamp": "2026-10-27T11:06:11.970702",
+            "token": "\u2588\u2588\u2588WIF"
+          },
+          {
+            "estimated_cost_pct": -19.45975187,
+            "timestamp": "2026-10-27T13:41:16.732174",
+            "token": "SI"
+          },
+          {
+            "estimated_cost_pct": -0.70168767,
+            "timestamp": "2026-10-27T14:13:15.070154",
+            "token": "GTA6"
+          }
+        ],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 4,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": []
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": 93.939,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 3,
+        "losing_exits_after_at_least_8pct_observed_peak": 0
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": -1.5647,
+        "completed": 112,
+        "net_pnl_usd": -1.314341,
+        "profit_factor": 0.634,
+        "valid_pnl_rows": 112,
+        "win_rate_pct": 37.5
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": -1.6625,
+          "completed": 96,
+          "net_pnl_usd": -1.197022,
+          "profit_factor": 0.6223,
+          "valid_pnl_rows": 96,
+          "win_rate_pct": 35.4167
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 0.088895,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -11.8527,
+          "completed": 1,
+          "net_pnl_usd": -0.088895,
+          "profit_factor": 0.0,
+          "valid_pnl_rows": 1,
+          "win_rate_pct": 0.0
+        }
+      }
+    }
+  },
+  "version": 1
+}
