@@ -183,7 +183,9 @@
         "infrastructure/windows_activation_attestation.py",
         "infrastructure/host_status_publisher.py",
         "infrastructure/eod_evidence_gate.py",
-        "test_eod_evidence_gate.py"
+        "test_eod_evidence_gate.py",
+        "infrastructure/eod_send_observation.py",
+        "test_eod_send_observation.py"
       ],
       "health": {
         "type": "evidence_only"
