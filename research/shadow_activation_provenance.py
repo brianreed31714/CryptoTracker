@@ -31,8 +31,10 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
     now = _utc(as_of)
     if now is None:
         raise ValueError("Invalid as_of timestamp")
-    # Host-signed runtime manifest must independently assert both loaded code
-    # and dependency digest, not merely git sync or a file-on-disk checksum.
+    # This read-only evaluator cannot independently validate a host signature.
+    # Treat even a structurally complete host claim as UNVERIFIED until an
+    # external attestation verifier is integrated. Git/disk hashes alone
+    # cannot establish loaded trader code or dependencies.
     loaded = a.get("loaded_code_digest")
     deps = a.get("loaded_dependency_digest")
     if not (a.get("independently_observed") is True and
@@ -42,7 +44,8 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
             stamp is not None and stamp <= now):
         report["reasons"].append("LOADED_RUNTIME_PROVENANCE_UNVERIFIED")
         return report
-    report["runtime"] = "VERIFIED"
+    report["runtime"] = "UNVERIFIED"
+    report["reasons"].append("INDEPENDENT_ATTESTATION_VALIDATOR_NOT_CONNECTED")
     matching = []
     for row in trades:
         if not isinstance(row, dict) or row.get("arm") != arm or row.get("event") != "EXIT":
@@ -58,7 +61,7 @@ def assess_arm(arm: str, activation: dict | None, trades: list[dict],
     if not matching:
         report["reasons"].append("NO_VERSION_MATCHED_POST_ACTIVATION_EXITS")
         return report
-    report["trade_provenance"] = "VERIFIED"
+    report["trade_provenance"] = "HOST_CLAIM_ONLY"
     if len(matching) >= 30:
         report["preliminary_sample"] = "MODELED"
     # Quotes must be independent timestamp-matched entry AND exit executable
