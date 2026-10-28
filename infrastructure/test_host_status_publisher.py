@@ -216,8 +216,8 @@ class HostSignalTests(unittest.TestCase):
                             "script": "cryptotracker_supervisor.py"},
                 "script_version": {"state": "MATCHED"},
             }
-            with patch.object(attest, "git_head", return_value=HEAD), \\
-                 patch.object(attest, "_head", return_value=HEAD), \\
+            with patch.object(attest, "git_head", return_value=HEAD), \
+                 patch.object(attest, "_head", return_value=HEAD), \
                  patch.object(attest, "_code_clean", return_value=True):
                 for minute, components in (
                     (0, {}),
