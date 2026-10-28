@@ -31,7 +31,9 @@ class ShadowProvenanceTests(unittest.TestCase):
         self.assertTrue(all(x["runtime"] == "UNVERIFIED" for x in rows.values()))
 
     def test_trade_version_and_activation_match(self):
-        self.assertEqual(self.run_gate()["trade_provenance"], "VERIFIED")
+        self.assertEqual(self.run_gate()["trade_provenance"], "HOST_CLAIM_ONLY")
+        self.assertEqual(self.run_gate()["runtime"], "UNVERIFIED")
+        self.assertIn("INDEPENDENT_ATTESTATION_VALIDATOR_NOT_CONNECTED", self.run_gate()["reasons"])
         self.assertEqual(self.run_gate()["executable_net"], "MISSING")
 
     def test_stale_trade_not_counted(self):
