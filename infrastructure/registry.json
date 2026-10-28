@@ -181,7 +181,9 @@
         "daily_model_review.py",
         "build_daily_review_bundle.py",
         "infrastructure/windows_activation_attestation.py",
-        "infrastructure/host_status_publisher.py"
+        "infrastructure/host_status_publisher.py",
+        "infrastructure/eod_evidence_gate.py",
+        "test_eod_evidence_gate.py"
       ],
       "health": {
         "type": "evidence_only"
