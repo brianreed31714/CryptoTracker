@@ -256,6 +256,12 @@ def poll(root: Path, *, observation: dict | None = None,
         report["local_eod_send_observation"] = inspect_local_eod_send(root, now=stamp)
     except (OSError, RuntimeError, ValueError, TypeError):
         report["local_eod_send_observation"] = {"status": "MISSING_OR_INVALID"}
+    # Read-only scheduler evidence; task exit code never establishes EOD delivery.
+    try:
+        from infrastructure.daily_review_task_probe import inspect_daily_review_task
+        report["daily_review_task_observation"] = inspect_daily_review_task(clock=stamp)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        report["daily_review_task_observation"] = {"status": "UNVERIFIED"}
     # Every distinct commit gets a CODE_SYNCED notice after positive source
     # integrity; a later EOD verification gets a second distinct notice.
     # Do not send repeated notices for each 60-second polling interval.
@@ -290,7 +296,10 @@ def poll(root: Path, *, observation: dict | None = None,
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
                   str(report.get("verified_review_date") or "") + ":" +
                   str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":" +
-                  str((report.get("local_eod_send_observation") or {}).get("review_date") or "") + ":status-file-v4")
+                  str((report.get("local_eod_send_observation") or {}).get("review_date") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("status") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("last_run_utc") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("last_task_result") or "") + ":status-file-v5")
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
     enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
