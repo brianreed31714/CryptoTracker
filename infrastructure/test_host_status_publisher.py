@@ -60,7 +60,7 @@ class HostSignalTests(unittest.TestCase):
             "status": "TASK_NAME_OBSERVED", "scheduler_state": "Ready",
             "last_run_utc": "2026-10-19T20:00:00+00:00",
             "last_task_result": 0, "eod_delivery_verified": True,
-            "local_path": "C:\\SECRET\\review.bat",
+            "local_path": r"C:\\SECRET\\review.bat",
         }
         published = publisher.sanitized(data)
         self.assertEqual(published["daily_review_task_status"], "TASK_NAME_OBSERVED")
