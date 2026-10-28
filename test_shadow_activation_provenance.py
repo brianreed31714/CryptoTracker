@@ -81,6 +81,29 @@ class ShadowProvenanceTests(unittest.TestCase):
         self.assertEqual(report["quote_evidence"], "MISSING")
         self.assertEqual(report["executable_net"], "MISSING")
 
+    def test_pre_activation_entry_with_post_activation_exit_is_excluded(self):
+        old_entry = {**self.exit, "entered_at_utc": "2026-10-27T17:59:59Z"}
+        report = self.run_gate(trades=[old_entry])
+        self.assertEqual(report["valid_post_activation_exits"], 0)
+        self.assertEqual(report["trade_provenance"], "MISSING")
+
+    def test_exit_before_entry_is_excluded(self):
+        backwards = {**self.exit, "entered_at_utc": "2026-10-27T19:00:01Z"}
+        self.assertEqual(self.run_gate(trades=[backwards])["valid_post_activation_exits"], 0)
+
+    def test_duplicate_trade_ids_cannot_inflate_sample(self):
+        duplicated = [{**self.exit, "trade_id": "t1"} for _ in range(30)]
+        report = self.run_gate(trades=duplicated)
+        self.assertEqual(report["valid_post_activation_exits"], 0)
+        self.assertEqual(report["trade_provenance"], "MISSING")
+        self.assertIn("DUPLICATE_TRADE_IDS_EXCLUDED", report["reasons"])
+        self.assertNotIn("SAMPLE_THRESHOLD_MET_BUT_RUNTIME_UNVERIFIED", report["reasons"])
+
+    def test_missing_or_non_string_trade_ids_are_excluded(self):
+        for bad_id in (None, "", " ", {"id": "t1"}):
+            row = {**self.exit, "trade_id": bad_id}
+            self.assertEqual(self.run_gate(trades=[row])["valid_post_activation_exits"], 0)
+
     def test_thirty_host_claimed_exits_do_not_verify_sample(self):
         trades = [{**self.exit, "trade_id": f"t{i}"} for i in range(30)]
         report = self.run_gate(trades=trades)
