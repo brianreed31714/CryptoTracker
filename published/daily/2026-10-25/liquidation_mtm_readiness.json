@@ -1,0 +1,52 @@
+{
+  "all_sleeves_point_in_time_equity_available": true,
+  "assessed_at_utc": "2026-10-26T03:00:49.307522+00:00",
+  "daily_equity_history_status": "UNAVAILABLE_NO_MATCHED_PRIOR_DAY_QUOTE_SNAPSHOT",
+  "full_portfolio_daily_return_pct": null,
+  "full_portfolio_drawdown_pct": null,
+  "full_portfolio_inception_return_pct": null,
+  "orders_submitted": false,
+  "paper_only": true,
+  "quote_max_age_seconds": 120,
+  "quote_snapshot_cycle_matches": false,
+  "quote_snapshot_present": false,
+  "report_date": "2026-10-25",
+  "schema": "PAPER_QUOTE_LIQUIDATION_READINESS_V1",
+  "sleeves": {
+    "balanced_ev": {
+      "daily_full_portfolio_return_pct": null,
+      "full_portfolio_drawdown_pct": null,
+      "inception_full_portfolio_return_pct": null,
+      "open_positions": 0,
+      "point_in_time_paper_equity_usdc": 16.65677572,
+      "quote_age_seconds": null,
+      "quoted_open_liquidation_value_usdc": 0.0,
+      "realized_equity_usdc": 16.65677572,
+      "status": "FLAT_STATE_QUOTE_NOT_REQUIRED"
+    },
+    "diy_whale": {
+      "daily_full_portfolio_return_pct": null,
+      "full_portfolio_drawdown_pct": null,
+      "inception_full_portfolio_return_pct": null,
+      "open_positions": 0,
+      "point_in_time_paper_equity_usdc": 12.878828,
+      "quote_age_seconds": null,
+      "quoted_open_liquidation_value_usdc": 0.0,
+      "realized_equity_usdc": 12.878828,
+      "status": "FLAT_STATE_QUOTE_NOT_REQUIRED"
+    },
+    "runner_hunter": {
+      "daily_full_portfolio_return_pct": null,
+      "full_portfolio_drawdown_pct": null,
+      "inception_full_portfolio_return_pct": null,
+      "open_positions": 0,
+      "point_in_time_paper_equity_usdc": 14.156767,
+      "quote_age_seconds": null,
+      "quoted_open_liquidation_value_usdc": 0.0,
+      "realized_equity_usdc": 14.156767,
+      "status": "FLAT_STATE_QUOTE_NOT_REQUIRED"
+    }
+  },
+  "state_present": true,
+  "warning": "Read-only quote estimates, not fills. No open-position mark-to-market or portfolio returns may be inferred from raw token marks or realized PnL."
+}

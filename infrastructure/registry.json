@@ -31,6 +31,14 @@
       "trigger": "at_logon",
       "run_level": "highest",
       "host_verified": false
+    },
+    {
+      "name": "CryptoTracker Daily Review",
+      "installer": "install_cryptotracker_daily_review.ps1",
+      "script": "run_daily_model_review.bat",
+      "trigger": "daily_18_05_pacific",
+      "run_level": "highest",
+      "host_verified": false
     }
   ],
   "components": [
@@ -61,7 +69,18 @@
       "deployment_component": null,
       "script_pattern": "deployment_agent.py",
       "source_files": [
-        "deployment_agent.py"
+        "deployment_agent.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py",
+        "infrastructure/runtime_inventory.py",
+        "infrastructure/host_evidence_collector.py",
+        "test_host_evidence_collector.py",
+        "infrastructure/host_confirmation_reader.py",
+        "test_host_confirmation_reader.py",
+        "infrastructure/fresh_attestation_runner.py",
+        "test_fresh_attestation_runner.py",
+        "infrastructure/daily_review_task_probe.py",
+        "infrastructure/test_daily_review_task_probe.py"
       ],
       "health": {
         "type": "process"
@@ -172,7 +191,15 @@
       "source_files": [
         "run_daily_model_review.bat",
         "daily_model_review.py",
-        "build_daily_review_bundle.py"
+        "build_daily_review_bundle.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py",
+        "infrastructure/eod_evidence_gate.py",
+        "test_eod_evidence_gate.py",
+        "infrastructure/eod_send_observation.py",
+        "test_eod_send_observation.py",
+        "install_cryptotracker_daily_review.ps1",
+        "infrastructure/completed_crypto_day.py"
       ],
       "health": {
         "type": "evidence_only"
@@ -204,7 +231,9 @@
       "deployment_component": null,
       "script_pattern": null,
       "source_files": [
-        "infrastructure/runtime_inventory.py"
+        "infrastructure/runtime_inventory.py",
+        "infrastructure/windows_activation_attestation.py",
+        "infrastructure/host_status_publisher.py"
       ],
       "health": {
         "type": "not_applicable"
@@ -238,6 +267,14 @@
       "script_pattern": null,
       "source_files": [
         "paper_research_lab_v11_10.py",
+        "research/paper_goal_scorecard.py",
+        "research/paper_quality_audit.py",
+        "research/crypto_improvement_diagnostics.py",
+        "research/paper_shadow_experiments.py",
+        "research/paper_liquidation_mtm.py",
+        "research/paper_stop_forensics.py",
+        "research/paper_jupiter_quote_capture.py",
+        "test_paper_jupiter_quote_capture.py",
         "research/daily_portfolio_scorecard.py",
         "test_daily_portfolio_scorecard.py"
       ],
@@ -283,7 +320,8 @@
     "Smart Money v2.3 heartbeat is more authoritative than Windows command-line discovery.",
     "Task installation mode is derived from current installer script; confirm on host before relying on it.",
     "Historical observed Smart Money PID 3096 is not a persistent identifier.",
-    "Balanced EV, Runner Hunter and DIY Whale are research-model variants within paper_research_lab_v11_10.py, not three separately supervised trading processes."
+    "Balanced EV, Runner Hunter and DIY Whale are research-model variants within paper_research_lab_v11_10.py, not three separately supervised trading processes.",
+    "Non-disruptive CryptoTracker host attestation is read-only and confirms source sync, process identity/start time for supervisor/agent/trader/dashboard, Smart Money v2.3 fresh healthy feed heartbeat, and a post-sync crypto EOD send record; these do NOT attest in-memory source digest, a wallet swap, or device Pushover delivery. Results are stored under ignored deploy/state and sanitized status is published to an isolated private branch cryptotracker-host-status (disable with CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED=0); no crypto trade settings, local checkout or supervisor processes changed. Running deployment agent must be reloaded through separately approved host action to adopt new monitoring hook."
   ],
   "external_services": [
     {
@@ -341,6 +379,13 @@
       "component": "trader",
       "endpoint": "service-configured",
       "current_policy": "on-demand only; no continuous influencer polling"
+    },
+    {
+      "name": "Jupiter Swap V2 quote-only",
+      "mode": "opt_in_read_only",
+      "component": "research_lab",
+      "endpoint": "https://api.jup.ag/swap/v2/order",
+      "current_policy": "Default disabled; GET without taker; no transaction, no signing or execution; raw snapshots local only"
     }
   ],
   "data_contracts": [
@@ -405,6 +450,15 @@
         "runtime_inventory"
       ],
       "freshness_seconds": null
+    },
+    {
+      "producer": "research_lab",
+      "artifact": "data/paper_research/liquidation_quotes.json",
+      "consumers": [
+        "research_lab"
+      ],
+      "freshness_seconds": 120,
+      "reason": "Optional private quote-only snapshot; never publish raw mint or API key; source must match current paper state cycle"
     }
   ],
   "observation_policy": {

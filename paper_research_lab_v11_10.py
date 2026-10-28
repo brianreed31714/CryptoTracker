@@ -1032,6 +1032,12 @@ def _manage_shadow_positions(name, model, spec, candidates_by_token, price_looku
         if not reason:
             kept.append(position)
             continue
+        # Experimental cooldowns observe their OWN earlier shadow losses.
+        # This is a raw-price loss proxy, not a net/executed loss.
+        if name.startswith("xp_") and raw_return < 0:
+            model.setdefault("shadow_last_loss", {})[
+                str(position.get("token_address") or "")
+            ] = now.isoformat()
         _append_csv(SHADOW_TRADE_FILE, {
             "timestamp": now.isoformat(), "date": now.date().isoformat(), "model": name,
             "action": "SELL", "symbol": position.get("symbol", ""),
@@ -1040,13 +1046,31 @@ def _manage_shadow_positions(name, model, spec, candidates_by_token, price_looku
             "exit_price": price, "net_return_pct": round(raw_return, 8),
             "peak_return_pct": round(_num(position.get("peak_return_pct")), 8),
             "entry_regime": position.get("regime", ""),
+            "name": position.get("name", ""),
+            "name_novelty_score": position.get("name_novelty_score") if position.get("name_novelty_score") is not None else "",
+            "name_category_flags": position.get("name_category_flags", ""),
+            "organic_flow_at_entry": position.get("organic_flow_at_entry", ""),
+            "novelty_study_version": position.get("novelty_study_version", ""),
         })
     model["shadow_positions"] = kept
 
 
-def _add_shadow_positions(name, model, spec, ranked, regime, now):
-    max_open = max(1, int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5)))
-    cooldown = max(0.0, _num(os.getenv("PAPER_RESEARCH_SHADOW_REENTRY_MINUTES", "60"), 60))
+def _add_shadow_positions(
+    name, model, spec, ranked, regime, now,
+    *, source_name=None, policy_gate=None, max_open_override=None,
+    cooldown_override=None,
+):
+    from research.paper_shadow_experiments import novelty_metadata
+
+    max_open = max(
+        1, int(max_open_override) if max_open_override is not None
+        else int(_num(os.getenv("PAPER_RESEARCH_SHADOW_POSITIONS_PER_MODEL", "5"), 5))
+    )
+    cooldown = (
+        max(0.0, float(cooldown_override))
+        if cooldown_override is not None
+        else max(0.0, _num(os.getenv("PAPER_RESEARCH_SHADOW_REENTRY_MINUTES", "60"), 60))
+    )
     positions = list(model.get("shadow_positions") or [])
     open_tokens = {str(p.get("token_address") or "") for p in positions}
     last_entries = model.setdefault("shadow_last_entry", {})
@@ -1057,10 +1081,11 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         token = str(candidate.get("token_address") or "")
         if not token or token in open_tokens:
             continue
+        source = source_name or name
         safe, _ = _model_safety_pass(
-            name, candidate, spec, regime, scores.get(name, 0.0)
+            source, candidate, spec, regime, scores.get(source, 0.0)
         )
-        if not safe:
+        if not safe or (policy_gate is not None and not policy_gate(candidate)):
             continue
         last = str(last_entries.get(token) or "")
         if last:
@@ -1073,8 +1098,9 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
         position = {
             "symbol": candidate.get("symbol", ""), "token_address": token,
             "entry_time": now.isoformat(), "entry_price": _num(candidate.get("price_usd")),
-            "score": scores.get(name, 0.0), "peak_return_pct": 0.0,
+            "score": scores.get(source_name or name, 0.0), "peak_return_pct": 0.0,
             "regime": regime["name"], "decay_confirmations": 0,
+            **novelty_metadata(candidate),
         }
         positions.append(position)
         open_tokens.add(token)
@@ -1085,6 +1111,11 @@ def _add_shadow_positions(name, model, spec, ranked, regime, now):
             "reason": "SHADOW_MULTI_CANDIDATE", "entry_time": now.isoformat(),
             "entry_price": position["entry_price"], "exit_price": "",
             "net_return_pct": "", "peak_return_pct": "", "entry_regime": regime["name"],
+            "name": position.get("name", ""),
+            "name_novelty_score": position.get("name_novelty_score") if position.get("name_novelty_score") is not None else "",
+            "name_category_flags": position.get("name_category_flags", ""),
+            "organic_flow_at_entry": position.get("organic_flow_at_entry", ""),
+            "novelty_study_version": position.get("novelty_study_version", ""),
         })
     model["shadow_positions"] = positions
 
@@ -1187,6 +1218,60 @@ def run_paper_research(
         name: sorted(scored, key=lambda item: item[1][name], reverse=True)
         for name in MODEL_SPECS
     }
+
+    # Separate raw-mark-only shadow experiments. No quotes, trades, or changes
+    # to baseline model parameters are caused by this section.
+    if _bool_env("PAPER_SHADOW_EXPERIMENTS_ENABLED", True):
+        from research.paper_shadow_experiments import (
+            VARIANTS, effective_spec, eligible, qualifies_flow,
+            update_confirmation,
+        )
+        experimental_models = state.setdefault("experiments", {})
+        shadow_price_cache = {}
+
+        def cached_shadow_price(token):
+            if token not in shadow_price_cache:
+                shadow_price_cache[token] = (
+                    price_lookup(token) if price_lookup else {}
+                )
+            return shadow_price_cache[token]
+
+        for variant in VARIANTS:
+            base_spec = MODEL_SPECS[variant.base]
+            variant_spec = effective_spec(variant, base_spec)
+            study = experimental_models.setdefault(variant.name, {
+                "shadow_positions": [], "shadow_last_entry": {},
+                "shadow_last_loss": {}, "confirmation_state": {},
+            })
+            _manage_shadow_positions(
+                variant.name, study, variant_spec, candidates_by_token,
+                cached_shadow_price, now,
+            )
+            if variant.confirmations > 1:
+                for candidate, scores in scored:
+                    token = str(candidate.get("token_address") or "")
+                    if not token:
+                        continue
+                    okay, _ = _model_safety_pass(
+                        variant.base, candidate, base_spec, regime,
+                        scores.get(variant.base, 0.0),
+                    )
+                    update_confirmation(
+                        study, token, now,
+                        okay and qualifies_flow(candidate),
+                    )
+            _add_shadow_positions(
+                variant.name, study, variant_spec,
+                ranked_by_model[variant.base], regime, now,
+                source_name=variant.base,
+                policy_gate=lambda candidate, v=variant, s=study: eligible(
+                    v, s, candidate, regime, now
+                ),
+                max_open_override=1,
+                # Compare optional loss cooldowns without an overriding
+                # blanket 60-minute cooldown on ALL entries.
+                cooldown_override=0,
+            )
 
     for name, spec in MODEL_SPECS.items():
         if name == "staged_runner":
@@ -1508,7 +1593,22 @@ def daily_summary(report_date=None, write_files=True):
         reverse=True,
     )
 
+    from research.paper_goal_scorecard import goal_scorecard
+    starting_equities = {
+        name: _num(((_load_state(_num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15)).get("models") or {}).get(name) or {}).get("starting_equity"), _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+        for name in ("balanced_ev", "runner_hunter", "diy_whale")
+    }
+    goal_metrics = goal_scorecard(TRADE_FILE, report_date, starting_equities)
+    for row in results:
+        if row["model"] in goal_metrics["sleeves"]:
+            row["goal_1pct_daily"] = goal_metrics["sleeves"][row["model"]]
+            # The previous value compounds percentage returns on each trade and
+            # is not a portfolio drawdown; replace it with realized-equity DD.
+            row["trade_compounded_drawdown_pct_legacy"] = row["max_drawdown_pct"]
+            row["max_drawdown_pct"] = row["goal_1pct_daily"]["daily_realized_equity_drawdown_pct"]
     summary = {
+        "goal_1pct_daily": goal_metrics,
+        "portfolio_metrics_caveat": "1% target measured on realized equity only; mark-to-market portfolio return unavailable.", 
         "date": report_date,
         "generated_at": datetime.now().isoformat(),
         "ranking_basis": (
@@ -1578,6 +1678,23 @@ def daily_summary(report_date=None, write_files=True):
             md.append(f"| {r['model']} | {r['entries']} | {r['completed']} | "
                       f"{r['win_rate_pct']:.1f}% | {r['avg_net_return_pct']:+.2f}% | "
                       f"{r['max_drawdown_pct']:.2f}% | ${r['realized_pnl_usd']:+.2f} |")
+        md.extend(["", "## 1% daily goal — realized-equity proxy (not portfolio return)", "",
+                   "| Sleeve | Daily realized-equity return | Daily target | Hit? | Since inception realized-equity return | Compounded target since first observed entry | Gap (USD) | Realized-equity DD since inception |",
+                   "|---|---:|---:|---|---:|---:|---:|---:|"])
+        for key, score in goal_metrics["sleeves"].items():
+            def fmt(value):
+                return f"{value:+.2f}%" if value is not None else "N/A"
+            md.append(
+                f"| {key} | {fmt(score['daily_realized_equity_return_pct'])} | +1.00% | "
+                f"{score['daily_goal_met_on_realized_basis']} | "
+                f"{fmt(score['since_inception_realized_equity_return_pct'])} | "
+                f"{fmt(score['since_inception_compounded_1pct_daily_target_pct'])} | "
+                f"{score['since_inception_gap_vs_target_usd']} | "
+                f"{fmt(score['since_inception_realized_equity_drawdown_pct'])} |"
+            )
+        md.extend(["", "**Warning:** These are completed-trade realized-equity measurements, "
+                   "not mark-to-market portfolio returns. Open-position losses are excluded. "
+                   "The target compounds 1% per calendar day, not per trade."])
         md.extend(["", summary["three_sleeve_comparison"]["note"]])
         md.extend([
             "",
@@ -1667,7 +1784,24 @@ def campaign_summary(write_files=True):
         ),
         reverse=True,
     )
+    from research.paper_goal_scorecard import goal_scorecard
+    # Include inactive calendar days in the 1%-per-day target; using the
+    # most recent SELL date would silently skip days with no realized exits.
+    through_date = datetime.now().date().isoformat()
+    state = _load_state(_num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+    starts = {
+        name: _num(((state.get("models") or {}).get(name) or {}).get("starting_equity"), _num(os.getenv("PAPER_STARTING_EQUITY_USDC", "15"), 15))
+        for name in ("balanced_ev", "runner_hunter", "diy_whale")
+    }
+    goal_metrics = goal_scorecard(TRADE_FILE, through_date, starts)
+    for item in models:
+        name = item["model"]
+        if name in goal_metrics["sleeves"]:
+            item["goal_1pct_daily"] = goal_metrics["sleeves"][name]
+            item["all"]["trade_compounded_drawdown_pct_legacy"] = item["all"]["max_drawdown_pct"]
+            item["all"]["max_drawdown_pct"] = goal_metrics["sleeves"][name]["since_inception_realized_equity_drawdown_pct"]
     summary = {
+        "goal_1pct_daily": goal_metrics,
         "generated_at": datetime.now().isoformat(),
         "split": "chronological_70_30",
         "minimum_completed_for_promotion_review": 30,
@@ -1765,6 +1899,17 @@ def eod_summary_text(report_date=None):
             f"{wins}W/{losses}L"
         ),
         f"Avg trade: {avg_trade:+.2f}% | Median: {median_trade:+.2f}%",
+        (
+            "1%/day goal (realized-only): "
+            + " | ".join(
+                f"{key}: day "
+                f"{(value.get('daily_realized_equity_return_pct') if value.get('daily_realized_equity_return_pct') is not None else float('nan')):+.2f}%"
+                f", inception "
+                f"{(value.get('since_inception_realized_equity_return_pct') if value.get('since_inception_realized_equity_return_pct') is not None else float('nan')):+.2f}%"
+                f", target {value.get('since_inception_compounded_1pct_daily_target_pct')}%"
+                for key, value in daily.get("goal_1pct_daily", {}).get("sleeves", {}).items()
+            )
+        ),
         f"Holdout: {holdout_n} trades | {holdout_avg:+.2f}% avg",
         promotion_text,
     ])

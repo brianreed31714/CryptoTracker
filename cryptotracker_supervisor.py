@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 import requests
 from dotenv import load_dotenv, dotenv_values
-from project_process_control import stop_project_services, project_services
+from project_process_control import stop_project_services, project_services, exact_script_running
 
 ROOT = Path(__file__).resolve().parent
 STATE_DIR = ROOT / "deploy" / "state"
@@ -50,13 +50,15 @@ def active_trader():
     return str(max(files, key=key).relative_to(ROOT)).replace("\\","/")
 
 def command_lines():
-    ps = "Get-CimInstance Win32_Process | Where-Object {$_.CommandLine} | Select-Object -ExpandProperty CommandLine"
+    ps = ("Get-CimInstance Win32_Process | "
+          "Where-Object { $_.Name -in @('python.exe', 'pythonw.exe') -and $_.CommandLine } | "
+          "Select-Object -ExpandProperty CommandLine")
     r = subprocess.run(["powershell","-NoProfile","-Command",ps], text=True, capture_output=True)
     return [x.strip() for x in r.stdout.splitlines() if x.strip()] if r.returncode == 0 else []
 
+
 def running(marker):
-    marker = Path(marker).name.lower()
-    return any(marker in x.lower() for x in command_lines())
+    return exact_script_running(command_lines(), marker)
 
 def start(rel, dashboard=False):
     path = (ROOT / rel).resolve()

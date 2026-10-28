@@ -135,6 +135,22 @@ def push(title: str, message: str):
         pass
 
 
+def push_attestation(title: str, message: str) -> bool:
+    """Report API acceptance only, never guarantee device delivery."""
+    if not PUSH_TOKEN or not PUSH_USER:
+        return False
+    try:
+        response = requests.post(
+            "https://api.pushover.net/1/messages.json",
+            data={"token": PUSH_TOKEN, "user": PUSH_USER,
+                  "title": title, "message": message[:1024]},
+            timeout=12,
+        )
+        return response.status_code == 200 and response.json().get("status") == 1
+    except (requests.RequestException, ValueError, TypeError, AttributeError):
+        return False
+
+
 def run(*args: str, check=True):
     return subprocess.run(
         list(args), cwd=ROOT, text=True, capture_output=True, check=check
@@ -457,6 +473,21 @@ def scan_once():
                 log(f"{pid}: validation/deployment BLOCKED before process change: {exc}")
                 mark_processed(pid, "VALIDATION_FAILED", commit=req.get("commit"), error=str(exc))
                 push("CryptoTracker Deployment BLOCKED", f"{pid}: {exc}")
+
+
+    # Read-only host activation evidence after normal Git sync/approved requests.
+    # Never reload or stop trading, Smart Money, or dashboard processes.
+    if os.name == "nt":
+        try:
+            # Importing poll() in a long-running agent caches the old module
+            # after Git sync. The bounded child always loads the new on-disk
+            # attestation without restarting trader/dashboard/feed processes.
+            from infrastructure.fresh_attestation_runner import run_fresh_host_attestation
+            evidence = run_fresh_host_attestation(ROOT)
+            if evidence["status"] != "HOST_CLAIM_ONLY":
+                log("Windows attestation unavailable: " + evidence.get("reason", "UNVERIFIED"))
+        except Exception:
+            log("Windows attestation runner unavailable (details redacted)")
 
 
 def main():

@@ -1,0 +1,128 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 1,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "diy_whale": {
+      "all_completed_exits": 16,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 3,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 4,
+      "stop_net_overrun_count": 2,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 4,
+      "valid_stop_exits": 4,
+      "worst_stops": [
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 8.142153,
+          "estimated_net_return_pct": -16.761467,
+          "estimated_pnl_usdc": -0.125711,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 9.133,
+          "net_stop_overrun_pp": 8.761467,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.619314,
+          "raw_stop_overrun_pp": 0.619314,
+          "symbol": "REMUS"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": -1.22263,
+          "estimated_net_return_pct": -8.968133,
+          "estimated_pnl_usdc": -0.067261,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 9.064,
+          "net_stop_overrun_pp": 0.968133,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -10.190763,
+          "raw_stop_overrun_pp": 2.190763,
+          "symbol": "CHICO"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -6.095256,
+          "estimated_net_return_pct": -4.696533,
+          "estimated_pnl_usdc": -0.035224,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 5.821,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -10.791789,
+          "raw_stop_overrun_pp": 2.791789,
+          "symbol": "GTA"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 4,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 2,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 3,
+      "stop_net_overrun_count": 1,
+      "stop_over_20pct_net_loss_count": 1,
+      "stop_raw_gap_count": 3,
+      "valid_stop_exits": 3,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 3.407536,
+          "estimated_net_return_pct": -65.251733,
+          "estimated_pnl_usdc": -0.489388,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 3.871,
+          "net_stop_overrun_pp": 58.251733,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -61.844197,
+          "raw_stop_overrun_pp": 54.844197,
+          "symbol": "Chop"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -6.095789,
+          "estimated_net_return_pct": -4.696,
+          "estimated_pnl_usdc": -0.03522,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 5.821,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -10.791789,
+          "raw_stop_overrun_pp": 3.791789,
+          "symbol": "GTA"
+        },
+        {
+          "entry_regime": "RISK_ON",
+          "estimated_cost_pct": -8.772823,
+          "estimated_net_return_pct": 0.702533,
+          "estimated_pnl_usdc": 0.005269,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 4.463,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.07029,
+          "raw_stop_overrun_pp": 1.07029,
+          "symbol": "CATTLEAXE"
+        }
+      ]
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-10-26",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}

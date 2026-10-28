@@ -1,0 +1,995 @@
+{
+  "goal_1pct_daily": {
+    "date": "2026-10-26",
+    "goal": "1% per calendar day compounded",
+    "paper_only": true,
+    "sleeves": {
+      "balanced_ev": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 1,
+        "daily_realized_pnl_usd": -0.020251,
+        "daily_opening_realized_equity_usd": 16.65677573,
+        "daily_realized_equity_return_pct": -0.121578,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 0.121578,
+        "first_observed_date": "2026-09-29",
+        "elapsed_calendar_days_inclusive": 28,
+        "since_inception_realized_pnl_usd": 1.63652473,
+        "since_inception_realized_equity_return_pct": 10.910165,
+        "since_inception_realized_equity_drawdown_pct": 11.928919,
+        "since_inception_compounded_1pct_daily_target_pct": 32.129097,
+        "since_inception_target_equity_usd": 19.8193645,
+        "since_inception_actual_realized_equity_usd": 16.63652473,
+        "since_inception_gap_vs_target_usd": -3.18283977,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      },
+      "runner_hunter": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 4,
+        "daily_realized_pnl_usd": -0.57115,
+        "daily_opening_realized_equity_usd": 14.194283,
+        "daily_realized_equity_return_pct": -4.023803,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 4.023803,
+        "first_observed_date": "2026-10-09",
+        "elapsed_calendar_days_inclusive": 18,
+        "since_inception_realized_pnl_usd": -1.376867,
+        "since_inception_realized_equity_return_pct": -9.179113,
+        "since_inception_realized_equity_drawdown_pct": 9.179113,
+        "since_inception_compounded_1pct_daily_target_pct": 19.614748,
+        "since_inception_target_equity_usd": 17.94221214,
+        "since_inception_actual_realized_equity_usd": 13.623133,
+        "since_inception_gap_vs_target_usd": -4.31907914,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      },
+      "diy_whale": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 16,
+        "daily_realized_pnl_usd": -0.132178,
+        "daily_opening_realized_equity_usd": 12.920566,
+        "daily_realized_equity_return_pct": -1.023005,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 1.772415,
+        "first_observed_date": "2026-10-09",
+        "elapsed_calendar_days_inclusive": 18,
+        "since_inception_realized_pnl_usd": -2.211612,
+        "since_inception_realized_equity_return_pct": -14.74408,
+        "since_inception_realized_equity_drawdown_pct": 15.963552,
+        "since_inception_compounded_1pct_daily_target_pct": 19.614748,
+        "since_inception_target_equity_usd": 17.94221214,
+        "since_inception_actual_realized_equity_usd": 12.788388,
+        "since_inception_gap_vs_target_usd": -5.15382414,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      }
+    }
+  },
+  "generated_at": "2026-10-26T20:00:21.464951",
+  "split": "chronological_70_30",
+  "minimum_completed_for_promotion_review": 30,
+  "models": [
+    {
+      "model": "staged_runner",
+      "all": {
+        "n": 103,
+        "avg_net_return_pct": 2.0512783875728156,
+        "median_net_return_pct": -0.45486667,
+        "realized_pnl_usd": 3.1692251199999997,
+        "win_rate_pct": 45.63106796116505,
+        "profit_factor": 1.9653131192707032,
+        "max_drawdown_pct": 46.35275621429059,
+        "optional_helius_degraded_trades": 103
+      },
+      "development_70pct": {
+        "n": 72,
+        "avg_net_return_pct": 2.125916378472222,
+        "median_net_return_pct": -0.2884,
+        "realized_pnl_usd": 2.29598969,
+        "win_rate_pct": 47.22222222222222,
+        "profit_factor": 2.0190847874449895,
+        "max_drawdown_pct": 46.35275621429059
+      },
+      "holdout_30pct": {
+        "n": 31,
+        "avg_net_return_pct": 1.877925634516129,
+        "median_net_return_pct": -0.68413333,
+        "realized_pnl_usd": 0.8732354299999999,
+        "win_rate_pct": 41.935483870967744,
+        "profit_factor": 1.847707564405493,
+        "max_drawdown_pct": 18.966120210954973
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 18,
+          "avg_net_return_pct": 0.5260409383333333,
+          "median_net_return_pct": -0.6994,
+          "realized_pnl_usd": 0.14203106,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 1.25694887473768,
+          "max_drawdown_pct": 21.489293666230623
+        },
+        "NEUTRAL": {
+          "n": 85,
+          "avg_net_return_pct": 2.3742698474117647,
+          "median_net_return_pct": -0.45486667,
+          "realized_pnl_usd": 3.02719406,
+          "win_rate_pct": 45.88235294117647,
+          "profit_factor": 2.1087218468171915,
+          "max_drawdown_pct": 41.25778907123275
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "anti_chase",
+      "all": {
+        "n": 124,
+        "avg_net_return_pct": 0.0837569891935483,
+        "median_net_return_pct": -0.062966665,
+        "realized_pnl_usd": 0.15578800000000004,
+        "win_rate_pct": 46.774193548387096,
+        "profit_factor": 1.033195024283455,
+        "max_drawdown_pct": 99.45525815073648,
+        "optional_helius_degraded_trades": 124
+      },
+      "development_70pct": {
+        "n": 86,
+        "avg_net_return_pct": -0.19306744197674428,
+        "median_net_return_pct": -0.017400000000000002,
+        "realized_pnl_usd": -0.24905699999999997,
+        "win_rate_pct": 46.51162790697674,
+        "profit_factor": 0.9318330362773262,
+        "max_drawdown_pct": 99.45525815073648
+      },
+      "holdout_30pct": {
+        "n": 38,
+        "avg_net_return_pct": 0.7102543860526316,
+        "median_net_return_pct": -0.192066665,
+        "realized_pnl_usd": 0.404845,
+        "win_rate_pct": 47.368421052631575,
+        "profit_factor": 1.38946839817178,
+        "max_drawdown_pct": 21.55832222740098
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 20,
+          "avg_net_return_pct": -3.6985999995000007,
+          "median_net_return_pct": 0.88546667,
+          "realized_pnl_usd": -1.10958,
+          "win_rate_pct": 65.0,
+          "profit_factor": 0.388285702629603,
+          "max_drawdown_pct": 99.18076587983977
+        },
+        "NEUTRAL": {
+          "n": 103,
+          "avg_net_return_pct": 0.9276647247572816,
+          "median_net_return_pct": -0.3684,
+          "realized_pnl_usd": 1.433242,
+          "win_rate_pct": 43.689320388349515,
+          "profit_factor": 1.5286076729957332,
+          "max_drawdown_pct": 37.15194740000743
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -11.1916,
+          "median_net_return_pct": -11.1916,
+          "realized_pnl_usd": -0.167874,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 11.191600000000001
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "patient_runner",
+      "all": {
+        "n": 149,
+        "avg_net_return_pct": 0.9690282775167787,
+        "median_net_return_pct": -0.88246667,
+        "realized_pnl_usd": 2.16577819,
+        "win_rate_pct": 43.624161073825505,
+        "profit_factor": 1.276381362133036,
+        "max_drawdown_pct": 99.51888818409944,
+        "optional_helius_degraded_trades": 135
+      },
+      "development_70pct": {
+        "n": 104,
+        "avg_net_return_pct": 1.0972841026923077,
+        "median_net_return_pct": -0.811666665,
+        "realized_pnl_usd": 1.71176319,
+        "win_rate_pct": 45.19230769230769,
+        "profit_factor": 1.2805215946956936,
+        "max_drawdown_pct": 99.51888818409944
+      },
+      "holdout_30pct": {
+        "n": 45,
+        "avg_net_return_pct": 0.672614814888889,
+        "median_net_return_pct": -0.94553333,
+        "realized_pnl_usd": 0.454015,
+        "win_rate_pct": 40.0,
+        "profit_factor": 1.2618126060334858,
+        "max_drawdown_pct": 48.358040810973534
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 27,
+          "avg_net_return_pct": -4.026528395555555,
+          "median_net_return_pct": -0.43253333,
+          "realized_pnl_usd": -1.630744,
+          "win_rate_pct": 48.148148148148145,
+          "profit_factor": 0.4065263238342016,
+          "max_drawdown_pct": 99.44896495148043
+        },
+        "NEUTRAL": {
+          "n": 107,
+          "avg_net_return_pct": 1.3522155764485984,
+          "median_net_return_pct": -0.78233333,
+          "realized_pnl_usd": 2.170306,
+          "win_rate_pct": 43.925233644859816,
+          "profit_factor": 1.5504990064513444,
+          "max_drawdown_pct": 49.050688639406154
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -13.681,
+          "median_net_return_pct": -13.681,
+          "realized_pnl_usd": -0.205215,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 13.681
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "strict_baseline",
+      "all": {
+        "n": 235,
+        "avg_net_return_pct": 0.7754986884680852,
+        "median_net_return_pct": -1.67813333,
+        "realized_pnl_usd": 2.7336328599999997,
+        "win_rate_pct": 39.57446808510638,
+        "profit_factor": 1.1974111680913324,
+        "max_drawdown_pct": 93.54934458002711,
+        "optional_helius_degraded_trades": 198
+      },
+      "development_70pct": {
+        "n": 164,
+        "avg_net_return_pct": 0.8276710879878049,
+        "median_net_return_pct": -1.815155205,
+        "realized_pnl_usd": 2.0360708599999997,
+        "win_rate_pct": 40.853658536585364,
+        "profit_factor": 1.193910248212813,
+        "max_drawdown_pct": 87.01571505541627
+      },
+      "holdout_30pct": {
+        "n": 71,
+        "avg_net_return_pct": 0.6549877938028169,
+        "median_net_return_pct": -1.17393333,
+        "realized_pnl_usd": 0.697562,
+        "win_rate_pct": 36.61971830985916,
+        "profit_factor": 1.208392995152269,
+        "max_drawdown_pct": 59.13565604959119
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 38,
+          "avg_net_return_pct": -0.44483684157894743,
+          "median_net_return_pct": -0.145633335,
+          "realized_pnl_usd": -0.2535570000000001,
+          "win_rate_pct": 50.0,
+          "profit_factor": 0.8964419151365841,
+          "max_drawdown_pct": 63.21532174065656
+        },
+        "NEUTRAL": {
+          "n": 159,
+          "avg_net_return_pct": 1.3260905663522013,
+          "median_net_return_pct": -1.06093333,
+          "realized_pnl_usd": 3.1627259999999997,
+          "win_rate_pct": 38.9937106918239,
+          "profit_factor": 1.389646360673527,
+          "max_drawdown_pct": 73.50306633423047
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -3.40246667,
+          "median_net_return_pct": -3.40246667,
+          "realized_pnl_usd": -0.051037,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 3.402466670000004
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "flow_breakout",
+      "all": {
+        "n": 71,
+        "avg_net_return_pct": -1.6292483452112676,
+        "median_net_return_pct": -0.38366667,
+        "realized_pnl_usd": -1.73514949,
+        "win_rate_pct": 38.028169014084504,
+        "profit_factor": 0.4954409691218768,
+        "max_drawdown_pct": 99.42401436152917,
+        "optional_helius_degraded_trades": 68
+      },
+      "development_70pct": {
+        "n": 49,
+        "avg_net_return_pct": -2.551255085102041,
+        "median_net_return_pct": -0.4228,
+        "realized_pnl_usd": -1.87517249,
+        "win_rate_pct": 38.775510204081634,
+        "profit_factor": 0.32942390771656194,
+        "max_drawdown_pct": 99.39271639490754
+      },
+      "holdout_30pct": {
+        "n": 22,
+        "avg_net_return_pct": 0.4243121209090908,
+        "median_net_return_pct": -0.359933335,
+        "realized_pnl_usd": 0.14002300000000006,
+        "win_rate_pct": 36.36363636363637,
+        "profit_factor": 1.2179068196743763,
+        "max_drawdown_pct": 25.45904161218849
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 11,
+          "avg_net_return_pct": -9.891963635454546,
+          "median_net_return_pct": -0.3362,
+          "realized_pnl_usd": -1.632174,
+          "win_rate_pct": 45.45454545454545,
+          "profit_factor": 0.09859103591334142,
+          "max_drawdown_pct": 99.24471820490012
+        },
+        "NEUTRAL": {
+          "n": 56,
+          "avg_net_return_pct": 0.2560845241071429,
+          "median_net_return_pct": -0.25,
+          "realized_pnl_usd": 0.21511100000000008,
+          "win_rate_pct": 39.285714285714285,
+          "profit_factor": 1.1641863156062908,
+          "max_drawdown_pct": 33.560598620478984
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -11.17346667,
+          "median_net_return_pct": -11.17346667,
+          "realized_pnl_usd": -0.167602,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 11.173466669999998
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "regime_filtered",
+      "all": {
+        "n": 37,
+        "avg_net_return_pct": 1.2650548181081078,
+        "median_net_return_pct": 0.4854,
+        "realized_pnl_usd": 0.70210542,
+        "win_rate_pct": 54.054054054054056,
+        "profit_factor": 1.310096069281985,
+        "max_drawdown_pct": 99.19445590409666,
+        "optional_helius_degraded_trades": 34
+      },
+      "development_70pct": {
+        "n": 25,
+        "avg_net_return_pct": 1.7334117971999996,
+        "median_net_return_pct": 0.83886667,
+        "realized_pnl_usd": 0.65002942,
+        "win_rate_pct": 56.00000000000001,
+        "profit_factor": 1.3289874755733426,
+        "max_drawdown_pct": 99.19445590409666
+      },
+      "holdout_30pct": {
+        "n": 12,
+        "avg_net_return_pct": 0.2893111116666666,
+        "median_net_return_pct": 0.110433335,
+        "realized_pnl_usd": 0.05207599999999998,
+        "win_rate_pct": 50.0,
+        "profit_factor": 1.180627527696267,
+        "max_drawdown_pct": 17.564317575082892
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 34,
+          "avg_net_return_pct": -2.1120450973529414,
+          "median_net_return_pct": 0.471433335,
+          "realized_pnl_usd": -1.077143,
+          "win_rate_pct": 52.94117647058824,
+          "profit_factor": 0.5098929779308218,
+          "max_drawdown_pct": 99.19445590409666
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "balanced_ev",
+      "all": {
+        "n": 163,
+        "avg_net_return_pct": 0.6693352652760736,
+        "median_net_return_pct": -0.50213333,
+        "realized_pnl_usd": 1.6365247299999996,
+        "win_rate_pct": 43.558282208588956,
+        "profit_factor": 1.2390671210453936,
+        "max_drawdown_pct": 11.928919,
+        "optional_helius_degraded_trades": 149,
+        "trade_compounded_drawdown_pct_legacy": 99.48370199588811
+      },
+      "development_70pct": {
+        "n": 114,
+        "avg_net_return_pct": 0.854698668859649,
+        "median_net_return_pct": -0.4832,
+        "realized_pnl_usd": 1.4615347299999997,
+        "win_rate_pct": 45.614035087719294,
+        "profit_factor": 1.2691884338576875,
+        "max_drawdown_pct": 99.48370199588811
+      },
+      "holdout_30pct": {
+        "n": 49,
+        "avg_net_return_pct": 0.2380816324489797,
+        "median_net_return_pct": -0.6102,
+        "realized_pnl_usd": 0.17498999999999998,
+        "win_rate_pct": 38.775510204081634,
+        "profit_factor": 1.1235761449101374,
+        "max_drawdown_pct": 37.667500049292116
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 30,
+          "avg_net_return_pct": -2.927553333666667,
+          "median_net_return_pct": 0.529033335,
+          "realized_pnl_usd": -1.317399,
+          "win_rate_pct": 53.333333333333336,
+          "profit_factor": 0.3860240436037909,
+          "max_drawdown_pct": 99.19696852274167
+        },
+        "NEUTRAL": {
+          "n": 118,
+          "avg_net_return_pct": 0.7427056493220339,
+          "median_net_return_pct": -0.49920000000000003,
+          "realized_pnl_usd": 1.3145889999999998,
+          "win_rate_pct": 42.3728813559322,
+          "profit_factor": 1.3586405374687829,
+          "max_drawdown_pct": 43.74364337881851
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -11.18566667,
+          "median_net_return_pct": -11.18566667,
+          "realized_pnl_usd": -0.167785,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 11.185666670000005
+        }
+      },
+      "stable_positive_holdout": false,
+      "goal_1pct_daily": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 1,
+        "daily_realized_pnl_usd": -0.020251,
+        "daily_opening_realized_equity_usd": 16.65677573,
+        "daily_realized_equity_return_pct": -0.121578,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 0.121578,
+        "first_observed_date": "2026-09-29",
+        "elapsed_calendar_days_inclusive": 28,
+        "since_inception_realized_pnl_usd": 1.63652473,
+        "since_inception_realized_equity_return_pct": 10.910165,
+        "since_inception_realized_equity_drawdown_pct": 11.928919,
+        "since_inception_compounded_1pct_daily_target_pct": 32.129097,
+        "since_inception_target_equity_usd": 19.8193645,
+        "since_inception_actual_realized_equity_usd": 16.63652473,
+        "since_inception_gap_vs_target_usd": -3.18283977,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      }
+    },
+    {
+      "model": "fast_exit",
+      "all": {
+        "n": 166,
+        "avg_net_return_pct": 0.716806234879518,
+        "median_net_return_pct": -0.41600000000000004,
+        "realized_pnl_usd": 1.7848475199999998,
+        "win_rate_pct": 40.963855421686745,
+        "profit_factor": 1.2899445470150661,
+        "max_drawdown_pct": 99.32826761158464,
+        "optional_helius_degraded_trades": 152
+      },
+      "development_70pct": {
+        "n": 116,
+        "avg_net_return_pct": 1.1635882325862068,
+        "median_net_return_pct": -0.422733335,
+        "realized_pnl_usd": 2.0246435199999997,
+        "win_rate_pct": 42.241379310344826,
+        "profit_factor": 1.4334033268442536,
+        "max_drawdown_pct": 99.32826761158464
+      },
+      "holdout_30pct": {
+        "n": 50,
+        "avg_net_return_pct": -0.3197279998000001,
+        "median_net_return_pct": -0.3826,
+        "realized_pnl_usd": -0.23979600000000004,
+        "win_rate_pct": 38.0,
+        "profit_factor": 0.8384476704546986,
+        "max_drawdown_pct": 39.227137168010465
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 30,
+          "avg_net_return_pct": -3.236228888666667,
+          "median_net_return_pct": -0.09759999999999999,
+          "realized_pnl_usd": -1.4563030000000001,
+          "win_rate_pct": 50.0,
+          "profit_factor": 0.36295319992546005,
+          "max_drawdown_pct": 99.17306733410055
+        },
+        "NEUTRAL": {
+          "n": 121,
+          "avg_net_return_pct": 0.7690159781818182,
+          "median_net_return_pct": -0.41326667,
+          "realized_pnl_usd": 1.395764,
+          "win_rate_pct": 39.66942148760331,
+          "profit_factor": 1.4599629462905754,
+          "max_drawdown_pct": 36.6140294036312
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -11.31246667,
+          "median_net_return_pct": -11.31246667,
+          "realized_pnl_usd": -0.169687,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 11.31246667
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "early_breakout",
+      "all": {
+        "n": 58,
+        "avg_net_return_pct": -0.5541522849999999,
+        "median_net_return_pct": -0.238933335,
+        "realized_pnl_usd": -0.24105624,
+        "win_rate_pct": 43.103448275862064,
+        "profit_factor": 0.6906013952495471,
+        "max_drawdown_pct": 32.03843960557386,
+        "optional_helius_degraded_trades": 55
+      },
+      "development_70pct": {
+        "n": 40,
+        "avg_net_return_pct": -0.3960841465,
+        "median_net_return_pct": -0.295666665,
+        "realized_pnl_usd": -0.11882524,
+        "win_rate_pct": 42.5,
+        "profit_factor": 0.7825753362815808,
+        "max_drawdown_pct": 25.71941332054186
+      },
+      "holdout_30pct": {
+        "n": 18,
+        "avg_net_return_pct": -0.9054148149999999,
+        "median_net_return_pct": -0.22266667,
+        "realized_pnl_usd": -0.12223099999999999,
+        "win_rate_pct": 44.44444444444444,
+        "profit_factor": 0.4745012897678418,
+        "max_drawdown_pct": 22.59548273671588
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 10,
+          "avg_net_return_pct": -0.64836,
+          "median_net_return_pct": -0.06006667,
+          "realized_pnl_usd": -0.048627,
+          "win_rate_pct": 50.0,
+          "profit_factor": 0.686933848382424,
+          "max_drawdown_pct": 18.33930813775426
+        },
+        "NEUTRAL": {
+          "n": 44,
+          "avg_net_return_pct": -0.4930636363636363,
+          "median_net_return_pct": -0.18293333499999997,
+          "realized_pnl_usd": -0.162711,
+          "win_rate_pct": 43.18181818181818,
+          "profit_factor": 0.7033771158245906,
+          "max_drawdown_pct": 27.766458622563682
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": 6.06986667,
+          "median_net_return_pct": 6.06986667,
+          "realized_pnl_usd": 0.045524,
+          "win_rate_pct": 100.0,
+          "profit_factor": 999.0,
+          "max_drawdown_pct": 0.0
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "whale_luna",
+      "all": {
+        "n": 14,
+        "avg_net_return_pct": 4.719236393571428,
+        "median_net_return_pct": -1.3380999999999998,
+        "realized_pnl_usd": 0.9910396399999999,
+        "win_rate_pct": 42.857142857142854,
+        "profit_factor": 2.458799239864989,
+        "max_drawdown_pct": 30.72546150774873,
+        "optional_helius_degraded_trades": 13
+      },
+      "development_70pct": {
+        "n": 9,
+        "avg_net_return_pct": 7.895552908888888,
+        "median_net_return_pct": -2.2668,
+        "realized_pnl_usd": 1.06589964,
+        "win_rate_pct": 44.44444444444444,
+        "profit_factor": 3.2907596753950106,
+        "max_drawdown_pct": 23.442716623135535
+      },
+      "holdout_30pct": {
+        "n": 5,
+        "avg_net_return_pct": -0.9981333339999997,
+        "median_net_return_pct": -0.4094,
+        "realized_pnl_usd": -0.07486000000000001,
+        "win_rate_pct": 40.0,
+        "profit_factor": 0.6502669949404108,
+        "max_drawdown_pct": 13.761374345241551
+      },
+      "by_entry_regime": {
+        "NEUTRAL": {
+          "n": 13,
+          "avg_net_return_pct": -1.8206461546153845,
+          "median_net_return_pct": -2.2668,
+          "realized_pnl_usd": -0.355026,
+          "win_rate_pct": 38.46153846153847,
+          "profit_factor": 0.47740570807812727,
+          "max_drawdown_pct": 30.72546150774872
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "low_friction",
+      "all": {
+        "n": 36,
+        "avg_net_return_pct": -3.7346648138888887,
+        "median_net_return_pct": -0.178066665,
+        "realized_pnl_usd": -2.0167189999999997,
+        "win_rate_pct": 36.11111111111111,
+        "profit_factor": 0.08997588573883317,
+        "max_drawdown_pct": 99.40979982088147,
+        "optional_helius_degraded_trades": 36
+      },
+      "development_70pct": {
+        "n": 25,
+        "avg_net_return_pct": -4.7777439992,
+        "median_net_return_pct": -0.00046667,
+        "realized_pnl_usd": -1.7916539999999999,
+        "win_rate_pct": 40.0,
+        "profit_factor": 0.07802391425613243,
+        "max_drawdown_pct": 99.31652796679741
+      },
+      "holdout_30pct": {
+        "n": 11,
+        "avg_net_return_pct": -1.3640303018181816,
+        "median_net_return_pct": -0.60226667,
+        "realized_pnl_usd": -0.225065,
+        "win_rate_pct": 27.27272727272727,
+        "profit_factor": 0.1751026242486439,
+        "max_drawdown_pct": 17.10588523211398
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 6,
+          "avg_net_return_pct": -18.250899998333335,
+          "median_net_return_pct": -1.521766665,
+          "realized_pnl_usd": -1.6425809999999998,
+          "win_rate_pct": 33.33333333333333,
+          "profit_factor": 0.023803170388314036,
+          "max_drawdown_pct": 99.22330832948576
+        },
+        "NEUTRAL": {
+          "n": 30,
+          "avg_net_return_pct": -0.8314177770000001,
+          "median_net_return_pct": -0.0646,
+          "realized_pnl_usd": -0.37413799999999997,
+          "win_rate_pct": 36.666666666666664,
+          "profit_factor": 0.2986880556643791,
+          "max_drawdown_pct": 24.011007002589757
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "diy_whale",
+      "all": {
+        "n": 269,
+        "avg_net_return_pct": -1.096214126133829,
+        "median_net_return_pct": -0.79453333,
+        "realized_pnl_usd": -2.2116119999999997,
+        "win_rate_pct": 44.60966542750929,
+        "profit_factor": 0.8002817135945501,
+        "max_drawdown_pct": 15.963552,
+        "optional_helius_degraded_trades": 269,
+        "trade_compounded_drawdown_pct_legacy": 99.99999791242968
+      },
+      "development_70pct": {
+        "n": 188,
+        "avg_net_return_pct": -0.702674467819149,
+        "median_net_return_pct": -0.912133335,
+        "realized_pnl_usd": -0.9907709999999998,
+        "win_rate_pct": 44.148936170212764,
+        "profit_factor": 0.875321614967079,
+        "max_drawdown_pct": 99.9999643799643
+      },
+      "holdout_30pct": {
+        "n": 81,
+        "avg_net_return_pct": -2.009614814567901,
+        "median_net_return_pct": -0.74573333,
+        "realized_pnl_usd": -1.220841,
+        "win_rate_pct": 45.67901234567901,
+        "profit_factor": 0.6095862418309432,
+        "max_drawdown_pct": 96.5050958486741
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 10,
+          "avg_net_return_pct": 2.0633466670000002,
+          "median_net_return_pct": 1.6012666649999998,
+          "realized_pnl_usd": 0.154751,
+          "win_rate_pct": 70.0,
+          "profit_factor": 2.0287380009040867,
+          "max_drawdown_pct": 13.997803218341465
+        },
+        "NEUTRAL": {
+          "n": 88,
+          "avg_net_return_pct": 1.056268182159091,
+          "median_net_return_pct": -0.19953333499999998,
+          "realized_pnl_usd": 0.697137,
+          "win_rate_pct": 50.0,
+          "profit_factor": 1.373078847589512,
+          "max_drawdown_pct": 49.66572122853551
+        },
+        "RISK_OFF": {
+          "n": 171,
+          "avg_net_return_pct": -2.388693956900585,
+          "median_net_return_pct": -1.35573333,
+          "realized_pnl_usd": -3.0635,
+          "win_rate_pct": 40.35087719298245,
+          "profit_factor": 0.6616646189102254,
+          "max_drawdown_pct": 99.99999882898678
+        }
+      },
+      "stable_positive_holdout": false,
+      "goal_1pct_daily": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 16,
+        "daily_realized_pnl_usd": -0.132178,
+        "daily_opening_realized_equity_usd": 12.920566,
+        "daily_realized_equity_return_pct": -1.023005,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 1.772415,
+        "first_observed_date": "2026-10-09",
+        "elapsed_calendar_days_inclusive": 18,
+        "since_inception_realized_pnl_usd": -2.211612,
+        "since_inception_realized_equity_return_pct": -14.74408,
+        "since_inception_realized_equity_drawdown_pct": 15.963552,
+        "since_inception_compounded_1pct_daily_target_pct": 19.614748,
+        "since_inception_target_equity_usd": 17.94221214,
+        "since_inception_actual_realized_equity_usd": 12.788388,
+        "since_inception_gap_vs_target_usd": -5.15382414,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      }
+    },
+    {
+      "model": "runner_hunter",
+      "all": {
+        "n": 103,
+        "avg_net_return_pct": -1.782352103883495,
+        "median_net_return_pct": -1.1472,
+        "realized_pnl_usd": -1.376867,
+        "win_rate_pct": 39.80582524271845,
+        "profit_factor": 0.5990106809759224,
+        "max_drawdown_pct": 9.179113,
+        "optional_helius_degraded_trades": 103,
+        "trade_compounded_drawdown_pct_legacy": 95.20196249379283
+      },
+      "development_70pct": {
+        "n": 72,
+        "avg_net_return_pct": -0.25375925972222224,
+        "median_net_return_pct": -1.0027333299999999,
+        "realized_pnl_usd": -0.13702999999999999,
+        "win_rate_pct": 41.66666666666667,
+        "profit_factor": 0.9226259410606508,
+        "max_drawdown_pct": 52.7465599339145
+      },
+      "holdout_30pct": {
+        "n": 31,
+        "avg_net_return_pct": -5.332632258064516,
+        "median_net_return_pct": -1.65506667,
+        "realized_pnl_usd": -1.239837,
+        "win_rate_pct": 35.483870967741936,
+        "profit_factor": 0.2543087375230653,
+        "max_drawdown_pct": 92.93108676189912
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 15,
+          "avg_net_return_pct": -0.25265777800000006,
+          "median_net_return_pct": 0.4944,
+          "realized_pnl_usd": -0.02842399999999999,
+          "win_rate_pct": 53.333333333333336,
+          "profit_factor": 0.9147204954035957,
+          "max_drawdown_pct": 30.933899076458193
+        },
+        "NEUTRAL": {
+          "n": 87,
+          "avg_net_return_pct": -1.9303417627586206,
+          "median_net_return_pct": -1.15733333,
+          "realized_pnl_usd": -1.2595480000000001,
+          "win_rate_pct": 37.93103448275862,
+          "profit_factor": 0.5817506099998804,
+          "max_drawdown_pct": 95.25277813759155
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -11.85266667,
+          "median_net_return_pct": -11.85266667,
+          "realized_pnl_usd": -0.088895,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 11.852666670000001
+        }
+      },
+      "stable_positive_holdout": false,
+      "goal_1pct_daily": {
+        "measurement": "realized_equity_only_excludes_open_position_mark_to_market",
+        "goal_daily_pct": 1.0,
+        "daily_completed": 4,
+        "daily_realized_pnl_usd": -0.57115,
+        "daily_opening_realized_equity_usd": 14.194283,
+        "daily_realized_equity_return_pct": -4.023803,
+        "daily_goal_met_on_realized_basis": false,
+        "daily_realized_equity_drawdown_pct": 4.023803,
+        "first_observed_date": "2026-10-09",
+        "elapsed_calendar_days_inclusive": 18,
+        "since_inception_realized_pnl_usd": -1.376867,
+        "since_inception_realized_equity_return_pct": -9.179113,
+        "since_inception_realized_equity_drawdown_pct": 9.179113,
+        "since_inception_compounded_1pct_daily_target_pct": 19.614748,
+        "since_inception_target_equity_usd": 17.94221214,
+        "since_inception_actual_realized_equity_usd": 13.623133,
+        "since_inception_gap_vs_target_usd": -4.31907914,
+        "full_portfolio_daily_return_pct": null,
+        "full_portfolio_since_inception_return_pct": null,
+        "full_portfolio_drawdown_pct": null,
+        "mark_to_market_status": "unavailable_not_inferred_from_completed_trades",
+        "sample_caveat": "No executed swaps; quote-based paper returns. Realized-only snapshots omit open-position risk."
+      }
+    },
+    {
+      "model": "extended_probe",
+      "all": {
+        "n": 38,
+        "avg_net_return_pct": -3.2281859647368423,
+        "median_net_return_pct": 0.15999999999999998,
+        "realized_pnl_usd": -0.920033,
+        "win_rate_pct": 50.0,
+        "profit_factor": 0.5551035290146719,
+        "max_drawdown_pct": 93.65756988800182,
+        "optional_helius_degraded_trades": 38
+      },
+      "development_70pct": {
+        "n": 26,
+        "avg_net_return_pct": 0.4304769234615384,
+        "median_net_return_pct": 2.01046667,
+        "realized_pnl_usd": 0.08394300000000002,
+        "win_rate_pct": 53.84615384615385,
+        "profit_factor": 1.1349717813901885,
+        "max_drawdown_pct": 41.53793085466182
+      },
+      "holdout_30pct": {
+        "n": 12,
+        "avg_net_return_pct": -11.155288889166668,
+        "median_net_return_pct": -4.021733335,
+        "realized_pnl_usd": -1.003976,
+        "win_rate_pct": 41.66666666666667,
+        "profit_factor": 0.30570709959122877,
+        "max_drawdown_pct": 93.3328676375285
+      },
+      "by_entry_regime": {
+        "RISK_ON": {
+          "n": 1,
+          "avg_net_return_pct": -39.81213333,
+          "median_net_return_pct": -39.81213333,
+          "realized_pnl_usd": -0.298591,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 39.81213333
+        },
+        "NEUTRAL": {
+          "n": 36,
+          "avg_net_return_pct": -1.9584148147222225,
+          "median_net_return_pct": 1.332733335,
+          "realized_pnl_usd": -0.528772,
+          "win_rate_pct": 52.77777777777778,
+          "profit_factor": 0.6846371763751632,
+          "max_drawdown_pct": 88.92279668421166
+        },
+        "RISK_OFF": {
+          "n": 1,
+          "avg_net_return_pct": -12.356,
+          "median_net_return_pct": -12.356,
+          "realized_pnl_usd": -0.09267,
+          "win_rate_pct": 0.0,
+          "profit_factor": 0.0,
+          "max_drawdown_pct": 12.356
+        }
+      },
+      "stable_positive_holdout": false
+    },
+    {
+      "model": "novelty_probe",
+      "all": {
+        "n": 0,
+        "avg_net_return_pct": 0.0,
+        "median_net_return_pct": 0.0,
+        "realized_pnl_usd": 0,
+        "win_rate_pct": 0.0,
+        "profit_factor": 0.0,
+        "max_drawdown_pct": 0.0,
+        "optional_helius_degraded_trades": 0
+      },
+      "development_70pct": {
+        "n": 0,
+        "avg_net_return_pct": 0.0,
+        "median_net_return_pct": 0.0,
+        "realized_pnl_usd": 0,
+        "win_rate_pct": 0.0,
+        "profit_factor": 0.0,
+        "max_drawdown_pct": 0.0
+      },
+      "holdout_30pct": {
+        "n": 0,
+        "avg_net_return_pct": 0.0,
+        "median_net_return_pct": 0.0,
+        "realized_pnl_usd": 0,
+        "win_rate_pct": 0.0,
+        "profit_factor": 0.0,
+        "max_drawdown_pct": 0.0
+      },
+      "by_entry_regime": {},
+      "stable_positive_holdout": false
+    }
+  ],
+  "promotion_candidates": []
+}

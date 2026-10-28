@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261019-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "c0d67124a925486d6bd23f236af17a0eb2fc0348",
+  "components": [
+    "trader"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py"
+  },
+  "mode": "PAPER",
+  "note": "Apply CI-validated paper-research reporting-only changes: daily and since-inception 1% target scorecards; realized-equity drawdown labeling; sanitized quality_audit.json and campaign reconciliation. NO strategy entry/exit changes, no live trading; enforce LIVE_TRADING=false, retain unchanged three sleeves and all runtime approval checks. Validate recorded active commit, version, reporting publication and service health. GitHub request alone does not confirm deployment."
+}

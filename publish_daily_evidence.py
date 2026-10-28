@@ -195,6 +195,55 @@ def publish_daily_evidence(report_date=None):
         destination / "campaign_summary.json",
     )
 
+    # Audits describe simulated execution and history reconciliation; they
+    # never modify the trader, its positions, or its decision thresholds.
+    from research.paper_quality_audit import csv_rows, audit_paper_day
+    quality = audit_paper_day(csv_rows(raw / "paper_trades.csv"), report_date, PUBLISHED_ROOT)
+    (destination / "quality_audit.json").write_text(
+        json.dumps(quality, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    counts["quality_audit.json"] = "generated"
+
+    # Automated research diagnostics are read-only and aggregate-only.
+    # They publish with the ordinary EOD evidence; no manual reconciliation.
+    from research.crypto_improvement_diagnostics import generate
+    improvement = generate(
+        PAPER_DIR / "paper_trades.csv",
+        report_date,
+        destination,
+        float(os.getenv("PAPER_STARTING_EQUITY_USDC", "15")),
+    )
+    counts["improvement_diagnostics.json"] = "generated"
+    counts["improvement_diagnostics.md"] = "generated"
+
+    # Prospective shadow variants are marked explicitly as UNPRICED marks.
+    # They never place orders or claim simulated returns are executable.
+    from research.paper_shadow_experiments import generate as generate_shadow
+    generate_shadow(PAPER_DIR / "shadow_trades.csv", report_date, destination)
+    counts["shadow_experiments.json"] = "generated"
+    counts["shadow_experiments.md"] = "generated"
+
+    # Read-only paper liquidation readiness. The private state and any raw
+    # Jupiter quote snapshot stay local; only sanitized per-sleeve aggregates
+    # are committed. Missing or stale quotes are explicitly UNAVAILABLE.
+    from research.paper_liquidation_mtm import generate as generate_mtm
+    generate_mtm(
+        PAPER_DIR / "state.json",
+        PAPER_DIR / "liquidation_quotes.json",
+        report_date,
+        destination,
+    )
+    counts["liquidation_mtm_readiness.json"] = "generated"
+    counts["liquidation_mtm_readiness.md"] = "generated"
+
+    # Distinguish price-gap loss from estimated quote costs at STOP.
+    # Holding duration is never mislabeled as quote age.
+    from research.paper_stop_forensics import generate as generate_stop_audit
+    generate_stop_audit(raw / "paper_trades.csv", report_date, destination)
+    counts["stop_forensics.json"] = "generated"
+    counts["stop_forensics.md"] = "generated"
+
     commit = _run(
         "git",
         "rev-parse",
