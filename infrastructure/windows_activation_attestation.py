@@ -28,6 +28,7 @@ REQUIRED_PROCESSES = ("supervisor", "deployment_agent", "trader", "dashboard")
 REQUIRED_SCRIPT_VERSIONS = ("trader", "dashboard")
 MIN_SECONDS_BETWEEN_SAMPLES = 20
 REQUIRED_SAMPLES = 3
+REMOTE_HEARTBEAT_SECONDS = 60 * 60  # Sanitized GitHub heartbeat, not a process restart.
 SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -305,26 +306,36 @@ def poll(root: Path, *, observation: dict | None = None,
                   str((report.get("daily_review_task_observation") or {}).get("status") or "") + ":" +
                   str((report.get("daily_review_task_observation") or {}).get("last_run_utc") or "") + ":" +
                   str((report.get("daily_review_task_observation") or {}).get("last_task_result") or "") + ":status-file-v5")
+    previous_publish = str(previous.get("remote_published_at_utc") or "")
+    try:
+        age_seconds = (stamp - parse_timestamp(previous_publish)).total_seconds()
+    except (ValueError, TypeError):
+        age_seconds = -1
+    recent_publish = 0 <= age_seconds < REMOTE_HEARTBEAT_SECONDS
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
     enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
         "0", "false", "no", "off")
     if report["code_synced"] and remote_publish is not None and enabled:
-        if remote_key == previous.get("remote_key"):
+        if remote_key == previous.get("remote_key") and recent_publish:
             report["remote_key"] = remote_key
+            report["remote_published_at_utc"] = previous_publish
             report["remote_publish"] = "PUBLISHED"
         else:
             try:
                 remote_publish(root, report)
                 report["remote_key"] = remote_key
+                report["remote_published_at_utc"] = stamp.isoformat()
                 report["remote_publish"] = "PUBLISHED"
             except Exception:
                 # Git credentials, branch protection or concurrency may reject
                 # the update; this must never interrupt the trader or EOD.
                 report["remote_key"] = str(previous.get("remote_key") or "")
+                report["remote_published_at_utc"] = previous_publish
                 report["remote_publish"] = "UNCONFIRMED"
     else:
         report["remote_key"] = str(previous.get("remote_key") or "")
+        report["remote_published_at_utc"] = previous_publish
         report["remote_publish"] = "DISABLED" if not enabled else "UNCONFIRMED"
     atomic_write(state_path, report)
     return report
