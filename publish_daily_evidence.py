@@ -12,8 +12,9 @@ import json
 import os
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parent
@@ -136,6 +137,19 @@ def _repo_clean_before_publish():
     return result.returncode == 0 and not result.stdout.strip()
 
 
+def _publication_phase(report_date: str, *, observed_utc: datetime) -> str:
+    """Calendar-day status only; never assert report integrity or host activation."""
+    if observed_utc.tzinfo is None:
+        raise ValueError("Publication timestamp must include a timezone")
+    target = datetime.strptime(report_date, "%Y-%m-%d").date()
+    today_pacific = observed_utc.astimezone(ZoneInfo("America/Los_Angeles")).date()
+    if target > today_pacific:
+        return "FUTURE_DATED"
+    if target == today_pacific:
+        return "INCOMPLETE_PACIFIC_DAY"
+    return "ELAPSED_PACIFIC_DAY_UNVERIFIED"
+
+
 def publish_daily_evidence(report_date=None):
     if not _enabled():
         return {"status": "DISABLED"}
@@ -251,9 +265,13 @@ def publish_daily_evidence(report_date=None):
         check=False,
     ).stdout.strip()
 
+    observed_utc = datetime.now(timezone.utc)
     manifest = {
         "report_date": report_date,
-        "published_at": datetime.now().isoformat(),
+        "published_at": datetime.now().isoformat(),  # legacy, timezone-naive
+        "published_at_utc": observed_utc.isoformat(),
+        "report_day_status": _publication_phase(report_date, observed_utc=observed_utc),
+        "full_portfolio_equity_verified": False,
         "source_commit": commit,
         "files": counts,
         "paper_only": str(
