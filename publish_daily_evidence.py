@@ -339,5 +339,38 @@ def publish_daily_evidence(report_date=None):
     }
 
 
+def main(argv=None):
+    """CLI for scheduled, completed-day publication without changing trader calls.
+
+    The normal no-argument invocation retains its historical behavior. The
+    opt-in completed-only mode fails closed before any Git or file writes.
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Publish sanitized paper evidence")
+    parser.add_argument("--date", help="Pacific report date (YYYY-MM-DD)")
+    parser.add_argument("--completed-only", action="store_true",
+                        help="Require an elapsed Pacific day and successful publication")
+    args = parser.parse_args(argv)
+    if args.completed_only:
+        if not args.date:
+            parser.error("--completed-only requires --date")
+        try:
+            phase = _publication_phase(args.date, observed_utc=datetime.now(timezone.utc))
+        except (TypeError, ValueError):
+            print(json.dumps({"status": "INVALID_REPORT_DATE"}))
+            return 2
+        if phase != "ELAPSED_PACIFIC_DAY_UNVERIFIED":
+            print(json.dumps({"status": "NOT_A_COMPLETED_PACIFIC_DAY",
+                              "date": args.date, "phase": phase}))
+            return 2
+
+    result = publish_daily_evidence(args.date)
+    print(json.dumps(result, indent=2))
+    if args.completed_only and result.get("status") not in {"PUBLISHED", "NO_CHANGES"}:
+        return 2
+    return 0
+
+
 if __name__ == "__main__":
-    print(json.dumps(publish_daily_evidence(), indent=2))
+    raise SystemExit(main())
