@@ -12,6 +12,7 @@ def test_unchanged_host_status_republishes_after_one_hour(tmp_path):
 
     def report(*args, **kwargs):
         return {
+            "observed_at_utc": kwargs["clock"].isoformat(),
             "git_head": head,
             "state": "HOST_PROCESSES_STABLE_SOURCE_ONLY",
             "code_synced": True,
