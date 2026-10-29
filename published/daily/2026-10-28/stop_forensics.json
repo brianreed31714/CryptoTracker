@@ -1,0 +1,116 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 10,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 2,
+      "stop_net_overrun_count": 2,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 2,
+      "valid_stop_exits": 2,
+      "worst_stops": [
+        {
+          "entry_regime": "RISK_ON",
+          "estimated_cost_pct": 2.848347,
+          "estimated_net_return_pct": -12.3154,
+          "estimated_pnl_usdc": -0.184731,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 6.142,
+          "net_stop_overrun_pp": 7.3154,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -9.467053,
+          "raw_stop_overrun_pp": 4.467053,
+          "symbol": "MOGZ"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 0.246508,
+          "estimated_net_return_pct": -5.3018,
+          "estimated_pnl_usdc": -0.079527,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 6.999,
+          "net_stop_overrun_pp": 0.3018,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -5.055292,
+          "raw_stop_overrun_pp": 0.055292,
+          "symbol": "Dacity"
+        }
+      ]
+    },
+    "diy_whale": {
+      "all_completed_exits": 32,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 2,
+      "stop_net_overrun_count": 2,
+      "stop_over_20pct_net_loss_count": 1,
+      "stop_raw_gap_count": 2,
+      "valid_stop_exits": 2,
+      "worst_stops": [
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 7.612048,
+          "estimated_net_return_pct": -21.648933,
+          "estimated_pnl_usdc": -0.162367,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 4.395,
+          "net_stop_overrun_pp": 13.648933,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -14.036885,
+          "raw_stop_overrun_pp": 6.036885,
+          "symbol": "DUBBLE"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 1.532047,
+          "estimated_net_return_pct": -11.407333,
+          "estimated_pnl_usdc": -0.085555,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 13.86,
+          "net_stop_overrun_pp": 3.407333,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -9.875286,
+          "raw_stop_overrun_pp": 1.875286,
+          "symbol": "MOGZ"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 14,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 1,
+      "stop_net_overrun_count": 1,
+      "stop_over_20pct_net_loss_count": 1,
+      "stop_raw_gap_count": 1,
+      "valid_stop_exits": 1,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -1.35343,
+          "estimated_net_return_pct": -21.519733,
+          "estimated_pnl_usdc": -0.161398,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 5.032,
+          "net_stop_overrun_pp": 14.519733,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -22.873163,
+          "raw_stop_overrun_pp": 15.873163,
+          "symbol": "CHICO"
+        }
+      ]
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-10-28",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
