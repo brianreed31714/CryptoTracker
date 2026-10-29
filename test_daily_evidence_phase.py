@@ -47,20 +47,20 @@ class ScheduledCompletedDayPublicationTests(unittest.TestCase):
         self.assertGreaterEqual(batch.lower().count("if errorlevel 1 goto :fail"), 5)
 
     def test_incomplete_day_never_calls_publisher(self):
-        with patch("publish_daily_evidence._publication_phase", return_value="INCOMPLETE_PACIFIC_DAY"), \\
-             patch("publish_daily_evidence.publish_daily_evidence") as publish, \\
+        with patch("publish_daily_evidence._publication_phase", return_value="INCOMPLETE_PACIFIC_DAY"), \
+             patch("publish_daily_evidence.publish_daily_evidence") as publish, \
              redirect_stdout(io.StringIO()):
             self.assertEqual(main(["--date", "2026-10-28", "--completed-only"]), 2)
             publish.assert_not_called()
 
     def test_completed_day_requires_successful_publication(self):
-        with patch("publish_daily_evidence._publication_phase", return_value="ELAPSED_PACIFIC_DAY_UNVERIFIED"), \\
-             patch("publish_daily_evidence.publish_daily_evidence", return_value={"status": "PUBLISHED"}) as publish, \\
+        with patch("publish_daily_evidence._publication_phase", return_value="ELAPSED_PACIFIC_DAY_UNVERIFIED"), \
+             patch("publish_daily_evidence.publish_daily_evidence", return_value={"status": "PUBLISHED"}) as publish, \
              redirect_stdout(io.StringIO()):
             self.assertEqual(main(["--date", "2026-10-28", "--completed-only"]), 0)
             publish.assert_called_once_with("2026-10-28")
-        with patch("publish_daily_evidence._publication_phase", return_value="ELAPSED_PACIFIC_DAY_UNVERIFIED"), \\
-             patch("publish_daily_evidence.publish_daily_evidence", return_value={"status": "SKIPPED_DIRTY_REPO"}), \\
+        with patch("publish_daily_evidence._publication_phase", return_value="ELAPSED_PACIFIC_DAY_UNVERIFIED"), \
+             patch("publish_daily_evidence.publish_daily_evidence", return_value={"status": "SKIPPED_DIRTY_REPO"}), \
              redirect_stdout(io.StringIO()):
             self.assertEqual(main(["--date", "2026-10-28", "--completed-only"]), 2)
 
