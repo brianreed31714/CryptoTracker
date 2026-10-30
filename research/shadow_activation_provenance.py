@@ -15,7 +15,7 @@ def _utc(value):
     try:
         result = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
         return result.astimezone(timezone.utc) if result.tzinfo else None
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         return None
 
 

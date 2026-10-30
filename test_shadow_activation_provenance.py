@@ -25,6 +25,17 @@ class ShadowProvenanceTests(unittest.TestCase):
     def test_source_only_does_not_verify_runtime(self):
         self.assertEqual(self.run_gate({"git_head": "f" * 40})["runtime"], "UNVERIFIED")
 
+    def test_out_of_range_utc_conversion_fails_closed(self):
+        for stamp in ("0001-01-01T00:00:00+01:00",
+                      "9999-12-31T23:59:59-01:00"):
+            with self.subTest(stamp=stamp):
+                activation = {**self.a, "activated_at_utc": stamp}
+                self.assertEqual(self.run_gate(activation)["valid_post_activation_exits"], 0)
+                trade = {**self.exit, "entered_at_utc": stamp}
+                self.assertEqual(self.run_gate(trades=[trade])["valid_post_activation_exits"], 0)
+                quote = {**self.good_quote(), "exit_quote_at_utc": stamp}
+                self.assertEqual(self.run_gate(quotes=[quote])["quote_evidence"], "MISSING")
+
     def test_all_six_fail_closed_without_host_evidence(self):
         rows = assess_all({}, [], [], as_of="2026-10-27T20:00:00Z")
         self.assertEqual(set(rows), set(ARMS))
