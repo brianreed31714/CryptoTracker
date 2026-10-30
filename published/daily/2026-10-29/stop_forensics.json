@@ -1,0 +1,88 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 10,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "diy_whale": {
+      "all_completed_exits": 19,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 2,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 4,
+      "stop_net_overrun_count": 4,
+      "stop_over_20pct_net_loss_count": 1,
+      "stop_raw_gap_count": 4,
+      "valid_stop_exits": 4,
+      "worst_stops": [
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 74.706215,
+          "estimated_net_return_pct": -98.611733,
+          "estimated_pnl_usdc": -0.739588,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 171.75,
+          "net_stop_overrun_pp": 90.611733,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -23.905518,
+          "raw_stop_overrun_pp": 15.905518,
+          "symbol": "PREDICT"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": -1.137497,
+          "estimated_net_return_pct": -17.631733,
+          "estimated_pnl_usdc": -0.132238,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 7.013,
+          "net_stop_overrun_pp": 9.631733,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -18.769231,
+          "raw_stop_overrun_pp": 10.769231,
+          "symbol": "VI"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -0.32089,
+          "estimated_net_return_pct": -11.314533,
+          "estimated_pnl_usdc": -0.084859,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 10.636,
+          "net_stop_overrun_pp": 3.314533,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -11.635423,
+          "raw_stop_overrun_pp": 3.635423,
+          "symbol": "DUBBLE"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 3,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-10-29",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
