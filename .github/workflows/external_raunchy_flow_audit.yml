@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'research/external_raunchy_flow_audit.py'
+      - 'research/external_raunchy_peak_comparison.py'
+      - 'test_external_raunchy_peak_comparison.py'
       - '.github/workflows/external_raunchy_flow_audit.yml'
   workflow_dispatch:
 permissions:
@@ -13,6 +15,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Offline fail-closed regression tests
+        run: python -m unittest -v test_external_raunchy_peak_comparison
       - name: Download public CC0 historical calls
         run: |
           curl --fail --location --retry 3 --max-time 120 \
@@ -22,10 +26,15 @@ jobs:
       - name: Execute frozen-name classifier research
         run: |
           python research/external_raunchy_flow_audit.py --input calls.jsonl --output external_raunchy_flow_audit.json
+      - name: Execute descriptive name vs control peak comparison
+        run: |
+          python -m research.external_raunchy_peak_comparison --input calls.jsonl --output external_raunchy_peak_comparison.json
       - name: Upload audit evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: external-raunchy-flow-audit
-          path: external_raunchy_flow_audit.json
+          path: |
+            external_raunchy_flow_audit.json
+            external_raunchy_peak_comparison.json
           if-no-files-found: warn
