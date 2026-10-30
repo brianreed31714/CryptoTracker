@@ -20,9 +20,11 @@ jobs:
       - name: Download public CC0 historical calls
         run: |
           curl --fail --location --retry 3 --max-time 120 \
-            https://raw.githubusercontent.com/Smurfetc/solana-memecoin-calls-dataset/main/calls.jsonl \
+            https://raw.githubusercontent.com/Smurfetc/solana-memecoin-calls-dataset/746a0484502ede92e2102ad58076d838ccacfcab/calls.jsonl \
             --output calls.jsonl
           test -s calls.jsonl
+          # Match the Git blob cited by the published research report.
+          test "$(git hash-object calls.jsonl)" = "0e59010a6c98892ad18c4490e609fa6cc4698e5c"
       - name: Execute frozen-name classifier research
         run: |
           python research/external_raunchy_flow_audit.py --input calls.jsonl --output external_raunchy_flow_audit.json
