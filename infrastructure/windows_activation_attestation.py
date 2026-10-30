@@ -28,6 +28,7 @@ REQUIRED_PROCESSES = ("supervisor", "deployment_agent", "trader", "dashboard")
 REQUIRED_SCRIPT_VERSIONS = ("trader", "dashboard")
 MIN_SECONDS_BETWEEN_SAMPLES = 20
 REQUIRED_SAMPLES = 3
+REMOTE_HEARTBEAT_SECONDS = 60 * 60  # Sanitized GitHub heartbeat, not a process restart.
 SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -236,6 +237,32 @@ def poll(root: Path, *, observation: dict | None = None,
     except (ValueError, TypeError, OSError, RuntimeError):
         report = advance(root, previous, {}, head="", upstream="", clean=False, clock=stamp)
         report["reasons"] = ["HOST_INVENTORY_UNAVAILABLE"]
+    # Collect sanitized disk evidence from the same Windows observation.
+    # These hashes are explicitly NOT in-memory process attestation.
+    try:
+        from infrastructure.host_evidence_collector import collect_host_evidence
+        from infrastructure.registry_contract import validate_registry
+        registry = validate_registry(root, check_local_safety=True)
+        dep_files = ("paper_research_lab_v11_10.py", "publish_daily_evidence.py") if registry["project"] == "CryptoTracker" else ("daily_model_review.py",)
+        disk = collect_host_evidence(root, snapshot, dependencies=dep_files)
+    except (OSError, RuntimeError, ValueError, KeyError, UnboundLocalError):
+        disk = {"disk_code_sha256": None, "disk_dependencies_sha256": None,
+                "process_identity_observed": False, "loaded_code_verified": False,
+                "loaded_dependencies_verified": False}
+    report["disk_evidence"] = disk
+    # Publish only the date/timestamp of a locally recorded EOD send, even if
+    # it predates source sync. This is a claim, never provider/device proof.
+    try:
+        from infrastructure.eod_send_observation import inspect_local_eod_send
+        report["local_eod_send_observation"] = inspect_local_eod_send(root, now=stamp)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        report["local_eod_send_observation"] = {"status": "MISSING_OR_INVALID"}
+    # Read-only scheduler evidence; task exit code never establishes EOD delivery.
+    try:
+        from infrastructure.daily_review_task_probe import inspect_daily_review_task
+        report["daily_review_task_observation"] = inspect_daily_review_task(clock=stamp)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        report["daily_review_task_observation"] = {"status": "UNVERIFIED"}
     # Every distinct commit gets a CODE_SYNCED notice after positive source
     # integrity; a later EOD verification gets a second distinct notice.
     # Do not send repeated notices for each 60-second polling interval.
@@ -267,28 +294,48 @@ def poll(root: Path, *, observation: dict | None = None,
     # One-time republish after fixing Windows mktree CRLF filename corruption.
     # The version suffix invalidates only the old publication cache key;
     # it does not reset process observations or trigger a service restart.
+    # Re-publish only meaningful changes in bounded, allowlisted health codes
+    # or the three-sample stability sequence. No raw host diagnostics leave Windows.
+    from infrastructure.host_status_publisher import safe_process_reasons, stability_samples
     remote_key = (report["git_head"] + ":" + report["state"] + ":" +
-                  str(report.get("verified_review_date") or "") + ":status-file-v2")
+                  ",".join(safe_process_reasons(report)) + ":" +
+                  str(stability_samples(report)) + ":" +
+                  str(report.get("verified_review_date") or "") + ":" +
+                  str((report.get("disk_evidence") or {}).get("disk_code_sha256") or "") + ":" +
+                  str((report.get("local_eod_send_observation") or {}).get("review_date") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("status") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("last_run_utc") or "") + ":" +
+                  str((report.get("daily_review_task_observation") or {}).get("last_task_result") or "") + ":status-file-v5")
+    previous_publish = str(previous.get("remote_published_at_utc") or "")
+    try:
+        age_seconds = (stamp - parse_timestamp(previous_publish)).total_seconds()
+    except (ValueError, TypeError):
+        age_seconds = -1
+    recent_publish = 0 <= age_seconds < REMOTE_HEARTBEAT_SECONDS
     if remote_publish is None and os.name == "nt" and observation is None:
         from infrastructure.host_status_publisher import publish as remote_publish
-    enabled = os.getenv("STOCKTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
+    enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
         "0", "false", "no", "off")
     if report["code_synced"] and remote_publish is not None and enabled:
-        if remote_key == previous.get("remote_key"):
+        if remote_key == previous.get("remote_key") and recent_publish:
             report["remote_key"] = remote_key
+            report["remote_published_at_utc"] = previous_publish
             report["remote_publish"] = "PUBLISHED"
         else:
             try:
                 remote_publish(root, report)
                 report["remote_key"] = remote_key
+                report["remote_published_at_utc"] = stamp.isoformat()
                 report["remote_publish"] = "PUBLISHED"
             except Exception:
                 # Git credentials, branch protection or concurrency may reject
                 # the update; this must never interrupt the trader or EOD.
                 report["remote_key"] = str(previous.get("remote_key") or "")
+                report["remote_published_at_utc"] = previous_publish
                 report["remote_publish"] = "UNCONFIRMED"
     else:
         report["remote_key"] = str(previous.get("remote_key") or "")
+        report["remote_published_at_utc"] = previous_publish
         report["remote_publish"] = "DISABLED" if not enabled else "UNCONFIRMED"
     atomic_write(state_path, report)
     return report

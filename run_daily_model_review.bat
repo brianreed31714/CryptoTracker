@@ -2,7 +2,15 @@
 setlocal
 cd /d "%~dp0"
 
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set REVIEWDATE=%%i
+rem At 18:05 Pacific the current 24/7 crypto calendar day is still incomplete.
+rem Review the prior *completed* Pacific day. An explicit date remains available
+rem for a controlled historical rerun; this batch never sends swaps or restarts.
+if not "%~1"=="" (
+  set REVIEWDATE=%~1
+) else (
+  for /f %%i in ('python -m infrastructure.completed_crypto_day') do set REVIEWDATE=%%i
+)
+if not defined REVIEWDATE goto :fail
 
 echo ============================================================
 echo CryptoTracker Agentic Daily Review
@@ -10,23 +18,31 @@ echo Review date: %REVIEWDATE%
 echo ============================================================
 echo.
 
-echo [1/4] Building daily review bundle...
+echo [1/5] Building daily review bundle...
 python build_daily_review_bundle.py --date %REVIEWDATE%
 if errorlevel 1 goto :fail
 
 echo.
-echo [2/4] Running model review...
+echo [2/5] Running model review...
 python daily_model_review.py --date %REVIEWDATE%
 if errorlevel 1 goto :fail
 
 echo.
-echo [3/4] Publishing proposal registry + REVIEW.md...
+echo [3/5] Publishing proposal registry + REVIEW.md...
 python proposal_registry.py publish --date %REVIEWDATE%
 if errorlevel 1 goto :fail
 
 echo.
-echo [4/4] Syncing proposal registry to GitHub...
+echo [4/5] Syncing proposal registry to GitHub...
 python sync_proposals_to_git.py --message "Publish CryptoTracker proposals %REVIEWDATE%"
+if errorlevel 1 goto :fail
+
+echo.
+echo [5/5] Publishing sanitized evidence for the completed Pacific day...
+rem This step commits only allowlisted research artifacts, never orders or secrets.
+rem Non-success and incomplete-day statuses fail the review; GitHub source
+rem publication alone does not prove Windows task execution or Pushover delivery.
+python publish_daily_evidence.py --date %REVIEWDATE% --completed-only
 if errorlevel 1 goto :fail
 
 echo.

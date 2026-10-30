@@ -429,8 +429,24 @@ def deploy(req_path: Path, req: dict):
         return False
 
 
+def _observe_host_read_only():
+    """Sample bounded Windows host evidence independently of deployment permission."""
+    if os.name == "nt":
+        try:
+            # Importing poll() in a long-running agent caches the old module
+            # after Git sync. The bounded child always loads the new on-disk
+            # attestation without restarting trader/dashboard/feed processes.
+            from infrastructure.fresh_attestation_runner import run_fresh_host_attestation
+            evidence = run_fresh_host_attestation(ROOT)
+            if evidence["status"] != "HOST_CLAIM_ONLY":
+                log("Windows attestation unavailable: " + evidence.get("reason", "UNVERIFIED"))
+        except Exception:
+            log("Windows attestation runner unavailable (details redacted)")
+
+
 def scan_once():
     if not AUTO_DEPLOY:
+        _observe_host_read_only()
         return
     REQUEST_DIR.mkdir(parents=True, exist_ok=True)
     pull_repo()
@@ -475,14 +491,8 @@ def scan_once():
                 push("CryptoTracker Deployment BLOCKED", f"{pid}: {exc}")
 
 
-    # Read-only host activation evidence after normal Git sync/approved requests.
-    # Never reload or stop trading, Smart Money, or dashboard processes.
-    if os.name == "nt":
-        try:
-            from infrastructure.windows_activation_attestation import poll
-            poll(ROOT, notify=push_attestation)
-        except Exception:
-            log("CryptoTracker Windows attestation unavailable (details redacted)")
+    # Observe host state without altering trader, Smart Money, or dashboard processes.
+    _observe_host_read_only()
 
 
 def main():

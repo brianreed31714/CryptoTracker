@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+from zoneinfo import ZoneInfo
 
 STATUS_BRANCH = "refs/heads/cryptotracker-host-status"
 OUTPUT_FILE = "status.json"
@@ -23,6 +24,31 @@ STATES = {
     "CODE_SYNCED_PROCESS_OBSERVED", "HOST_PROCESSES_STABLE_SOURCE_ONLY",
     "EOD_EXECUTION_VERIFIED",
 }
+
+# Public host-status reports expose only these predeclared, non-sensitive
+# diagnostic codes. Never publish raw exceptions, paths, PIDs, or log text.
+PROCESS_REASON = re.compile(
+    r"^(?:PROCESS_UNVERIFIED|START_TIME_UNVERIFIED|SCRIPT_VERSION_UNVERIFIED)"
+    r"_(?:SUPERVISOR|DEPLOYMENT_AGENT|TRADER|DASHBOARD)$"
+)
+SAFE_PROCESS_REASONS = frozenset({"SMART_MONEY_HEARTBEAT_NOT_HEALTHY"})
+
+
+def safe_process_reasons(report: dict) -> list[str]:
+    raw = report.get("reasons")
+    if not isinstance(raw, list):
+        return []
+    return sorted({
+        value for value in raw
+        if isinstance(value, str)
+        and (PROCESS_REASON.fullmatch(value) or value in SAFE_PROCESS_REASONS)
+    })
+
+
+def stability_samples(report: dict) -> int:
+    value = report.get("consecutive_observations")
+    return value if type(value) is int and 0 <= value <= 3 else 0
+
 
 
 def sanitized(report: dict) -> dict:
@@ -58,10 +84,67 @@ def sanitized(report: dict) -> dict:
         "state": state,
         "source_code_synced": report.get("code_synced") is True,
         "processes_stable": report.get("processes_stable") is True,
+        "process_health_reason_codes": safe_process_reasons(report),
+        "process_stability_samples": stability_samples(report),
         "post_sync_eod_verified": report.get("eod_execution_verified") is True,
         "in_memory_trader_digest_verified": False,
         "broker_trade_health_verified": False,
     }
+    # Disk hashes are useful diagnostics, never proof of loaded process memory.
+    disk = report.get("disk_evidence") or {}
+    digest = disk.get("disk_code_sha256")
+    dep_digest = disk.get("disk_dependencies_sha256")
+    if isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest):
+        payload["disk_code_sha256"] = digest
+    if isinstance(dep_digest, str) and re.fullmatch(r"[0-9a-f]{64}", dep_digest):
+        payload["disk_dependencies_sha256"] = dep_digest
+    payload["process_identity_observed"] = disk.get("process_identity_observed") is True
+    payload["loaded_dependencies_verified"] = False
+    # Local EOD state is a host claim only; it is neither an independent
+    # Pushover API receipt nor proof that a device displayed the message.
+    payload["local_eod_send_state"] = "MISSING_OR_INVALID"
+    payload["eod_device_delivery_verified"] = False
+    local = report.get("local_eod_send_observation") or {}
+    if isinstance(local, dict) and local.get("status") == "HOST_LOCAL_SEND_STATE_CLAIM":
+        day = local.get("review_date")
+        when = local.get("sent_at_utc")
+        try:
+            sent = datetime.fromisoformat(str(when).replace("Z", "+00:00"))
+            valid = (
+                isinstance(day, str) and DATE.fullmatch(day)
+                and datetime.fromisoformat(day).date().isoformat() == day
+                and sent.tzinfo is not None and sent <= stamp
+                and sent.astimezone(ZoneInfo("America/Los_Angeles")).date().isoformat() == day
+            )
+        except (ValueError, TypeError, OverflowError):
+            valid = False
+        if valid:
+            payload["local_eod_send_state"] = "HOST_LOCAL_CLAIM_ONLY"
+            payload["local_eod_send_date"] = day
+            payload["local_eod_send_at_utc"] = sent.astimezone(timezone.utc).isoformat()
+    # Task Scheduler evidence is a host observation only; even exit 0 is
+    # not proof of a report, Pushover acceptance, or device delivery.
+    payload["daily_review_task_status"] = "UNVERIFIED"
+    task = report.get("daily_review_task_observation") or {}
+    if isinstance(task, dict) and task.get("status") == "TASK_NAME_OBSERVED":
+        state = task.get("scheduler_state")
+        result = task.get("last_task_result")
+        raw = task.get("last_run_utc")
+        if state in {"Ready", "Running", "Disabled", "Queued", "Unknown"} and type(result) is int and -2**31 <= result < 2**32:
+            last = None
+            if isinstance(raw, str):
+                try:
+                    last = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                    if last.tzinfo is None or last.year < 2001 or last > stamp:
+                        last = None
+                except ValueError:
+                    last = None
+            if raw is None or last is not None:
+                payload["daily_review_task_status"] = "TASK_NAME_OBSERVED"
+                payload["daily_review_task_state"] = state
+                payload["daily_review_last_task_result"] = result
+                if last is not None:
+                    payload["daily_review_last_run_utc"] = last.astimezone(timezone.utc).isoformat()
     if payload["post_sync_eod_verified"]:
         day = report.get("verified_review_date")
         if not isinstance(day, str) or not DATE.fullmatch(day) or datetime.fromisoformat(day).date().isoformat() != day:

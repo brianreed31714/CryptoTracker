@@ -1,0 +1,32 @@
+name: CryptoTracker EOD publication phase regression
+on:
+  pull_request:
+    paths:
+      - publish_daily_evidence.py
+      - test_daily_evidence_phase.py
+      - .github/workflows/eod-publication-phase.yml
+  push:
+    branches: [main]
+    paths:
+      - publish_daily_evidence.py
+      - test_daily_evidence_phase.py
+      - .github/workflows/eod-publication-phase.yml
+permissions:
+  contents: read
+jobs:
+  pacific-day-tests:
+    name: pacific-day-${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install timezone database on Windows
+        run: python -m pip install tzdata
+      - name: Verify Pacific calendar-day classification
+        run: python -m unittest -v test_daily_evidence_phase
