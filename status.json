@@ -12,14 +12,16 @@
   "local_eod_send_at_utc": "2026-10-31T03:02:20.739287+00:00",
   "local_eod_send_date": "2026-10-30",
   "local_eod_send_state": "HOST_LOCAL_CLAIM_ONLY",
-  "observed_at_utc": "2026-10-31T22:59:05.935846+00:00",
+  "observed_at_utc": "2026-10-31T23:00:16.501741+00:00",
   "post_sync_eod_verified": false,
-  "process_health_reason_codes": [],
+  "process_health_reason_codes": [
+    "SMART_MONEY_HEARTBEAT_NOT_HEALTHY"
+  ],
   "process_identity_observed": true,
-  "process_stability_samples": 2,
+  "process_stability_samples": 0,
   "processes_stable": false,
   "project": "CryptoTracker",
   "schema": "cryptotracker_windows_attestation_v1",
   "source_code_synced": true,
-  "state": "CODE_SYNCED_PROCESS_OBSERVED"
+  "state": "CODE_SYNCED_RUNTIME_UNVERIFIED"
 }
