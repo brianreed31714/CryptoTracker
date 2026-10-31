@@ -200,7 +200,10 @@
         "infrastructure/eod_send_observation.py",
         "test_eod_send_observation.py",
         "install_cryptotracker_daily_review.ps1",
-        "infrastructure/completed_crypto_day.py"
+        "infrastructure/completed_crypto_day.py",
+        "review_delivery.py",
+        "test_review_delivery.py",
+        ".github/workflows/review-delivery.yml"
       ],
       "health": {
         "type": "evidence_only"
