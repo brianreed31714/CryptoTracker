@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import requests
+from review_delivery import deliver_once, record_publication, provider_status, require_completed_crypto_day
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent
@@ -35,6 +36,10 @@ def args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date")
     ap.add_argument("--no-ai", action="store_true")
+    phase = ap.add_mutually_exclusive_group()
+    phase.add_argument("--defer-notification", action="store_true")
+    phase.add_argument("--record-publication", action="store_true")
+    phase.add_argument("--notify-only", action="store_true")
     return ap.parse_args()
 
 def fnum(v: Any) -> Optional[float]:
@@ -504,8 +509,8 @@ def render_md(date_str, findings, review):
     return "\n".join(lines)+"\n"
 
 def send_push(date_str, review):
-    if not PUSH_ENABLED: return False,"disabled"
-    if not PUSH_TOKEN or not PUSH_USER: return False,"missing token/user"
+    if not PUSH_ENABLED: return "DISABLED"
+    if not PUSH_TOKEN or not PUSH_USER: return "CONFIG_MISSING"
     ps=review.get("proposals",[])
     lines=[f"CryptoTracker Daily Review {date_str}",f"{len(ps)} proposal(s) ready."]
     if review.get("executive_summary"):
@@ -519,13 +524,37 @@ def send_push(date_str, review):
             "title":"CryptoTracker Daily Model Review",
             "message":"\n".join(lines)[:1024],"priority":0
         },timeout=20)
-        return (True,"sent") if r.ok else (False,f"HTTP {r.status_code}: {r.text[:200]}")
-    except Exception as e:
-        return False,str(e)
+        return provider_status(r)
+    except Exception:
+        return "UNCONFIRMED"
+
+
+def handle_notification_phase(args, day):
+    if not (args.record_publication or args.notify_only):
+        return False
+    path = ANALYSIS_DIR / day / "daily_model_review.json"
+    state = ROOT / "deploy" / "state" / "eod_review_delivery"
+    if args.record_publication:
+        record_publication(ROOT, state, "CryptoTracker", day, path)
+        print("Publication verified for " + day)
+    else:
+        review = json.loads(path.read_text(encoding="utf-8"))
+        status = deliver_once(state, "CryptoTracker", day, path,
+                              lambda saved_review: send_push(day, saved_review))
+        print("Model-review provider status: " + status)
+        if status != "API_ACCEPTED":
+            raise SystemExit(4)
+    return True
+
 
 def main():
     a=args()
-    date_str=a.date or datetime.now().strftime("%Y-%m-%d")
+    if not a.date:
+        raise SystemExit("An explicit completed Pacific --date is required")
+    date_str=a.date
+    require_completed_crypto_day(date_str)
+    if handle_notification_phase(a, date_str):
+        return
     bundle=ANALYSIS_DIR/date_str
     manifest=read_json(bundle/"manifest.json",{}) or {}
     if not manifest:
@@ -551,7 +580,7 @@ def main():
 
     (bundle/"daily_model_review.json").write_text(json.dumps(review,indent=2),encoding="utf-8")
     (bundle/"daily_model_review.md").write_text(render_md(date_str,findings,review),encoding="utf-8")
-    _,status=send_push(date_str,review)
+    status="DEFERRED_UNTIL_PUBLICATION"
 
     print(f"Daily review written: {bundle/'daily_model_review.md'}")
     print(f"Proposals: {len(review.get('proposals',[]))}")

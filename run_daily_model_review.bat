@@ -11,6 +11,8 @@ if not "%~1"=="" (
   for /f %%i in ('python -m infrastructure.completed_crypto_day') do set REVIEWDATE=%%i
 )
 if not defined REVIEWDATE goto :fail
+python -c "import sys; from review_delivery import require_completed_crypto_day; require_completed_crypto_day(sys.argv[1])" %REVIEWDATE%
+if errorlevel 1 goto :fail
 
 echo ============================================================
 echo CryptoTracker Agentic Daily Review
@@ -24,7 +26,7 @@ if errorlevel 1 goto :fail
 
 echo.
 echo [2/5] Running model review...
-python daily_model_review.py --date %REVIEWDATE%
+python daily_model_review.py --date %REVIEWDATE% --defer-notification
 if errorlevel 1 goto :fail
 
 echo.
@@ -56,6 +58,11 @@ echo.
 echo To approve in ChatGPT, use:
 echo   Approve P-YYYYMMDD-NN
 echo.
+rem Review/publication is complete; notification is a separate, dated phase.
+python daily_model_review.py --date %REVIEWDATE% --record-publication
+if errorlevel 1 goto :notification_failed
+python daily_model_review.py --date %REVIEWDATE% --notify-only
+if errorlevel 1 goto :notification_failed
 rem Read-only one-shot Windows evidence; cannot change review success.
 python -m infrastructure.windows_activation_attestation --notify
 if errorlevel 1 echo CryptoTracker Windows attestation unavailable; model review still complete.
@@ -67,3 +74,8 @@ echo ============================================================
 echo Agentic daily review FAILED.
 echo ============================================================
 exit /b 1
+
+:notification_failed
+echo Review artifacts completed; publication verification or notification needs attention.
+echo Do not rerun the model to resend. Inspect the dated local receipt first.
+exit /b 4
