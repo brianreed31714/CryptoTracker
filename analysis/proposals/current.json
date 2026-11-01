@@ -1,43 +1,25 @@
 {
-  "generated_at": "2026-09-27T23:03:00-07:00",
-  "review_date": "2026-09-26",
-  "proposal_count": 5,
-  "pending": [],
+  "generated_at": "2026-10-31T18:06:33",
+  "review_date": "2026-10-30",
+  "proposal_count": 2,
+  "pending": [
+    "P-20261030-01",
+    "P-20261030-02"
+  ],
   "proposals": [
     {
-      "proposal_id": "P-20260926-01",
-      "title": "Audit forward-outcome collection",
-      "confidence": "HIGH",
+      "proposal_id": "P-20261030-01",
+      "title": "Continue organic-flow model in shadow only",
+      "confidence": "LOW",
       "recommended_mode": "SHADOW",
-      "status": "READY_TO_DEPLOY"
+      "status": "PENDING"
     },
     {
-      "proposal_id": "P-20260926-02",
-      "title": "Verify smart-money feed health",
+      "proposal_id": "P-20261030-02",
+      "title": "Validate follow-up and missed-opportunity outcome reporting",
       "confidence": "MEDIUM",
       "recommended_mode": "SHADOW",
-      "status": "READY_TO_DEPLOY"
-    },
-    {
-      "proposal_id": "P-20260926-03",
-      "title": "Create Luna outcome scorecard",
-      "confidence": "HIGH",
-      "recommended_mode": "SHADOW",
-      "status": "READY_TO_DEPLOY"
-    },
-    {
-      "proposal_id": "P-20260926-04",
-      "title": "Audit missed-opportunity report generation",
-      "confidence": "MEDIUM",
-      "recommended_mode": "SHADOW",
-      "status": "READY_TO_DEPLOY"
-    },
-    {
-      "proposal_id": "P-20260927-04",
-      "title": "Fix CryptoTracker EOD schedule startup failure",
-      "confidence": "HIGH",
-      "recommended_mode": "LIVE",
-      "status": "READY_TO_DEPLOY"
+      "status": "PENDING"
     }
   ]
 }

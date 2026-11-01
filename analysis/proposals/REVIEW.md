@@ -1,78 +1,58 @@
-# CryptoTracker Proposals — 2026-09-26
+# CryptoTracker Proposals — 2026-10-30
 
 These are the current model-improvement proposals from the nightly review.
-P-01 through P-04 are approved for SHADOW research and bundled into one safe full-release deployment.
+Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20260926-01 — Audit forward-outcome collection
+## P-20261030-01 — Continue organic-flow model in shadow only
 
-- **Status:** READY_TO_DEPLOY
+- **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `surge follow-up outcome pipeline`
-- **Current:** 12 follow-up rows; all path NONE; no forward horizons found
-- **Proposed:** Run a SHADOW audit that traces candidate creation, path assignment, deduplication, and scheduled 30/60/120-minute outcome capture without changing entry thresholds. Require at least 12 outcome-labeled relevant observations before proposing calibration.
-- **Confidence:** HIGH
+- **Target:** `paper_research model xp_diy_organic_flow`
+- **Current:** Shadow evaluation; 13 completed; no promotion candidate
+- **Proposed:** Keep in SHADOW and collect a larger, deduplicated, matched comparison against the baseline across market conditions before considering any promotion; make no live or entry-rule change.
+- **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Deployment:** BUNDLED via `P-20260926-04`
-- **Risk:** Additional shadow logging may increase storage and investigation workload; an audit may also find that the empty outcomes were legitimate because no eligible signals occurred.
+- **Risk:** A small or right-tail-driven result may not persist; overlapping candidates, selection effects, and unmodeled execution costs may overstate performance.
 - **Evidence:**
-  - surge_followup_log contains n=12 rows, with NONE accounting for 12 of 12
-  - horizons_found is empty, so MFE, MAE, hit rates, medians, and false-positive cost cannot be computed
+  - 13 completed shadow observations: 9 wins and 4 losses (69.23% win rate).
+  - Median net return is 6.978%, profit factor 6.7411, and max drawdown 10.0198%; shadow realized PnL is reported as 0.
+  - The sample is small, model variants may share candidate observations, and the research summary lists no promotion candidates.
+
+**Approve in ChatGPT:**
+
+`Approve P-20261030-01`
+
+**Decline in ChatGPT:**
+
+`Decline P-20261030-01`
 
 ---
 
-## P-20260926-02 — Verify smart-money feed health
+## P-20261030-02 — Validate follow-up and missed-opportunity outcome reporting
 
-- **Status:** READY_TO_DEPLOY
+- **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `local smart-money event and campaign pipeline`
-- **Current:** SMART_MONEY_ENABLED=1 and WHALE_DISCOVERY_ENABLED=1, but daily event, campaign, and trader-performance files each contain 0 filtered rows
-- **Proposed:** Run a SHADOW feed-health audit covering monitor uptime, polling, source responses, timestamp filtering, wallet coverage, and event-to-campaign propagation. Do not change campaign-strength weights or bonuses.
+- **Target:** `SURGE_FOLLOWUP and MISSED_OPPORTUNITY audit/reporting`
+- **Current:** 41,323 follow-up rows with no reported horizons or score bands; 78 usable rejected signals without summarized outcomes
+- **Proposed:** Audit outcome coverage and deduplication, then report sample counts and token-level 30/60/120-minute returns, MFE, and MAE by path, acceptance status, and rejection reason before using these data to tune trading rules.
 - **Confidence:** MEDIUM
 - **Recommended mode:** SHADOW
-- **Deployment:** BUNDLED via `P-20260926-04`
-- **Risk:** Zero rows may represent genuinely inactive tracked wallets rather than a pipeline fault, so changing scoring before the audit could create false positives.
+- **Risk:** Duplicate or incomplete token-horizon observations, survivorship/selection bias, or inconsistent labels could produce misleading group comparisons.
 - **Evidence:**
-  - smart_money_events_v21.csv has 0 daily rows
-  - smart_money_campaigns_v21.csv and trader_performance_v21.csv each have 0 daily rows, with 0 unique campaigns and 0 convergence observations
+  - The follow-up summary reports 41,323 rows and path counts but empty score_bands and horizons_found.
+  - The missed-opportunity audit reports 78 usable rejected signals and 87 sampled rows at both 30 and 60 minutes, but no outcome values in the supplied metrics.
+  - Without outcome distributions and rejection-reason attribution, false-positive cost and missed-signal value cannot be estimated.
+
+**Approve in ChatGPT:**
+
+`Approve P-20261030-02`
+
+**Decline in ChatGPT:**
+
+`Decline P-20261030-02`
 
 ---
 
-## P-20260926-03 — Create Luna outcome scorecard
+## Quick commands
 
-- **Status:** READY_TO_DEPLOY
-- **Type:** RESEARCH
-- **Target:** `Luna confirmation calibration`
-- **Current:** 0 Luna observations; current confidence thresholds and bonus limits are not empirically assessable
-- **Proposed:** Keep all Luna settings unchanged and build a SHADOW scorecard linking each future Luna decision and confidence band to 30/60/120-minute MFE, MAE, and quant-only baseline outcomes. Defer calibration until at least 12 outcome-labeled confirmations exist.
-- **Confidence:** HIGH
-- **Recommended mode:** SHADOW
-- **Deployment:** BUNDLED via `P-20260926-04`
-- **Risk:** Outcome attribution may be confounded by candidate selection and changing market regimes; a minimum sample of 12 remains preliminary rather than proof.
-- **Evidence:**
-  - luna.rows is 0
-  - AI confirmation is enabled, but no daily observations exist to estimate confidence-band hit rates or incremental value over quant ranking
-
----
-
-## P-20260926-04 — Audit missed-opportunity report generation
-
-- **Status:** READY_TO_DEPLOY
-- **Type:** RESEARCH
-- **Target:** `nightly false-negative review`
-- **Current:** MISSED_OPPORTUNITY_REPORT_ENABLED=1, but no missed-opportunity file is listed and no forward horizons are available
-- **Proposed:** Run a SHADOW audit to distinguish a valid zero-case day from missing report generation or missing forward-price outcomes. Preserve the current 20% 30-minute and 50% 60-minute MFE thresholds during the audit.
-- **Confidence:** MEDIUM
-- **Recommended mode:** SHADOW
-- **Deployment:** READY_TO_DEPLOY via `P-20260926-04`
-- **Risk:** Forcing an output file on zero-case days could add operational noise; lowering MFE thresholds without evidence would inflate false-negative counts.
-- **Evidence:**
-  - files_present does not include a missed_opportunities_2026-09-26.csv file
-  - horizons_found is empty, preventing measurement of false-negative count, MFE distribution, and opportunity cost
-
----
-
-## Combined release
-
-`P-20260926-04` is the single deployment request for P-01 through P-04. It starts the updated trader, Smart Money monitor, and existing dashboard together so one partial deployment cannot stop the other components.
-
-No trading thresholds, sizing, entry/exit logic, or execution gates are changed by this SHADOW release.
+`Review today's CryptoTracker proposals`
