@@ -1,0 +1,102 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 8,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "diy_whale": {
+      "all_completed_exits": 25,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 2,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 2,
+      "stop_net_overrun_count": 2,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 2,
+      "valid_stop_exits": 2,
+      "worst_stops": [
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": -4.234279,
+          "estimated_net_return_pct": -10.475333,
+          "estimated_pnl_usdc": -0.078565,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 12.085,
+          "net_stop_overrun_pp": 2.475333,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -14.709612,
+          "raw_stop_overrun_pp": 6.709612,
+          "symbol": "Leverhedge"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": -0.918736,
+          "estimated_net_return_pct": -10.1196,
+          "estimated_pnl_usdc": -0.075897,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 4.151,
+          "net_stop_overrun_pp": 2.1196,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -11.038336,
+          "raw_stop_overrun_pp": 3.038336,
+          "symbol": "BNB"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 8,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 2,
+      "stop_net_overrun_count": 2,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 2,
+      "valid_stop_exits": 2,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 4.468196,
+          "estimated_net_return_pct": -13.739333,
+          "estimated_pnl_usdc": -0.103045,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 4.152,
+          "net_stop_overrun_pp": 6.739333,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -9.271137,
+          "raw_stop_overrun_pp": 2.271137,
+          "symbol": "Leverhedge"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 4.987613,
+          "estimated_net_return_pct": -13.269067,
+          "estimated_pnl_usdc": -0.099518,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 4.053,
+          "net_stop_overrun_pp": 6.269067,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.281454,
+          "raw_stop_overrun_pp": 1.281454,
+          "symbol": "SIS"
+        }
+      ]
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-10-31",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
