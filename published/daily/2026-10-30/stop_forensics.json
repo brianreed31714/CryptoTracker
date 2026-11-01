@@ -2,7 +2,7 @@
   "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
   "models": {
     "balanced_ev": {
-      "all_completed_exits": 6,
+      "all_completed_exits": 9,
       "configured_stop_trigger_pct": -5.0,
       "invalid_stop_marks": 0,
       "negative_estimated_quote_cost_count": 0,
@@ -15,17 +15,43 @@
       "worst_stops": []
     },
     "diy_whale": {
-      "all_completed_exits": 12,
+      "all_completed_exits": 18,
       "configured_stop_trigger_pct": -8.0,
       "invalid_stop_marks": 0,
-      "negative_estimated_quote_cost_count": 0,
+      "negative_estimated_quote_cost_count": 2,
       "quote_timestamp_verified_count": 0,
-      "stop_exits": 1,
-      "stop_net_overrun_count": 1,
+      "stop_exits": 5,
+      "stop_net_overrun_count": 4,
       "stop_over_20pct_net_loss_count": 0,
-      "stop_raw_gap_count": 1,
-      "valid_stop_exits": 1,
+      "stop_raw_gap_count": 5,
+      "valid_stop_exits": 5,
       "worst_stops": [
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 3.344611,
+          "estimated_net_return_pct": -12.974667,
+          "estimated_pnl_usdc": -0.09731,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 10.972,
+          "net_stop_overrun_pp": 4.974667,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -9.630056,
+          "raw_stop_overrun_pp": 1.630056,
+          "symbol": "Leverhedge"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 3.494787,
+          "estimated_net_return_pct": -11.8152,
+          "estimated_pnl_usdc": -0.088614,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 6.801,
+          "net_stop_overrun_pp": 3.8152,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.320413,
+          "raw_stop_overrun_pp": 0.320413,
+          "symbol": "AgenC"
+        },
         {
           "entry_regime": "RISK_ON",
           "estimated_cost_pct": 2.666568,
