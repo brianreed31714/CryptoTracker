@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261031-03",
+  "title": "Report rejection outcomes by reason and false-positive cost",
+  "change_type": "RESEARCH",
+  "target": "missed-opportunity audit",
+  "current": "The supplied daily metrics report rejection and usable-sample counts but do not provide rejection-reason-specific outcome or false-positive-cost estimates.",
+  "proposed": "For SHADOW analysis, join rejected signals to accepted signals and forward outcomes by rejection reason; report horizon-specific sample sizes, median return, hit rate, MFE/MAE, and the cost of including rejected signals. Do not relax filters unless the comparison is sufficiently sampled and robust.",
+  "evidence": [
+    "The audit contains 108 signal rows, including 92 rejected and 89 usable rejected signals.",
+    "The audit reports 104 30m and 98 60m samples, but the supplied metrics do not show their outcome distributions or adverse excursions.",
+    "Paper and shadow aggregate strategy returns are generally negative, making unmeasured false-positive costs material to any proposed relaxation."
+  ],
+  "risk": "Outcome availability and selection may differ between accepted and rejected signals; hindsight labels and correlated token-days could overstate the value of missed opportunities.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-10-31",
+  "created_at": "2026-11-01T17:06:41",
+  "updated_at": "2026-11-01T17:06:41",
+  "implementation": {},
+  "deployment": {}
+}

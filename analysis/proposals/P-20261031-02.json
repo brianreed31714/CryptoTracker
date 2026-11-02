@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261031-02",
+  "title": "Validate Luna calibration without changing its influence",
+  "change_type": "RESEARCH",
+  "target": "Luna outcome calibration analysis",
+  "current": "Luna can contribute up to a 5-point bonus; no calibration or bonus change is supported by the supplied outcome sample.",
+  "proposed": "Keep current Luna settings and run a shadow-only, signal-level calibration analysis that accounts for repeated 30m/60m/120m labels and compares Luna sentiment/confidence against outcomes conditional on the underlying quant setup.",
+  "evidence": [
+    "The outcome file has 108 signals and 324 labeled rows across horizons, so horizon rows are not independent observations.",
+    "NEUTRAL|LOW median returns are negative at 30m (n=90), 60m (n=85), and 120m (n=83), with substantial median MAE.",
+    "POSITIVE|MEDIUM medians are negative at each reported horizon, but each horizon has only 9\u201311 observations; confidence-high groups have n=1."
+  ],
+  "risk": "Small effective sample size and confounding by the quant setup may produce unstable calibration estimates; reducing or increasing Luna influence prematurely could discard useful information or add noise.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-10-31",
+  "created_at": "2026-11-01T17:06:41",
+  "updated_at": "2026-11-01T17:06:41",
+  "implementation": {},
+  "deployment": {}
+}

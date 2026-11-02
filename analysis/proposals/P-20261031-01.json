@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261031-01",
+  "title": "Run paired entry and exit attribution in shadow",
+  "change_type": "RESEARCH",
+  "target": "paper_research evaluation protocol",
+  "current": "Model results are reported as aggregate completed-trade metrics; the supplied summary does not establish matched entries or isolate one exit variable.",
+  "proposed": "In SHADOW, compare exit variants on the same eligible entries while holding entry rules fixed; report sample size, median net return, hit rate, MFE/MAE, drawdown, and estimated costs. Evaluate one exit variable at a time and do not promote a model from this study alone.",
+  "evidence": [
+    "Paper DIY Whale has 29 completed trades, 34.48% wins, -0.4056% median net return, and 0.5123 profit factor.",
+    "Shadow DIY Whale has 48 completed trades, 50.0% wins, -0.1055% median net return, and 0.7277 profit factor.",
+    "Several reported exit-model paper samples have only 7\u20138 completed trades, while larger shadow exit aggregates do not isolate exit effects from entry differences."
+  ],
+  "risk": "Matched shadow results may still be affected by overlapping candidates, selection bias, quote assumptions, and limited independent market regimes; apparent improvements may not transfer to live execution.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-10-31",
+  "created_at": "2026-11-01T17:06:41",
+  "updated_at": "2026-11-01T17:06:41",
+  "implementation": {},
+  "deployment": {}
+}
