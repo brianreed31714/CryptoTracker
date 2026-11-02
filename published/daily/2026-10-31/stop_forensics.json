@@ -15,17 +15,30 @@
       "worst_stops": []
     },
     "diy_whale": {
-      "all_completed_exits": 25,
+      "all_completed_exits": 29,
       "configured_stop_trigger_pct": -8.0,
       "invalid_stop_marks": 0,
       "negative_estimated_quote_cost_count": 2,
       "quote_timestamp_verified_count": 0,
-      "stop_exits": 2,
-      "stop_net_overrun_count": 2,
+      "stop_exits": 3,
+      "stop_net_overrun_count": 3,
       "stop_over_20pct_net_loss_count": 0,
-      "stop_raw_gap_count": 2,
-      "valid_stop_exits": 2,
+      "stop_raw_gap_count": 3,
+      "valid_stop_exits": 3,
       "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 2.91573,
+          "estimated_net_return_pct": -14.996267,
+          "estimated_pnl_usdc": -0.112472,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 13.628,
+          "net_stop_overrun_pp": 6.996267,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -12.080537,
+          "raw_stop_overrun_pp": 4.080537,
+          "symbol": "ANTS"
+        },
         {
           "entry_regime": "RISK_OFF",
           "estimated_cost_pct": -4.234279,
