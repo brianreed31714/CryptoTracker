@@ -1,0 +1,75 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 16,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    },
+    "diy_whale": {
+      "all_completed_exits": 19,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 2,
+      "stop_net_overrun_count": 1,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 2,
+      "valid_stop_exits": 2,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 0.036453,
+          "estimated_net_return_pct": -8.266267,
+          "estimated_pnl_usdc": -0.061997,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 10.03,
+          "net_stop_overrun_pp": 0.266267,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.229814,
+          "raw_stop_overrun_pp": 0.229814,
+          "symbol": "DESSA"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": -106.957772,
+          "estimated_net_return_pct": 6.986533,
+          "estimated_pnl_usdc": 0.052399,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 118.233,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -99.971239,
+          "raw_stop_overrun_pp": 91.971239,
+          "symbol": "Dacity"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 6,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-11-01",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
