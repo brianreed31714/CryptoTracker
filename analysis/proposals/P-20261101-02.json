@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261101-02",
+  "title": "Continue runner_hunter evaluation in shadow only",
+  "change_type": "RESEARCH",
+  "target": "paper_research runner_hunter evaluation",
+  "current": "Preliminary shadow leader with 17 completed trades; no promotion candidate is reported.",
+  "proposed": "Continue shadow-only, execution-cost-aware evaluation and compare against its paper cohort using non-overlapping signal-level outcomes; do not promote to live based on the current samples.",
+  "evidence": [
+    "Shadow runner_hunter has 17 completions, 70.59% wins, median net return 1.7066%, and 25.71% maximum drawdown.",
+    "The separate paper runner_hunter cohort has only 7 completions and median net return -0.3903%, indicating limited and not yet consistent evidence across modes."
+  ],
+  "risk": "Small, potentially overlapping or selected cohorts may inflate apparent performance; the 25.71% shadow drawdown also signals meaningful downside despite positive median return.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-01",
+  "created_at": "2026-11-02T17:06:22",
+  "updated_at": "2026-11-02T17:06:22",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261101-01",
+  "title": "Restore signal-level forward-outcome reporting",
+  "change_type": "CODE",
+  "target": "surge follow-up and missed-opportunity audit pipeline",
+  "current": "44,383 follow-up rows are present, but score_bands is empty and no outcome horizons are detected; rejected-signal audit counts are available without usable reported outcome detail.",
+  "proposed": "After human approval, audit the joins and reporting so each eligible signal has clearly matched 30/60/120-minute outcomes, MFE/MAE, decision path, and coverage denominators. Keep the work in shadow/research and do not change trading thresholds.",
+  "evidence": [
+    "Follow-up metrics report 44,383 rows but score_bands={} and horizons_found=[].",
+    "The missed-opportunity audit reports 107 usable rejected signals and sample counts of 121 at 30 minutes and 119 at 60 minutes, but the supplied metrics do not provide their outcome distribution or false-positive cost."
+  ],
+  "risk": "Incorrect signal-time joins or incomplete horizon handling could introduce lookahead or mislabel outcomes; validate timestamps and coverage before using the report for strategy decisions.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-01",
+  "created_at": "2026-11-02T17:06:22",
+  "updated_at": "2026-11-02T17:06:22",
+  "implementation": {},
+  "deployment": {}
+}
