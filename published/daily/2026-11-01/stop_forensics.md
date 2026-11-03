@@ -4,7 +4,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | balanced_ev | -5.0% | 0 | 0 | 0 | 0 | N/A |
 | runner_hunter | -7.0% | 0 | 0 | 0 | 0 | N/A |
-| diy_whale | -8.0% | 2 | 0 | 2 | 1 | DESSA -8.27% |
+| diy_whale | -8.0% | 3 | 0 | 3 | 2 | Anakin -8.56% |
 
 **No quote-observation timestamp is present in the trade ledger.** Holding minutes are not quote age. Stop triggers do not guarantee fills. Simulated costs and Jupiter labels do not establish executable returns.
 
