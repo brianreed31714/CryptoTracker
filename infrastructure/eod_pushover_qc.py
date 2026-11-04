@@ -58,7 +58,11 @@ def format_paper_sleeves(root, day):
 
 
 def _number(value):
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool):
         return None
     import math
-    return float(value) if math.isfinite(value) else None
+    try:
+        parsed = float(value)
+    except (ValueError, TypeError, OverflowError):
+        return None
+    return parsed if math.isfinite(parsed) else None
