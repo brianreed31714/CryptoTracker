@@ -8,6 +8,16 @@ from infrastructure.eod_pushover_qc import format_paper_sleeves
 
 
 class EodPushoverQcTests(unittest.TestCase):
+    def test_publisher_precedes_dated_paper_qc(self):
+        source = (Path(__file__).parent / "auto_trader_with_alerts_v11_10_research_fairness.py").read_text(encoding="utf-8")
+        start = source.index("def maybe_send_crypto_eod_report(")
+        end = source.index("def ", start + 4)
+        eod = source[start:end]
+        self.assertLess(
+            eod.index("evidence_publisher.publish_daily_evidence(report_date)"),
+            eod.index("lines.extend(format_paper_sleeves(ROOT, report_date))"),
+        )
+
     def test_missing_evidence_is_not_zero(self):
         with tempfile.TemporaryDirectory() as folder:
             lines = format_paper_sleeves(folder, "2026-11-02")
