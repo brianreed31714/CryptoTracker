@@ -3447,7 +3447,7 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
 
     # Distinct from the host account. Fail closed on missing or mismatched paper evidence.
     from infrastructure.eod_pushover_qc import format_paper_sleeves
-    lines.extend(format_paper_sleeves(BASE_DIR, report_date))
+    lines.extend(format_paper_sleeves(ROOT, report_date))
 
     missed = generate_missed_opportunity_report(
         settings,
