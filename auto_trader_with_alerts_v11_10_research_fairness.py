@@ -3445,10 +3445,6 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     except Exception as exc:
         print(f"  Paper research EOD warning: {exc}")
 
-    # Distinct from the host account. Fail closed on missing or mismatched paper evidence.
-    from infrastructure.eod_pushover_qc import format_paper_sleeves
-    lines.extend(format_paper_sleeves(ROOT, report_date))
-
     missed = generate_missed_opportunity_report(
         settings,
         report_date=report_date,
@@ -3495,6 +3491,10 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     except Exception as exc:
         print(f"  Evidence publish warning: {exc}")
         lines.append("Evidence publish: ERROR")
+
+    # Distinct from the host account. Fail closed on missing or mismatched paper evidence.
+    from infrastructure.eod_pushover_qc import format_paper_sleeves
+    lines.extend(format_paper_sleeves(ROOT, report_date))
 
     if position:
         open_text = f"Open: {position.get('symbol', '?')} ${safe_number(position.get('entry_usdc')):.2f} entry"
