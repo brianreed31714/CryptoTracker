@@ -3402,7 +3402,7 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
     account_return = day_status.get("return_pct")
 
     lines = [
-        f"Account day: {account_return:+.2f}%" if account_return is not None else "Account day: unavailable",
+        f"HOST ACCOUNT DAY (not paper sleeves): {account_return:+.2f}%" if account_return is not None else "HOST ACCOUNT DAY: MISSING (unverified valuation)",
         f"Realized: ${stats['realized']:+.4f} | Trade return: {stats['trade_return_pct']:+.2f}%",
         f"Completed: {stats['completed']} | W/L: {stats['wins']}/{stats['losses']}",
     ]
@@ -3444,6 +3444,10 @@ def maybe_send_crypto_eod_report(settings, api_key, wallet_address, force=False)
         lines.append(paper_lab.eod_summary_text(report_date))
     except Exception as exc:
         print(f"  Paper research EOD warning: {exc}")
+
+    # Distinct from the host account. Fail closed on missing or mismatched paper evidence.
+    from infrastructure.eod_pushover_qc import format_paper_sleeves
+    lines.extend(format_paper_sleeves(BASE_DIR, report_date))
 
     missed = generate_missed_opportunity_report(
         settings,
