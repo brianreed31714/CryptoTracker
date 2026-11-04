@@ -1,22 +1,30 @@
 {
-  "generated_at": "2026-11-02T17:06:22",
-  "review_date": "2026-11-01",
-  "proposal_count": 2,
+  "generated_at": "2026-11-03T17:06:34",
+  "review_date": "2026-11-02",
+  "proposal_count": 3,
   "pending": [
-    "P-20261101-01",
-    "P-20261101-02"
+    "P-20261102-01",
+    "P-20261102-02",
+    "P-20261102-03"
   ],
   "proposals": [
     {
-      "proposal_id": "P-20261101-01",
-      "title": "Restore signal-level forward-outcome reporting",
+      "proposal_id": "P-20261102-01",
+      "title": "Validate follow-up outcome linkage before strategy tuning",
       "confidence": "MEDIUM",
       "recommended_mode": "SHADOW",
       "status": "PENDING"
     },
     {
-      "proposal_id": "P-20261101-02",
-      "title": "Continue runner_hunter evaluation in shadow only",
+      "proposal_id": "P-20261102-02",
+      "title": "Continue runner comparison without promotion",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261102-03",
+      "title": "Audit smart-money campaign strength inputs",
       "confidence": "LOW",
       "recommended_mode": "SHADOW",
       "status": "PENDING"

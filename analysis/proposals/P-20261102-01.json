@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261102-01",
+  "title": "Validate follow-up outcome linkage before strategy tuning",
+  "change_type": "RESEARCH",
+  "target": "SURGE_FOLLOWUP outcome reporting and missed-opportunity audit",
+  "current": "45,560 follow-up rows; score_bands is empty and horizons_found is empty in the supplied metrics, despite an available missed-opportunity report.",
+  "proposed": "In shadow research, audit deduplication and token/signal-to-outcome joins, then report 30/60/120-minute outcome coverage and rejection-level MFE, MAE, and false-positive cost before changing entry or rejection rules.",
+  "evidence": [
+    "Follow-up metrics contain 45,560 rows but no score bands or horizons.",
+    "The missed-opportunity audit has 101 usable rejected signals but supplies no rejection-level cost or outcome summary."
+  ],
+  "risk": "Join or deduplication errors could create misleading outcome rates; validate samples against source records before using the report for decisions.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-02",
+  "created_at": "2026-11-03T17:06:34",
+  "updated_at": "2026-11-03T17:06:34",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261102-03",
+  "title": "Audit smart-money campaign strength inputs",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor campaign scoring and wallet scorecard",
+  "current": "120 campaign rows across 21 unique campaigns; median campaign strength 0, no multi-wallet convergence, and no wallet 30-minute scorecard entries.",
+  "proposed": "In shadow research, verify campaign-strength and wallet-scorecard input coverage and scoring semantics against source events; do not use campaign strength to alter ranking or entries until the audit is complete.",
+  "evidence": [
+    "Feed health reports latest status OK and 100% latest wallet coverage, but also 1,356 failed wallet checks in the available history.",
+    "The campaign metrics show zero median strength and zero multi-wallet convergence, while the wallet scorecard is empty."
+  ],
+  "risk": "An audit may identify no data defect; treating the current zero values as a defect without source-level validation could lead to unjustified signal changes.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-02",
+  "created_at": "2026-11-03T17:06:34",
+  "updated_at": "2026-11-03T17:06:34",
+  "implementation": {},
+  "deployment": {}
+}

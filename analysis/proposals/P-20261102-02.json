@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261102-02",
+  "title": "Continue runner comparison without promotion",
+  "change_type": "RESEARCH",
+  "target": "Shadow runner model evaluation",
+  "current": "runner_hunter has 11 completed trades and xp_runner_control has 13; no promotion candidates are reported.",
+  "proposed": "Keep both variants in shadow and collect a deduplicated, candidate-matched comparison with entry and exit outcomes before considering any promotion; make no live or paper execution change from these aggregates.",
+  "evidence": [
+    "runner_hunter reports 8 wins from 11 trades, median net return 5.7708%, and profit factor 12.8313.",
+    "xp_runner_control reports 9 wins from 13 trades, median net return 5.7708%, and profit factor 7.0586.",
+    "The samples are small, and the reported shadow metrics do not establish independence or a causal advantage over a matched control."
+  ],
+  "risk": "Promising small-sample results may regress out of sample or reflect overlapping candidates and selection effects.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-02",
+  "created_at": "2026-11-03T17:06:34",
+  "updated_at": "2026-11-03T17:06:34",
+  "implementation": {},
+  "deployment": {}
+}
