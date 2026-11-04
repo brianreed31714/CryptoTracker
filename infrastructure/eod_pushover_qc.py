@@ -17,7 +17,7 @@ def format_paper_sleeves(root, day):
     base = Path(root) / "published" / "daily" / day
     try:
         summary = json.loads((base / "paper_summary.json").read_text(encoding="utf-8"))
-        if summary.get("date") != day:
+        if summary.get("goal_1pct_daily", {}).get("date") != day:
             raise ValueError("summary date mismatch")
         sleeves = summary["goal_1pct_daily"]["sleeves"]
         with (base / "raw" / "paper_trades.csv").open(newline="", encoding="utf-8") as handle:
