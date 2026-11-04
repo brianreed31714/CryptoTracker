@@ -37,7 +37,7 @@ class EodPushoverQcTests(unittest.TestCase):
                     "daily_realized_pnl_usd": 0.25,
                 }
             (base / "paper_summary.json").write_text(json.dumps({
-                "date": "2026-11-02", "goal_1pct_daily": {"sleeves": sleeves}
+                "goal_1pct_daily": {"date": "2026-11-02", "sleeves": sleeves}
             }))
             with (base / "raw/paper_trades.csv").open("w", newline="") as handle:
                 writer = csv.DictWriter(handle, fieldnames=["date", "model", "action", "net_return_pct"])
@@ -52,7 +52,7 @@ class EodPushoverQcTests(unittest.TestCase):
             self.assertIn("Invested-capital portfolio ROI: MISSING", lines)
             sleeves["balanced_ev"]["daily_completed"] = 3
             (base / "paper_summary.json").write_text(json.dumps({
-                "date": "2026-11-02", "goal_1pct_daily": {"sleeves": sleeves}
+                "goal_1pct_daily": {"date": "2026-11-02", "sleeves": sleeves}
             }))
             lines = "\n".join(format_paper_sleeves(folder, "2026-11-02"))
             self.assertIn("Core: MISSING / RECONCILIATION REQUIRED", lines)
