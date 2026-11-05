@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261103-03",
+  "title": "Maintain Luna calibration as a shadow study",
+  "change_type": "RESEARCH",
+  "target": "Luna review and outcome-calibration reporting",
+  "current": "AI confirmation is enabled with a maximum bonus of 5; daily review log has 22 rows, and outcome aggregates are not shown linked to individual Luna setup predictions.",
+  "proposed": "Keep the current bonus unchanged and evaluate predictions in SHADOW, linking setup, confidence, and timestamp to fixed-horizon outcomes before proposing any prompt, threshold, or bonus change.",
+  "evidence": [
+    "The 22 daily reviews have median confidence 76, which is too small to establish calibration.",
+    "POSITIVE|MEDIUM outcome groups have n=11 at 30 minutes with median return -0.976% and n=11 at 60 minutes with median -5.445%; the 120-minute group has n=9 and median -17.564%."
+  ],
+  "risk": "Small samples, incomplete labels, or a mismatch between review records and outcome groups could produce a misleading calibration assessment.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-03",
+  "created_at": "2026-11-04T17:06:27",
+  "updated_at": "2026-11-04T17:06:27",
+  "implementation": {},
+  "deployment": {}
+}

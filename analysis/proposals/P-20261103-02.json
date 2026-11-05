@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261103-02",
+  "title": "Report path-based follow-up and rejection outcomes",
+  "change_type": "RESEARCH",
+  "target": "surge_followup and missed_opportunity daily reporting",
+  "current": "Follow-up metrics expose no score bands or horizons; rejected-signal audit has 90 usable rows but no summarized MFE/MAE or false-positive cost.",
+  "proposed": "Validate outcome joins and produce accepted-versus-rejected 30/60/120-minute counts, median return, MFE, MAE, and false-positive cost by path and score band before considering entry-gate changes.",
+  "evidence": [
+    "The follow-up log has 47,406 rows, while reported score_bands is empty and horizons_found is empty.",
+    "The missed-opportunity audit reports 95 rejected signal rows and 90 usable rejected signals, but the supplied metrics contain no outcome summary for them."
+  ],
+  "risk": "Incorrect signal-to-outcome joins, repeated observations, or survivorship bias could make the added summaries misleading.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-03",
+  "created_at": "2026-11-04T17:06:27",
+  "updated_at": "2026-11-04T17:06:27",
+  "implementation": {},
+  "deployment": {}
+}
