@@ -4,7 +4,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | balanced_ev | -5.0% | 1 | 0 | 1 | 0 | MAMESUKE -4.42% |
 | runner_hunter | -7.0% | 1 | 0 | 1 | 1 | Ahsoka -9.71% |
-| diy_whale | -8.0% | 1 | 0 | 1 | 0 | ANONVOYAGE -6.57% |
+| diy_whale | -8.0% | 3 | 0 | 3 | 1 | PREDICT -98.65% |
 
 **No quote-observation timestamp is present in the trade ledger.** Holding minutes are not quote age. Stop triggers do not guarantee fills. Simulated costs and Jupiter labels do not establish executable returns.
 
