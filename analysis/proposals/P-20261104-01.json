@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261104-01",
+  "title": "Validate follow-up outcome and rejection-cost reporting",
+  "change_type": "RESEARCH",
+  "target": "Daily follow-up and missed-opportunity analysis",
+  "current": "48,610 follow-up rows are summarized with empty horizons_found and score_bands; the missed-opportunity audit reports usable rejected signals but no false-positive cost distribution.",
+  "proposed": "In shadow research, validate signal-level outcome joins and publish 30m, 60m, and 120m sample counts, path and score-band MFE/MAE, and rejected-signal false-positive cost. Deduplicate horizon observations by signal when calculating sample sizes. Do not alter entry thresholds.",
+  "evidence": [
+    "The daily summary reports 48,610 follow-up rows but no recognized outcome horizons or score bands.",
+    "The missed-opportunity audit reports 107 rejected signals and 106 usable rejected signals, but no false-positive cost metrics.",
+    "The audit has 130 30m and 128 60m samples, so outcome completeness and linkage can be checked against nontrivial raw counts."
+  ],
+  "risk": "Incorrect joins, incomplete horizon maturity, or survivorship bias could produce misleading outcome and false-positive estimates.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-04",
+  "created_at": "2026-11-05T17:06:48",
+  "updated_at": "2026-11-05T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261104-02",
+  "title": "Continue a controlled staged-versus-patient exit comparison",
+  "change_type": "RESEARCH",
+  "target": "Paper exit-model evaluation",
+  "current": "staged_runner and patient_runner each have 14 completed paper trades; both have a 50.0% win rate, with median net returns of +0.236% and +0.2233%, respectively.",
+  "proposed": "Continue shadow/paper evaluation on the same eligible entry set, varying only the exit policy, and report per-signal paired outcomes, median net return, MFE/MAE, profit factor, and drawdown before considering promotion.",
+  "evidence": [
+    "staged_runner: 14 completed, 7 wins, profit factor 1.349, maximum drawdown 6.97%.",
+    "patient_runner: 14 completed, 7 wins, profit factor 1.2908, maximum drawdown 7.82%.",
+    "The modest observed differences and small sample do not establish an exit-policy advantage."
+  ],
+  "risk": "The current model samples may not use identical entries; without paired evaluation, apparent exit differences may reflect selection effects rather than exit quality.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-04",
+  "created_at": "2026-11-05T17:06:48",
+  "updated_at": "2026-11-05T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}
