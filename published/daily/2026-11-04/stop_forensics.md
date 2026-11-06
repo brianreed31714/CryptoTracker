@@ -2,7 +2,7 @@
 
 | Sleeve | Stop trigger | Stops | Invalid | Raw gap | Net overrun | Worst net stop |
 |---|---:|---:|---:|---:|---:|---:|
-| balanced_ev | -5.0% | 3 | 0 | 3 | 1 | RICO -6.97% |
+| balanced_ev | -5.0% | 4 | 0 | 4 | 1 | RICO -6.97% |
 | runner_hunter | -7.0% | 0 | 0 | 0 | 0 | N/A |
 | diy_whale | -8.0% | 4 | 0 | 4 | 4 | VI -16.65% |
 
