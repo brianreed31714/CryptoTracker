@@ -1,55 +1,53 @@
-# CryptoTracker Proposals — 2026-11-04
+# CryptoTracker Proposals — 2026-11-05
 
 These are the current model-improvement proposals from the nightly review.
 Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20261104-01 — Validate follow-up outcome and rejection-cost reporting
+## P-20261105-01 — Validate anti-chase on a matched shadow cohort
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Daily follow-up and missed-opportunity analysis`
-- **Current:** 48,610 follow-up rows are summarized with empty horizons_found and score_bands; the missed-opportunity audit reports usable rejected signals but no false-positive cost distribution.
-- **Proposed:** In shadow research, validate signal-level outcome joins and publish 30m, 60m, and 120m sample counts, path and score-band MFE/MAE, and rejected-signal false-positive cost. Deduplicate horizon observations by signal when calculating sample sizes. Do not alter entry thresholds.
-- **Confidence:** MEDIUM
+- **Target:** `paper_research anti_chase evaluation`
+- **Current:** Paper anti_chase: 12 completed trades, 50% wins, median net return +0.0754%, profit factor 3.2332. Shadow anti_chase: 50 completed trades, 32% wins, median -1.0657%, profit factor 0.7574.
+- **Proposed:** Research only: compare anti_chase with a fixed baseline on identical candidate/time snapshots and execution assumptions; report signal-level median net return, hit rate, profit factor, drawdown, and false-positive cost. Keep both in shadow until a preregistered sample of at least 30 non-overlapping completed trades per model is available.
+- **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Incorrect joins, incomplete horizon maturity, or survivorship bias could produce misleading outcome and false-positive estimates.
+- **Risk:** Matched shadow results may still be affected by overlapping tokens, market-regime changes, or quote assumptions and may not predict live execution.
 - **Evidence:**
-  - The daily summary reports 48,610 follow-up rows but no recognized outcome horizons or score bands.
-  - The missed-opportunity audit reports 107 rejected signals and 106 usable rejected signals, but no false-positive cost metrics.
-  - The audit has 130 30m and 128 60m samples, so outcome completeness and linkage can be checked against nontrivial raw counts.
+  - The paper and shadow summaries disagree materially on anti_chase outcomes.
+  - The existing paper sample is only 12 trades, and the summaries do not establish that the two cohorts are comparable.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261104-01`
+`Approve P-20261105-01`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261104-01`
+`Decline P-20261105-01`
 
 ---
 
-## P-20261104-02 — Continue a controlled staged-versus-patient exit comparison
+## P-20261105-02 — Shadow-test Luna horizon decay before changing exits
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Paper exit-model evaluation`
-- **Current:** staged_runner and patient_runner each have 14 completed paper trades; both have a 50.0% win rate, with median net returns of +0.236% and +0.2233%, respectively.
-- **Proposed:** Continue shadow/paper evaluation on the same eligible entry set, varying only the exit policy, and report per-signal paired outcomes, median net return, MFE/MAE, profit factor, and drawdown before considering promotion.
+- **Target:** `Luna POSITIVE|MEDIUM outcome and exit evaluation`
+- **Current:** No Luna-driven exit change is established; the POSITIVE|MEDIUM group has 11 observations per reported horizon.
+- **Proposed:** Research only: run a signal-level, paired shadow comparison of fixed 30-minute and 60-minute exits for this group, including net returns, MFE/MAE, and transaction costs. Keep current exit settings unchanged and collect at least 30 independent signals before considering calibration.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** The current model samples may not use identical entries; without paired evaluation, apparent exit differences may reflect selection effects rather than exit quality.
+- **Risk:** The apparent decay may be driven by a few tokens, overlapping horizon labels, or unmodeled costs; a fixed time exit could also truncate genuine runners.
 - **Evidence:**
-  - staged_runner: 14 completed, 7 wins, profit factor 1.349, maximum drawdown 6.97%.
-  - patient_runner: 14 completed, 7 wins, profit factor 1.2908, maximum drawdown 7.82%.
-  - The modest observed differences and small sample do not establish an exit-policy advantage.
+  - For 11 POSITIVE|MEDIUM observations, the reported positive rate falls from 63.64% at 30 minutes to 27.27% at 60 minutes.
+  - Median return falls from +0.471% at 30 minutes to -2.216% at 60 minutes, while median MAE worsens from -2.640% to -6.794%.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261104-02`
+`Approve P-20261105-02`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261104-02`
+`Decline P-20261105-02`
 
 ---
 

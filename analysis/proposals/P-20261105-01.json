@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261105-01",
+  "title": "Validate anti-chase on a matched shadow cohort",
+  "change_type": "RESEARCH",
+  "target": "paper_research anti_chase evaluation",
+  "current": "Paper anti_chase: 12 completed trades, 50% wins, median net return +0.0754%, profit factor 3.2332. Shadow anti_chase: 50 completed trades, 32% wins, median -1.0657%, profit factor 0.7574.",
+  "proposed": "Research only: compare anti_chase with a fixed baseline on identical candidate/time snapshots and execution assumptions; report signal-level median net return, hit rate, profit factor, drawdown, and false-positive cost. Keep both in shadow until a preregistered sample of at least 30 non-overlapping completed trades per model is available.",
+  "evidence": [
+    "The paper and shadow summaries disagree materially on anti_chase outcomes.",
+    "The existing paper sample is only 12 trades, and the summaries do not establish that the two cohorts are comparable."
+  ],
+  "risk": "Matched shadow results may still be affected by overlapping tokens, market-regime changes, or quote assumptions and may not predict live execution.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-05",
+  "created_at": "2026-11-06T17:06:45",
+  "updated_at": "2026-11-06T17:06:45",
+  "implementation": {},
+  "deployment": {}
+}
