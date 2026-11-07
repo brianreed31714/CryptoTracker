@@ -964,3 +964,140 @@ logged_at,event,signal_id,symbol,token_address,entry_path,local_entry_pass,dedup
 2026-11-05T20:02:02.811258,OUTCOME_DUE,FeMbDoX7-1793930496-105,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,120,120.442,,,Scheduled forward-outcome horizon is due
 2026-11-05T20:02:04.378287,OUTCOME_CAPTURED,FeMbDoX7-1793930496-105,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,120,120.442,OK,scanner,Forward outcome written to surge_followup_log.csv
 2026-11-05T20:02:04.591253,SIGNAL_COMPLETE,FeMbDoX7-1793930496-105,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T20:05:15.844282,OUTCOME_DUE,Fyff8ZbT-1793934289-190,Chika,Fyff8ZbT3omcwoqmAgLbXH25tzqQp1FoM4UYWtePpump,NONE,0,,,60,60.419,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:05:17.659980,OUTCOME_CAPTURED,Fyff8ZbT-1793934289-190,Chika,Fyff8ZbT3omcwoqmAgLbXH25tzqQp1FoM4UYWtePpump,NONE,0,,,60,60.419,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:05:18.522597,OUTCOME_DUE,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,31.607,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:05:19.496020,OUTCOME_CAPTURED,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,31.607,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:15:37.151632,OUTCOME_DUE,ACv7iJ7x-1793934829-65,RETARD,ACv7iJ7xVfohvfXp3dt7AfAPcekL2dHsYCbJw8Vp1osr,NONE,0,,,60,61.755,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:15:39.151583,OUTCOME_CAPTURED,ACv7iJ7x-1793934829-65,RETARD,ACv7iJ7xVfohvfXp3dt7AfAPcekL2dHsYCbJw8Vp1osr,NONE,0,,,60,61.755,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:35:13.422692,OUTCOME_DUE,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,61.539,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:35:14.628428,OUTCOME_CAPTURED,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,61.539,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:37:32.111989,CANDIDATE_SEEN,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T20:37:32.328791,PATH_ASSIGNED,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T20:37:32.563912,SIGNAL_REGISTERED,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T20:41:55.512027,CANDIDATE_SEEN,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T20:41:55.802213,DEDUPED,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,10.0,4.39,,,,,Existing signal inside dedupe window; no new follow-up episode created
+2026-11-05T20:41:56.088861,CANDIDATE_SEEN,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T20:41:56.368052,PATH_ASSIGNED,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T20:41:56.704809,SIGNAL_REGISTERED,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T20:42:01.637303,OUTCOME_DUE,DNerJKig-1793932870-130,Bubbles,DNerJKigs1xZ5rCBDtU9a2ACxvskScMnSihWY9yYpump,NONE,0,,,120,120.838,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:42:05.542096,OUTCOME_CAPTURED,DNerJKig-1793932870-130,Bubbles,DNerJKigs1xZ5rCBDtU9a2ACxvskScMnSihWY9yYpump,NONE,0,,,120,120.838,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:42:05.846439,SIGNAL_COMPLETE,DNerJKig-1793932870-130,Bubbles,DNerJKigs1xZ5rCBDtU9a2ACxvskScMnSihWY9yYpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T20:47:42.191874,CANDIDATE_SEEN,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T20:47:42.417903,DEDUPED,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,10.0,5.778,,,,,Existing signal inside dedupe window; no new follow-up episode created
+2026-11-05T20:47:42.664830,OUTCOME_DUE,8Xg89xT8-1793933169-55,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,121.555,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:47:44.656434,OUTCOME_CAPTURED,8Xg89xT8-1793933169-55,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,121.555,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:47:44.871355,SIGNAL_COMPLETE,8Xg89xT8-1793933169-55,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T20:50:37.699031,CANDIDATE_SEEN,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T20:50:37.911186,PATH_ASSIGNED,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T20:50:38.133951,SIGNAL_REGISTERED,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T20:55:29.772845,OUTCOME_DUE,HsprHxBR-1793933705-85,GATO,HsprHxBRgiVaQdRf3TnKNuZZtaX9JUSPgMFdAkk6pump,NONE,0,,,120,120.408,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:55:31.730404,OUTCOME_CAPTURED,HsprHxBR-1793933705-85,GATO,HsprHxBRgiVaQdRf3TnKNuZZtaX9JUSPgMFdAkk6pump,NONE,0,,,120,120.408,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:55:31.937122,SIGNAL_COMPLETE,HsprHxBR-1793933705-85,GATO,HsprHxBRgiVaQdRf3TnKNuZZtaX9JUSPgMFdAkk6pump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T20:58:01.913123,OUTCOME_DUE,oCZHH8Hn-1793933867-130,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,120.238,,,Scheduled forward-outcome horizon is due
+2026-11-05T20:58:03.463050,OUTCOME_CAPTURED,oCZHH8Hn-1793933867-130,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,120.238,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T20:58:03.674526,SIGNAL_COMPLETE,oCZHH8Hn-1793933867-130,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T21:04:53.503689,OUTCOME_DUE,Fyff8ZbT-1793934289-190,Chika,Fyff8ZbT3omcwoqmAgLbXH25tzqQp1FoM4UYWtePpump,NONE,0,,,120,120.057,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:04:54.981886,OUTCOME_CAPTURED,Fyff8ZbT-1793934289-190,Chika,Fyff8ZbT3omcwoqmAgLbXH25tzqQp1FoM4UYWtePpump,NONE,0,,,120,120.057,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:04:55.194558,SIGNAL_COMPLETE,Fyff8ZbT-1793934289-190,Chika,Fyff8ZbT3omcwoqmAgLbXH25tzqQp1FoM4UYWtePpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T21:09:29.871080,OUTCOME_DUE,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,31.952,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:09:31.332701,OUTCOME_CAPTURED,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,31.952,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:14:08.974386,OUTCOME_DUE,ACv7iJ7x-1793934829-65,RETARD,ACv7iJ7xVfohvfXp3dt7AfAPcekL2dHsYCbJw8Vp1osr,NONE,0,,,120,120.313,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:14:10.698094,OUTCOME_CAPTURED,ACv7iJ7x-1793934829-65,RETARD,ACv7iJ7xVfohvfXp3dt7AfAPcekL2dHsYCbJw8Vp1osr,NONE,0,,,120,120.313,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:14:10.950562,SIGNAL_COMPLETE,ACv7iJ7x-1793934829-65,RETARD,ACv7iJ7xVfohvfXp3dt7AfAPcekL2dHsYCbJw8Vp1osr,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T21:14:11.219238,OUTCOME_DUE,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,32.214,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:14:12.325239,OUTCOME_CAPTURED,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,32.214,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:16:39.276178,CANDIDATE_SEEN,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:16:39.494844,PATH_ASSIGNED,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T21:16:39.711907,SIGNAL_REGISTERED,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T21:21:35.371924,OUTCOME_DUE,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,30,30.961,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:21:36.891574,OUTCOME_CAPTURED,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,30,30.961,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:24:27.810670,CANDIDATE_SEEN,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:24:28.175748,PATH_ASSIGNED,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T21:24:28.415231,SIGNAL_REGISTERED,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T21:27:03.785775,CANDIDATE_SEEN,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NORMAL,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:27:04.025067,DEDUPED,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NORMAL,,10.0,2.6,,,,,Existing signal inside dedupe window; no new follow-up episode created
+2026-11-05T21:32:22.351311,CANDIDATE_SEEN,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NORMAL,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:32:22.621076,DEDUPED,,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NORMAL,,10.0,7.909,,,,,Existing signal inside dedupe window; no new follow-up episode created
+2026-11-05T21:32:22.874161,CANDIDATE_SEEN,,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:32:23.141738,PATH_ASSIGNED,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T21:32:23.458323,SIGNAL_REGISTERED,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T21:34:49.229393,CANDIDATE_SEEN,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:34:49.444329,PATH_ASSIGNED,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T21:34:49.656872,SIGNAL_REGISTERED,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T21:34:51.209207,OUTCOME_DUE,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,121.218,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:34:52.192548,OUTCOME_CAPTURED,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,121.218,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:34:52.413118,SIGNAL_COMPLETE,8Xg89xT8-1793936018-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T21:39:33.447976,OUTCOME_DUE,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,62.022,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:39:34.958996,OUTCOME_CAPTURED,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,62.022,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:44:17.611356,OUTCOME_DUE,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,62.368,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:44:19.126197,OUTCOME_CAPTURED,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,62.368,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:46:47.057516,OUTCOME_DUE,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,30.129,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:46:48.537487,OUTCOME_CAPTURED,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,30,30.129,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:49:29.013307,CANDIDATE_SEEN,,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T21:49:29.321913,PATH_ASSIGNED,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T21:49:29.532285,SIGNAL_REGISTERED,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T21:51:55.068491,OUTCOME_DUE,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,60,61.289,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:51:56.607601,OUTCOME_CAPTURED,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,60,61.289,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T21:56:50.593246,OUTCOME_DUE,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,30,32.379,,,Scheduled forward-outcome horizon is due
+2026-11-05T21:56:52.131275,OUTCOME_CAPTURED,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,30,32.379,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:04:03.254261,CANDIDATE_SEEN,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T22:04:03.474108,PATH_ASSIGNED,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T22:04:03.734519,SIGNAL_REGISTERED,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T22:04:07.033085,OUTCOME_DUE,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,30,31.728,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:04:08.344825,OUTCOME_CAPTURED,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,30,31.728,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:06:35.290143,CANDIDATE_SEEN,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T22:06:35.538287,DEDUPED,,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,,10.0,2.534,,,,,Existing signal inside dedupe window; no new follow-up episode created
+2026-11-05T22:06:35.788497,OUTCOME_DUE,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,31.775,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:06:37.325416,OUTCOME_CAPTURED,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,31.775,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:18:52.608167,OUTCOME_DUE,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,62.222,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:18:54.513456,OUTCOME_CAPTURED,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,60,62.222,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:21:21.713339,OUTCOME_DUE,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,30,31.843,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:21:22.866574,OUTCOME_CAPTURED,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,30,31.843,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:26:18.670631,OUTCOME_DUE,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,60,61.847,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:26:20.143743,OUTCOME_CAPTURED,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,60,61.847,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:33:54.577518,OUTCOME_DUE,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,60,61.537,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:33:56.046843,OUTCOME_CAPTURED,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,60,61.537,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:37:07.101827,OUTCOME_DUE,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,62.297,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:37:08.680927,OUTCOME_CAPTURED,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,62.297,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:37:10.399834,OUTCOME_DUE,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,33.064,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:37:11.481917,OUTCOME_CAPTURED,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,30,33.064,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:39:47.215207,OUTCOME_DUE,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,122.251,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:39:48.707797,OUTCOME_CAPTURED,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,122.251,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:39:48.919885,SIGNAL_COMPLETE,oCZHH8Hn-1793939852-105,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T22:42:16.634971,OUTCOME_DUE,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,120.352,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:42:18.278481,OUTCOME_CAPTURED,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,120.352,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:42:18.497025,SIGNAL_COMPLETE,8Xg89xT8-1793940115-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T22:49:45.637347,OUTCOME_DUE,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,60,60.276,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:49:47.566493,OUTCOME_CAPTURED,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,60,60.276,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:52:10.002985,OUTCOME_DUE,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,120,121.538,,,Scheduled forward-outcome horizon is due
+2026-11-05T22:52:11.595266,OUTCOME_CAPTURED,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,120,121.538,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T22:52:11.801240,SIGNAL_COMPLETE,FeMbDoX7-1793940637-60,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T23:04:52.527440,CANDIDATE_SEEN,,SI276,HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T23:04:52.768822,PATH_ASSIGNED,HMYd9tos-1793948692-60,SI276,HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T23:04:52.988332,SIGNAL_REGISTERED,HMYd9tos-1793948692-60,SI276,HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T23:04:56.589369,OUTCOME_DUE,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,60.854,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:04:57.569602,OUTCOME_CAPTURED,oCZHH8Hn-1793945043-140,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,60,60.854,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:17:11.389309,OUTCOME_DUE,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,120.535,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:17:13.266445,OUTCOME_CAPTURED,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,120,120.535,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:17:13.516386,SIGNAL_COMPLETE,8Xg89xT8-1793942199-60,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T23:26:29.052775,OUTCOME_DUE,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,120,122.021,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:26:30.571466,OUTCOME_CAPTURED,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,120,122.021,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:26:30.783749,SIGNAL_COMPLETE,FeMbDoX7-1793942667-80,three,FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump,EARLY_ACCEL,1,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T23:33:41.078541,OUTCOME_DUE,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,120,121.312,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:33:42.600862,OUTCOME_CAPTURED,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,120,121.312,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:33:42.823743,SIGNAL_COMPLETE,8UQdy5sH-1793943142-65,COGE,8UQdy5sHMVWUWSHeA5B3ZuuAVNumjSLPXdf19MXcpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T23:36:05.040695,CANDIDATE_SEEN,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T23:36:05.258169,PATH_ASSIGNED,8Xg89xT8-1793950565-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T23:36:05.471083,SIGNAL_REGISTERED,8Xg89xT8-1793950565-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T23:36:07.002097,OUTCOME_DUE,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,121.296,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:36:07.967709,OUTCOME_CAPTURED,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,120,121.296,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:36:08.193651,SIGNAL_COMPLETE,oCZHH8Hn-1793943289-155,AMD,oCZHH8HnEBCPipEGdEcP3f45pQAaM7nh7P6EkRPpump,NONE,0,,,,,,,All configured follow-up horizons are finalized
+2026-11-05T23:36:09.729440,OUTCOME_DUE,HMYd9tos-1793948692-60,SI276,HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump,NONE,0,,,30,31.241,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:36:10.680202,OUTCOME_CAPTURED,HMYd9tos-1793948692-60,SI276,HMYd9tosnUXuNHmq7pXmoePRVBLBBjA3JBfydq6upump,NONE,0,,,30,31.241,OK,scanner,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:50:07.529122,CANDIDATE_SEEN,,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,,,,,,,,SURGING candidate entered forward-outcome registration
+2026-11-05T23:50:07.760809,PATH_ASSIGNED,8Xg89xT8-1793951407-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Quant-only entry path recorded for SHADOW outcome analysis
+2026-11-05T23:50:07.985484,SIGNAL_REGISTERED,8Xg89xT8-1793951407-65,GLITCH,8Xg89xT8Ve34sKiYqYuMs46mycREsCA2F362UscRpump,NONE,0,,,,,,,Follow-up episode persisted to surge state
+2026-11-05T23:50:10.169082,OUTCOME_DUE,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,120,120.675,,,Scheduled forward-outcome horizon is due
+2026-11-05T23:50:11.278888,OUTCOME_CAPTURED,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,120,120.675,OK,direct_dex,Forward outcome written to surge_followup_log.csv
+2026-11-05T23:50:11.516161,SIGNAL_COMPLETE,519AMDtB-1793944169-165,RETIRE,519AMDtBqCpVk8CTYCg2i9kJQH62ZSkT5Uvfn71Upump,NONE,0,,,,,,,All configured follow-up horizons are finalized

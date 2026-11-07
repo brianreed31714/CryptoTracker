@@ -5,8 +5,8 @@ Target: +1.00% per calendar day on mark-to-market portfolio equity; unavailable 
 
 | Sleeve | Daily exits | Daily realized P&L | Inception exits | Inception realized P&L | Avg net/trade inception |
 |---|---:|---:|---:|---:|---:|
-| balanced_ev | 9 | $+0.1974 | 287 | $+0.8824 | +0.20% |
-| runner_hunter | 8 | $-0.5113 | 176 | $-2.2064 | -1.67% |
+| balanced_ev | 10 | $+0.3111 | 288 | $+0.9961 | +0.23% |
+| runner_hunter | 9 | $-0.4413 | 177 | $-2.1365 | -1.61% |
 | diy_whale | 12 | $+0.1163 | 502 | $-4.4817 | -1.19% |
 
 ## Investigation flags

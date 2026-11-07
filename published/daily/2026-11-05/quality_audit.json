@@ -2,8 +2,8 @@
   "date": "2026-11-05",
   "models": {
     "balanced_ev": {
-      "completed": 9,
-      "entries": 9,
+      "completed": 10,
+      "entries": 10,
       "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
       "negative_estimated_execution_cost_exits": 4,
       "over_5pct_estimated_execution_cost_exits": 0,
@@ -12,7 +12,7 @@
       "tokens_with_repeated_loss_exits": {
         "npz2FhoufQ7pKqhGpaipYWacrAkidyW2yDpVWSvpump": 3
       },
-      "unavailable_helius_exits": 9
+      "unavailable_helius_exits": 10
     },
     "diy_whale": {
       "completed": 12,
@@ -29,8 +29,8 @@
       "unavailable_helius_exits": 12
     },
     "runner_hunter": {
-      "completed": 8,
-      "entries": 8,
+      "completed": 9,
+      "entries": 9,
       "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
       "negative_estimated_execution_cost_exits": 2,
       "over_5pct_estimated_execution_cost_exits": 1,
@@ -39,7 +39,7 @@
       "tokens_with_repeated_loss_exits": {
         "9mWrj77gDZ7w4rwHF6STYXDZmYRMyf39L4go1mXepump": 2
       },
-      "unavailable_helius_exits": 8
+      "unavailable_helius_exits": 9
     }
   },
   "paper_only": true,
@@ -49,7 +49,7 @@
         "campaign_completed_delta": 12,
         "campaign_pnl_delta_usd": 0.258292,
         "count_reconciled": false,
-        "daily_completed": 9,
+        "daily_completed": 10,
         "note": "Mismatch can be caused by historical backfill or corrections; investigate rather than attributing to today's trades."
       },
       "diy_whale": {
@@ -62,8 +62,8 @@
       "runner_hunter": {
         "campaign_completed_delta": 8,
         "campaign_pnl_delta_usd": -0.511256,
-        "count_reconciled": true,
-        "daily_completed": 8,
+        "count_reconciled": false,
+        "daily_completed": 9,
         "note": "Mismatch can be caused by historical backfill or corrections; investigate rather than attributing to today's trades."
       }
     },
