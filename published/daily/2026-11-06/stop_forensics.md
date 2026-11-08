@@ -3,7 +3,7 @@
 | Sleeve | Stop trigger | Stops | Invalid | Raw gap | Net overrun | Worst net stop |
 |---|---:|---:|---:|---:|---:|---:|
 | balanced_ev | -5.0% | 2 | 0 | 2 | 1 | HODL -6.36% |
-| runner_hunter | -7.0% | 0 | 0 | 0 | 0 | N/A |
+| runner_hunter | -7.0% | 1 | 0 | 1 | 1 | NETWORK -13.78% |
 | diy_whale | -8.0% | 3 | 0 | 3 | 3 | DESSA -14.53% |
 
 **No quote-observation timestamp is present in the trade ledger.** Holding minutes are not quote age. Stop triggers do not guarantee fills. Simulated costs and Jupiter labels do not establish executable returns.

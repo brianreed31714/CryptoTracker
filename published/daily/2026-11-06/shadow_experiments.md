@@ -4,19 +4,19 @@
 
 | Variant | Entry rows today | Exits today | Valid/total exits | Raw win rate | Avg raw mark/exit | Observation status |
 |---|---:|---:|---:|---:|---:|---|
-| xp_balanced_cd0 | 35 | 35 | 629/629 | 38.0% | -1.09% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_balanced_cd30 | 31 | 31 | 586/586 | 38.7% | -0.81% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_balanced_cd60 | 30 | 30 | 559/559 | 39.5% | -0.84% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_balanced_cd120 | 27 | 27 | 512/512 | 40.6% | -0.44% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_runner_control | 11 | 11 | 307/307 | 43.3% | -0.33% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_balanced_cd0 | 43 | 43 | 637/637 | 38.1% | -1.13% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_balanced_cd30 | 38 | 38 | 593/593 | 39.0% | -0.86% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_balanced_cd60 | 37 | 37 | 566/566 | 39.8% | -0.89% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_balanced_cd120 | 34 | 34 | 519/519 | 40.8% | -0.49% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_runner_control | 13 | 13 | 309/309 | 43.0% | -0.39% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_runner_confirm2 | 1 | 1 | 54/54 | 27.8% | -6.23% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_runner_confirm3 | 0 | 0 | 3/3 | 66.7% | +8.37% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_runner_early_trail | 11 | 11 | 310/310 | 44.5% | -0.30% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_diy_control | 24 | 25 | 390/390 | 44.6% | -0.13% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_diy_neutral_only | 10 | 10 | 225/225 | 44.9% | -0.29% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_diy_riskoff_strict | 13 | 13 | 265/265 | 47.2% | +0.12% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_runner_early_trail | 13 | 13 | 312/312 | 44.2% | -0.36% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_diy_control | 28 | 29 | 394/394 | 44.2% | -0.15% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_diy_neutral_only | 13 | 13 | 228/228 | 44.3% | -0.36% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_diy_riskoff_strict | 16 | 16 | 268/268 | 46.6% | +0.06% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_diy_name12 | 5 | 5 | 122/122 | 46.7% | +0.40% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
-| xp_diy_organic_flow | 18 | 18 | 273/273 | 46.2% | +0.07% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
+| xp_diy_organic_flow | 22 | 22 | 277/277 | 45.5% | +0.01% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_diy_name12_flow | 2 | 2 | 82/82 | 43.9% | -0.80% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_diy_raunchy | 0 | 0 | 7/7 | 57.1% | +13.39% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
 | xp_diy_raunchy_flow | 0 | 0 | 4/4 | 50.0% | +11.60% | SHADOW_ROWS_OBSERVED_NOT_RUNTIME_ATTESTATION |
