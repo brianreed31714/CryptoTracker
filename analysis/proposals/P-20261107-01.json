@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261107-01",
+  "title": "Continue prospective cooldown comparison in shadow",
+  "change_type": "RESEARCH",
+  "target": "paper_shadow cooldown variants: xp_balanced_cd60 versus xp_balanced_cd120",
+  "current": "Both variants are in shadow research; cd60 has 31 completed observations and cd120 has 29.",
+  "proposed": "Keep both variants SHADOW-only and compare them prospectively on non-overlapping candidate outcomes, changing cooldown only. Report paired return differences, hit rates, drawdown, and uncertainty before considering promotion.",
+  "evidence": [
+    "cd120: n=29, 51.72% wins, 1.5189% average net return, 0.0358% median net return, profit factor 1.5093, maximum drawdown 30.89%.",
+    "cd60: n=31, 45.16% wins, 0.8883% average net return, -1.1168% median net return, profit factor 1.3027, maximum drawdown 29.66%.",
+    "The apparent advantage is not conclusive because model samples may share candidates and cd120 still has a near-zero median and substantial drawdown."
+  ],
+  "risk": "Shared or regime-concentrated candidates can make the apparent difference spurious; a cooldown change could also reduce opportunity frequency without improving out-of-sample returns.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-07",
+  "created_at": "2026-11-08T17:07:12",
+  "updated_at": "2026-11-08T17:07:12",
+  "implementation": {},
+  "deployment": {}
+}

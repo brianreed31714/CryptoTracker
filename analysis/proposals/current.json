@@ -1,15 +1,31 @@
 {
-  "generated_at": "2026-11-07T17:07:01",
-  "review_date": "2026-11-06",
-  "proposal_count": 1,
+  "generated_at": "2026-11-08T17:07:12",
+  "review_date": "2026-11-07",
+  "proposal_count": 3,
   "pending": [
-    "P-20261106-01"
+    "P-20261107-01",
+    "P-20261107-02",
+    "P-20261107-03"
   ],
   "proposals": [
     {
-      "proposal_id": "P-20261106-01",
-      "title": "Validate follow-up outcome coverage before gate tuning",
-      "confidence": "MEDIUM",
+      "proposal_id": "P-20261107-01",
+      "title": "Continue prospective cooldown comparison in shadow",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261107-02",
+      "title": "Audit Luna confidence and direction calibration before rescoring",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261107-03",
+      "title": "Expose rejected-signal outcome and false-positive costs",
+      "confidence": "LOW",
       "recommended_mode": "SHADOW",
       "status": "PENDING"
     }

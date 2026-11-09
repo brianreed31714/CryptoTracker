@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261107-03",
+  "title": "Expose rejected-signal outcome and false-positive costs",
+  "change_type": "RESEARCH",
+  "target": "missed-opportunity and surge-follow-up reporting",
+  "current": "The audit reports 57 usable rejected signals and follow-up path counts, but the supplied summary omits stratified return, MFE/MAE, and rejection-reason outcomes.",
+  "proposed": "Produce a SHADOW research report stratified by rejection reason and accepted/rejected path, including distinct-signal denominators, 30/60/120-minute return, MFE/MAE, and false-positive cost before proposing any gate adjustment.",
+  "evidence": [
+    "The missed-opportunity audit has 57 usable rejected signals and reports 68 30-minute and 67 60-minute outcome rows.",
+    "The follow-up log has 51,603 rows, but the summary reports no horizons found and no score bands.",
+    "Without outcome distributions and rejection reasons, rejected-signal counts cannot quantify missed upside or the cost of admitting false positives."
+  ],
+  "risk": "Overlapping signals, incomplete follow-up, and outcome-window selection can bias retrospective comparisons; no entry threshold should be loosened based on counts alone.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-07",
+  "created_at": "2026-11-08T17:07:12",
+  "updated_at": "2026-11-08T17:07:12",
+  "implementation": {},
+  "deployment": {}
+}

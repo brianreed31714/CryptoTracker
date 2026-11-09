@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261107-02",
+  "title": "Audit Luna confidence and direction calibration before rescoring",
+  "change_type": "RESEARCH",
+  "target": "Luna outcome calibration report",
+  "current": "Luna can contribute up to a 5-point bonus; no calibration change is supported by the 14 daily reviews.",
+  "proposed": "In SHADOW, evaluate signal-level outcomes by Luna direction and confidence at each horizon, with distinct-signal counts and MFE/MAE; do not change the bonus or entry gates during the study.",
+  "evidence": [
+    "NEUTRAL|LOW has 56 to 58 observations per horizon, negative median returns from -5.262% to -8.180%, and median MAE from -9.588% to -13.254%.",
+    "POSITIVE|MEDIUM has only 5 observations per horizon and its median return declines from 1.285% at 30 minutes to -11.127% at 120 minutes.",
+    "The daily Luna review sample is 14, and outcomes at different horizons may reuse the same signals."
+  ],
+  "risk": "Repeated horizons, market-regime effects, and small or imbalanced confidence buckets may create misleading calibration estimates.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-07",
+  "created_at": "2026-11-08T17:07:12",
+  "updated_at": "2026-11-08T17:07:12",
+  "implementation": {},
+  "deployment": {}
+}
