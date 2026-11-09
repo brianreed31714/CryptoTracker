@@ -1,0 +1,90 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 8,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 1,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 1,
+      "valid_stop_exits": 1,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -0.860063,
+          "estimated_net_return_pct": -4.4572,
+          "estimated_pnl_usdc": -0.066858,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 3.307,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -5.317263,
+          "raw_stop_overrun_pp": 0.317263,
+          "symbol": "DESSA"
+        }
+      ]
+    },
+    "diy_whale": {
+      "all_completed_exits": 14,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 1,
+      "stop_net_overrun_count": 1,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 1,
+      "valid_stop_exits": 1,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -1.370727,
+          "estimated_net_return_pct": -8.873867,
+          "estimated_pnl_usdc": -0.066554,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 12.623,
+          "net_stop_overrun_pp": 0.873867,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -10.244594,
+          "raw_stop_overrun_pp": 2.244594,
+          "symbol": "DESSA"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 8,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 1,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 1,
+      "valid_stop_exits": 1,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -0.983285,
+          "estimated_net_return_pct": -6.1064,
+          "estimated_pnl_usdc": -0.045798,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 6.044,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -7.089685,
+          "raw_stop_overrun_pp": 0.089685,
+          "symbol": "DESSA"
+        }
+      ]
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-11-08",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}
