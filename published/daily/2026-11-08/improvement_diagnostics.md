@@ -5,15 +5,15 @@ Target: +1.00% per calendar day on mark-to-market portfolio equity; unavailable 
 
 | Sleeve | Daily exits | Daily realized P&L | Inception exits | Inception realized P&L | Avg net/trade inception |
 |---|---:|---:|---:|---:|---:|
-| balanced_ev | 8 | $+0.4603 | 314 | $+0.5571 | +0.12% |
-| runner_hunter | 8 | $+0.1646 | 200 | $-2.3954 | -1.60% |
-| diy_whale | 14 | $+0.1631 | 556 | $-4.6814 | -1.12% |
+| balanced_ev | 9 | $+0.6231 | 315 | $+0.7199 | +0.15% |
+| runner_hunter | 9 | $+0.1605 | 201 | $-2.3995 | -1.59% |
+| diy_whale | 15 | $+0.4429 | 557 | $-4.4017 | -1.05% |
 
 ## Investigation flags
 
 - **balanced_ev**: 4 unusual daily cost estimates; 0 severe stop overruns; 0 gains-to-loss reversals; 30 observed reentries within 60m of a loss; RISK_OFF 1 completed exits / $-0.1678 inception.
 - **runner_hunter**: 6 unusual daily cost estimates; 0 severe stop overruns; 0 gains-to-loss reversals; 7 observed reentries within 60m of a loss; RISK_OFF 1 completed exits / $-0.0889 inception.
-- **diy_whale**: 10 unusual daily cost estimates; 0 severe stop overruns; 1 gains-to-loss reversals; 78 observed reentries within 60m of a loss; RISK_OFF 339 completed exits / $-3.3348 inception.
+- **diy_whale**: 10 unusual daily cost estimates; 0 severe stop overruns; 1 gains-to-loss reversals; 78 observed reentries within 60m of a loss; RISK_OFF 340 completed exits / $-3.0550 inception.
 
 ## Evaluation policy
 
