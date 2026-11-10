@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261108-03",
+  "title": "Continue horizon-specific Luna calibration in shadow",
+  "change_type": "RESEARCH",
+  "target": "Luna confirmation calibration and outcome reporting",
+  "current": "AI confirmation is enabled with a maximum bonus of 5; the available outcome groups include only 13 POSITIVE|MEDIUM signals per horizon.",
+  "proposed": "Keep Luna scoring and thresholds unchanged while tracking signal-level, horizon-specific outcomes against matched quant-valid controls in SHADOW. Report sample sizes, hit rates, median return, MFE, and MAE before considering any calibration change.",
+  "evidence": [
+    "For POSITIVE|MEDIUM, n=13 at each horizon; median return is +0.347% at 30m, -2.504% at 60m, and -18.16% at 120m.",
+    "For the same group, median MFE increases from 13.558% at 30m to 21.531% at 120m, while median MAE worsens from -9.505% to -19.147%.",
+    "The daily review contains 21 Luna rows, which is too small to establish a calibration change."
+  ],
+  "risk": "Signals are few and horizon outcomes overlap; selection effects or market-regime changes could produce misleading calibration conclusions.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-08",
+  "created_at": "2026-11-09T17:06:48",
+  "updated_at": "2026-11-09T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,80 +1,80 @@
-# CryptoTracker Proposals — 2026-11-07
+# CryptoTracker Proposals — 2026-11-08
 
 These are the current model-improvement proposals from the nightly review.
 Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20261107-01 — Continue prospective cooldown comparison in shadow
+## P-20261108-01 — Validate shadow return and profit-factor aggregation
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `paper_shadow cooldown variants: xp_balanced_cd60 versus xp_balanced_cd120`
-- **Current:** Both variants are in shadow research; cd60 has 31 completed observations and cd120 has 29.
-- **Proposed:** Keep both variants SHADOW-only and compare them prospectively on non-overlapping candidate outcomes, changing cooldown only. Report paired return differences, hit rates, drawdown, and uncertainty before considering promotion.
-- **Confidence:** LOW
+- **Target:** `Paper/shadow trade outcome and model-ranking reports`
+- **Current:** Shadow model summaries include extreme average returns and profit factors that are far from their medians, alongside substantial drawdowns; no promotion candidates are reported.
+- **Proposed:** In SHADOW, reconcile trade-level returns, units, outliers, and aggregation for the affected models before using mean return or profit factor in rankings. Preserve uncapped results and report robust summaries; make no model or execution changes during the audit.
+- **Confidence:** MEDIUM
 - **Recommended mode:** SHADOW
-- **Risk:** Shared or regime-concentrated candidates can make the apparent difference spurious; a cooldown change could also reduce opportunity frequency without improving out-of-sample returns.
+- **Risk:** A legitimate small number of extreme runner outcomes may explain the mean/median gap; treating them as errors or capping them could understate genuine tail performance.
 - **Evidence:**
-  - cd120: n=29, 51.72% wins, 1.5189% average net return, 0.0358% median net return, profit factor 1.5093, maximum drawdown 30.89%.
-  - cd60: n=31, 45.16% wins, 0.8883% average net return, -1.1168% median net return, profit factor 1.3027, maximum drawdown 29.66%.
-  - The apparent advantage is not conclusive because model samples may share candidates and cd120 still has a near-zero median and substantial drawdown.
+  - Runner Hunter: n=24, 50.0% win rate, median return +0.0215%, average +537.5367%, PF 78.5146, and max drawdown 77.9215%.
+  - Extended Probe: n=10, median return +8.1788% versus average +1292.986% and max drawdown 72.9329%.
+  - Several shadow models report zero realized PnL, so the return summaries require interpretation distinct from realized account performance.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261107-01`
+`Approve P-20261108-01`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261107-01`
+`Decline P-20261108-01`
 
 ---
 
-## P-20261107-02 — Audit Luna confidence and direction calibration before rescoring
+## P-20261108-02 — Run matched shadow replay for exit variants
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Luna outcome calibration report`
-- **Current:** Luna can contribute up to a 5-point bonus; no calibration change is supported by the 14 daily reviews.
-- **Proposed:** In SHADOW, evaluate signal-level outcomes by Luna direction and confidence at each horizon, with distinct-signal counts and MFE/MAE; do not change the bonus or entry gates during the study.
+- **Target:** `Patient Runner versus Fast Exit outcome evaluation`
+- **Current:** Exit summaries are separate model aggregates; same-entry pairing and comparable censoring are not established.
+- **Proposed:** Compare both exit policies on the same eligible entries in SHADOW, recording net return, hit rate, MFE, MAE, and drawdown at common horizons. Keep live and paper exit settings unchanged until the paired evaluation is sufficiently populated.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Repeated horizons, market-regime effects, and small or imbalanced confidence buckets may create misleading calibration estimates.
+- **Risk:** A matched sample may be smaller or affected by incomplete outcome horizons; apparent differences may not generalize to future market regimes.
 - **Evidence:**
-  - NEUTRAL|LOW has 56 to 58 observations per horizon, negative median returns from -5.262% to -8.180%, and median MAE from -9.588% to -13.254%.
-  - POSITIVE|MEDIUM has only 5 observations per horizon and its median return declines from 1.285% at 30 minutes to -11.127% at 120 minutes.
-  - The daily Luna review sample is 14, and outcomes at different horizons may reuse the same signals.
+  - Patient Runner: n=37, 56.76% wins, median net return +1.7783%, max drawdown 81.4708%.
+  - Fast Exit: n=37, 51.35% wins, median net return +0.4288%, max drawdown 29.3443%.
+  - The aggregate profiles suggest a return-versus-drawdown trade-off, but the available summaries do not establish a controlled comparison.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261107-02`
+`Approve P-20261108-02`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261107-02`
+`Decline P-20261108-02`
 
 ---
 
-## P-20261107-03 — Expose rejected-signal outcome and false-positive costs
+## P-20261108-03 — Continue horizon-specific Luna calibration in shadow
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `missed-opportunity and surge-follow-up reporting`
-- **Current:** The audit reports 57 usable rejected signals and follow-up path counts, but the supplied summary omits stratified return, MFE/MAE, and rejection-reason outcomes.
-- **Proposed:** Produce a SHADOW research report stratified by rejection reason and accepted/rejected path, including distinct-signal denominators, 30/60/120-minute return, MFE/MAE, and false-positive cost before proposing any gate adjustment.
+- **Target:** `Luna confirmation calibration and outcome reporting`
+- **Current:** AI confirmation is enabled with a maximum bonus of 5; the available outcome groups include only 13 POSITIVE|MEDIUM signals per horizon.
+- **Proposed:** Keep Luna scoring and thresholds unchanged while tracking signal-level, horizon-specific outcomes against matched quant-valid controls in SHADOW. Report sample sizes, hit rates, median return, MFE, and MAE before considering any calibration change.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Overlapping signals, incomplete follow-up, and outcome-window selection can bias retrospective comparisons; no entry threshold should be loosened based on counts alone.
+- **Risk:** Signals are few and horizon outcomes overlap; selection effects or market-regime changes could produce misleading calibration conclusions.
 - **Evidence:**
-  - The missed-opportunity audit has 57 usable rejected signals and reports 68 30-minute and 67 60-minute outcome rows.
-  - The follow-up log has 51,603 rows, but the summary reports no horizons found and no score bands.
-  - Without outcome distributions and rejection reasons, rejected-signal counts cannot quantify missed upside or the cost of admitting false positives.
+  - For POSITIVE|MEDIUM, n=13 at each horizon; median return is +0.347% at 30m, -2.504% at 60m, and -18.16% at 120m.
+  - For the same group, median MFE increases from 13.558% at 30m to 21.531% at 120m, while median MAE worsens from -9.505% to -19.147%.
+  - The daily review contains 21 Luna rows, which is too small to establish a calibration change.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261107-03`
+`Approve P-20261108-03`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261107-03`
+`Decline P-20261108-03`
 
 ---
 

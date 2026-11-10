@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261108-01",
+  "title": "Validate shadow return and profit-factor aggregation",
+  "change_type": "RESEARCH",
+  "target": "Paper/shadow trade outcome and model-ranking reports",
+  "current": "Shadow model summaries include extreme average returns and profit factors that are far from their medians, alongside substantial drawdowns; no promotion candidates are reported.",
+  "proposed": "In SHADOW, reconcile trade-level returns, units, outliers, and aggregation for the affected models before using mean return or profit factor in rankings. Preserve uncapped results and report robust summaries; make no model or execution changes during the audit.",
+  "evidence": [
+    "Runner Hunter: n=24, 50.0% win rate, median return +0.0215%, average +537.5367%, PF 78.5146, and max drawdown 77.9215%.",
+    "Extended Probe: n=10, median return +8.1788% versus average +1292.986% and max drawdown 72.9329%.",
+    "Several shadow models report zero realized PnL, so the return summaries require interpretation distinct from realized account performance."
+  ],
+  "risk": "A legitimate small number of extreme runner outcomes may explain the mean/median gap; treating them as errors or capping them could understate genuine tail performance.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-08",
+  "created_at": "2026-11-09T17:06:48",
+  "updated_at": "2026-11-09T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}
