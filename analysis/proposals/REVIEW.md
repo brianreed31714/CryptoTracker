@@ -1,80 +1,105 @@
-# CryptoTracker Proposals — 2026-11-08
+# CryptoTracker Proposals — 2026-11-09
 
 These are the current model-improvement proposals from the nightly review.
 Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20261108-01 — Validate shadow return and profit-factor aggregation
+## P-20261109-01 — Run matched-entry, exit-only shadow comparison
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Paper/shadow trade outcome and model-ranking reports`
-- **Current:** Shadow model summaries include extreme average returns and profit factors that are far from their medians, alongside substantial drawdowns; no promotion candidates are reported.
-- **Proposed:** In SHADOW, reconcile trade-level returns, units, outliers, and aggregation for the affected models before using mean return or profit factor in rankings. Preserve uncapped results and report robust summaries; make no model or execution changes during the audit.
-- **Confidence:** MEDIUM
+- **Target:** `Paper/shadow exit evaluation`
+- **Current:** fast_exit is the paper preliminary leader but has 14 completed trades and negative net results; no promotion candidates are reported.
+- **Proposed:** Continue shadow evaluation using matched candidate entries and vary only the exit rule; report signal-level net returns, hit rate, MFE/MAE, and execution assumptions before considering any promotion.
+- **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** A legitimate small number of extreme runner outcomes may explain the mean/median gap; treating them as errors or capping them could understate genuine tail performance.
+- **Risk:** Shadow results can remain biased by overlapping candidates, outliers, incomplete outcomes, or unrealistic execution assumptions; they must not be treated as live-performance evidence.
 - **Evidence:**
-  - Runner Hunter: n=24, 50.0% win rate, median return +0.0215%, average +537.5367%, PF 78.5146, and max drawdown 77.9215%.
-  - Extended Probe: n=10, median return +8.1788% versus average +1292.986% and max drawdown 72.9329%.
-  - Several shadow models report zero realized PnL, so the return summaries require interpretation distinct from realized account performance.
+  - fast_exit: n=14, 5 wins and 9 losses, median net return -1.1482%, profit factor 0.3444.
+  - Shadow flow_breakout: n=22, average net return +2.7054% but median -0.5078%; the positive average does not establish robust performance.
+  - No model is listed as a promotion candidate, and available summaries do not isolate exit effects on matched entries.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261108-01`
+`Approve P-20261109-01`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261108-01`
+`Decline P-20261109-01`
 
 ---
 
-## P-20261108-02 — Run matched shadow replay for exit variants
+## P-20261109-02 — Validate Luna outcomes at the signal level before recalibration
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Patient Runner versus Fast Exit outcome evaluation`
-- **Current:** Exit summaries are separate model aggregates; same-entry pairing and comparable censoring are not established.
-- **Proposed:** Compare both exit policies on the same eligible entries in SHADOW, recording net return, hit rate, MFE, MAE, and drawdown at common horizons. Keep live and paper exit settings unchanged until the paired evaluation is sufficiently populated.
+- **Target:** `Luna confidence and setup calibration`
+- **Current:** Luna has 17 daily review rows; outcome summaries group 106 signals across multiple horizons, with several setup/confidence groups below 12 observations.
+- **Proposed:** Produce a signal-level calibration study by setup and confidence, preserving horizon outcomes per signal and reporting sample sizes, median return, hit rate, MFE, and MAE; leave Luna scoring and thresholds unchanged during the study.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** A matched sample may be smaller or affected by incomplete outcome horizons; apparent differences may not generalize to future market regimes.
+- **Risk:** Small or selectively labeled groups may produce unstable calibration estimates, and horizon outcomes from one signal are correlated.
 - **Evidence:**
-  - Patient Runner: n=37, 56.76% wins, median net return +1.7783%, max drawdown 81.4708%.
-  - Fast Exit: n=37, 51.35% wins, median net return +0.4288%, max drawdown 29.3443%.
-  - The aggregate profiles suggest a return-versus-drawdown trade-off, but the available summaries do not establish a controlled comparison.
+  - POSITIVE|MEDIUM has n=8 per horizon and changes from +2.125% median return at 30 minutes to -1.502% at 60 minutes.
+  - NEUTRAL|HIGH has only n=2; other NEUTRAL|MEDIUM results have n=1.
+  - The 318 outcome rows span 106 signals and multiple horizons, so treating rows as independent would overstate evidence.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261108-02`
+`Approve P-20261109-02`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261108-02`
+`Decline P-20261109-02`
 
 ---
 
-## P-20261108-03 — Continue horizon-specific Luna calibration in shadow
+## P-20261109-03 — Reconcile rejected-signal outcome coverage
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Luna confirmation calibration and outcome reporting`
-- **Current:** AI confirmation is enabled with a maximum bonus of 5; the available outcome groups include only 13 POSITIVE|MEDIUM signals per horizon.
-- **Proposed:** Keep Luna scoring and thresholds unchanged while tracking signal-level, horizon-specific outcomes against matched quant-valid controls in SHADOW. Report sample sizes, hit rates, median return, MFE, and MAE before considering any calibration change.
+- **Target:** `Missed-opportunity audit and follow-up reporting`
+- **Current:** The audit reports 93 usable rejected signals; reported 30- and 60-minute samples are 105 and 102, without rejected-signal MFE/MAE or false-positive-cost summaries.
+- **Proposed:** Reconcile signal-to-outcome linkage and horizon coverage, then report rejected-signal MFE/MAE and estimated false-negative opportunity separately from accepted-signal outcomes; make no entry-gate changes until those results are available.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Signals are few and horizon outcomes overlap; selection effects or market-regime changes could produce misleading calibration conclusions.
+- **Risk:** Outcome linkage or survivorship effects may bias retrospective estimates, and future market conditions may not match the reviewed sample.
 - **Evidence:**
-  - For POSITIVE|MEDIUM, n=13 at each horizon; median return is +0.347% at 30m, -2.504% at 60m, and -18.16% at 120m.
-  - For the same group, median MFE increases from 13.558% at 30m to 21.531% at 120m, while median MAE worsens from -9.505% to -19.147%.
-  - The daily review contains 21 Luna rows, which is too small to establish a calibration change.
+  - The audit lists 106 signal rows, 94 rejected rows, and 93 usable rejected signals.
+  - Reported horizon sample counts differ from usable rejected-signal count, and the daily metrics provide no rejected-signal return or MFE/MAE breakdown.
+  - Without outcome-linked rejection costs, the current evidence cannot quantify the trade-off between missed winners and avoided false positives.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261108-03`
+`Approve P-20261109-03`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261108-03`
+`Decline P-20261109-03`
+
+---
+
+## P-20261109-04 — Audit smart-money campaign score coverage
+
+- **Status:** PENDING
+- **Type:** RESEARCH
+- **Target:** `SmartMoneyMonitor campaign and wallet scorecard pipeline`
+- **Current:** There are 31 campaign rows across 13 unique campaigns, median campaign strength is 0, multi-wallet convergence is 0, and the wallet 30-minute scorecard is empty.
+- **Proposed:** Verify campaign-strength and convergence calculation coverage, including why the scorecard is empty, and keep smart-money signals observational until coverage and outcome value are demonstrated.
+- **Confidence:** LOW
+- **Recommended mode:** SHADOW
+- **Risk:** A coverage issue may be temporary or limited to the filtered daily extract; changing signal weighting before diagnosis could discard useful information or amplify unvalidated data.
+- **Evidence:**
+  - Campaign strength median is 0 and multi-wallet convergence count is 0 in the daily metrics.
+  - The wallet 30-minute scorecard contains no rows.
+  - Feed health is latest OK with 100% latest wallet coverage, but the log also records 1,737 failed wallet checks across 15,570 rows.
+
+**Approve in ChatGPT:**
+
+`Approve P-20261109-04`
+
+**Decline in ChatGPT:**
+
+`Decline P-20261109-04`
 
 ---
 

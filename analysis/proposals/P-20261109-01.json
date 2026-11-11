@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261109-01",
+  "title": "Run matched-entry, exit-only shadow comparison",
+  "change_type": "RESEARCH",
+  "target": "Paper/shadow exit evaluation",
+  "current": "fast_exit is the paper preliminary leader but has 14 completed trades and negative net results; no promotion candidates are reported.",
+  "proposed": "Continue shadow evaluation using matched candidate entries and vary only the exit rule; report signal-level net returns, hit rate, MFE/MAE, and execution assumptions before considering any promotion.",
+  "evidence": [
+    "fast_exit: n=14, 5 wins and 9 losses, median net return -1.1482%, profit factor 0.3444.",
+    "Shadow flow_breakout: n=22, average net return +2.7054% but median -0.5078%; the positive average does not establish robust performance.",
+    "No model is listed as a promotion candidate, and available summaries do not isolate exit effects on matched entries."
+  ],
+  "risk": "Shadow results can remain biased by overlapping candidates, outliers, incomplete outcomes, or unrealistic execution assumptions; they must not be treated as live-performance evidence.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-09",
+  "created_at": "2026-11-10T17:06:48",
+  "updated_at": "2026-11-10T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}

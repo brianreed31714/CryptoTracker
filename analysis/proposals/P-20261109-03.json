@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261109-03",
+  "title": "Reconcile rejected-signal outcome coverage",
+  "change_type": "RESEARCH",
+  "target": "Missed-opportunity audit and follow-up reporting",
+  "current": "The audit reports 93 usable rejected signals; reported 30- and 60-minute samples are 105 and 102, without rejected-signal MFE/MAE or false-positive-cost summaries.",
+  "proposed": "Reconcile signal-to-outcome linkage and horizon coverage, then report rejected-signal MFE/MAE and estimated false-negative opportunity separately from accepted-signal outcomes; make no entry-gate changes until those results are available.",
+  "evidence": [
+    "The audit lists 106 signal rows, 94 rejected rows, and 93 usable rejected signals.",
+    "Reported horizon sample counts differ from usable rejected-signal count, and the daily metrics provide no rejected-signal return or MFE/MAE breakdown.",
+    "Without outcome-linked rejection costs, the current evidence cannot quantify the trade-off between missed winners and avoided false positives."
+  ],
+  "risk": "Outcome linkage or survivorship effects may bias retrospective estimates, and future market conditions may not match the reviewed sample.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-09",
+  "created_at": "2026-11-10T17:06:48",
+  "updated_at": "2026-11-10T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}

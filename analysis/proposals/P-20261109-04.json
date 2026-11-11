@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261109-04",
+  "title": "Audit smart-money campaign score coverage",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor campaign and wallet scorecard pipeline",
+  "current": "There are 31 campaign rows across 13 unique campaigns, median campaign strength is 0, multi-wallet convergence is 0, and the wallet 30-minute scorecard is empty.",
+  "proposed": "Verify campaign-strength and convergence calculation coverage, including why the scorecard is empty, and keep smart-money signals observational until coverage and outcome value are demonstrated.",
+  "evidence": [
+    "Campaign strength median is 0 and multi-wallet convergence count is 0 in the daily metrics.",
+    "The wallet 30-minute scorecard contains no rows.",
+    "Feed health is latest OK with 100% latest wallet coverage, but the log also records 1,737 failed wallet checks across 15,570 rows."
+  ],
+  "risk": "A coverage issue may be temporary or limited to the filtered daily extract; changing signal weighting before diagnosis could discard useful information or amplify unvalidated data.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-09",
+  "created_at": "2026-11-10T17:06:48",
+  "updated_at": "2026-11-10T17:06:48",
+  "implementation": {},
+  "deployment": {}
+}
