@@ -444,10 +444,7 @@ def _observe_host_read_only():
             log("Windows attestation runner unavailable (details redacted)")
 
 
-def scan_once():
-    if not AUTO_DEPLOY:
-        _observe_host_read_only()
-        return
+def _scan_deployment_requests():
     REQUEST_DIR.mkdir(parents=True, exist_ok=True)
     pull_repo()
     for path in sorted(REQUEST_DIR.glob("P-*.json")):
@@ -491,8 +488,13 @@ def scan_once():
                 push("CryptoTracker Deployment BLOCKED", f"{pid}: {exc}")
 
 
-    # Observe host state without altering trader, Smart Money, or dashboard processes.
-    _observe_host_read_only()
+def scan_once():
+    """Observe host health even when deployment sync or validation fails."""
+    try:
+        if AUTO_DEPLOY:
+            _scan_deployment_requests()
+    finally:
+        _observe_host_read_only()
 
 
 def main():
