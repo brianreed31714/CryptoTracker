@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import time
 from contextlib import closing
 from pathlib import Path
 
 from dotenv import dotenv_values
+
+MODULE_DIGEST = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
 class HeliusBudgetDenied(RuntimeError):
@@ -58,6 +61,10 @@ class HeliusUsage:
             values = {k: int(config.get(k, v)) for k, v in DEFAULTS.items()}
             if any(v <= 0 for v in values.values()):
                 raise ValueError("limits must be positive")
+            mode = config.get("HELIUS_MODE", "bounded")
+            if mode not in {"holders_only", "bounded"}:
+                raise ValueError("unknown provider mode")
+            values["HELIUS_MODE"] = mode
             return values
         except HeliusBudgetDenied:
             raise
@@ -72,6 +79,7 @@ class HeliusUsage:
             conn.execute("CREATE TABLE IF NOT EXISTS usage (at REAL NOT NULL, method TEXT NOT NULL, credits INTEGER NOT NULL)")
             conn.execute("CREATE INDEX IF NOT EXISTS usage_at ON usage(at)")
             conn.execute("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT, fetched REAL NOT NULL DEFAULT 0, retry_after REAL NOT NULL DEFAULT 0)")
+            conn.execute("CREATE TABLE IF NOT EXISTS clients (pid INTEGER PRIMARY KEY, module_digest TEXT NOT NULL, first_seen REAL NOT NULL, last_seen REAL NOT NULL)")
             return conn
         except Exception:
             conn.close()
@@ -81,6 +89,8 @@ class HeliusUsage:
         policy = self.policy()
         if method not in COSTS:
             raise HeliusBudgetDenied("HELIUS_UNPRICED_METHOD")
+        if policy["HELIUS_MODE"] == "holders_only" and method != "getTokenAccounts":
+            raise HeliusBudgetDenied("HELIUS_METHOD_DISABLED_BY_HOLDER_ONLY_POLICY")
         now, cost = self.clock(), COSTS[method]
         try:
             with closing(self._connect()) as conn:
@@ -95,6 +105,8 @@ class HeliusUsage:
                     if spent + cost > policy[key]:
                         raise HeliusBudgetDenied(f"HELIUS_BUDGET_EXHAUSTED: {key}")
                 conn.execute("INSERT INTO usage VALUES (?,?,?)", (now, method, cost))
+                conn.execute("INSERT INTO clients VALUES (?,?,?,?) ON CONFLICT(pid) DO UPDATE SET module_digest=excluded.module_digest,last_seen=excluded.last_seen",
+                             (os.getpid(), MODULE_DIGEST, now, now))
                 conn.execute("DELETE FROM usage WHERE at <= ?", (now - 31 * 86400,))
                 conn.execute("COMMIT")
         except HeliusBudgetDenied:

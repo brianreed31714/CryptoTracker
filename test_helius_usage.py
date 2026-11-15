@@ -2,6 +2,7 @@
 import ast
 import json
 import os
+import sqlite3
 import tempfile
 import time
 import unittest
@@ -118,6 +119,18 @@ class BudgetTests(BudgetFixture):
             HeliusUsage(self.root, lambda: self.now).reserve("getBalance")
         self.now += 86401
         self.usage.reserve("getBalance")
+
+    def test_holder_only_mode_blocks_paid_history_and_general_rpc(self):
+        with (self.root / ".env.config").open("a") as f:
+            f.write("\nHELIUS_MODE=holders_only\n")
+        for method in ("enhanced_history", "getBalance", "getTokenSupply"):
+            with self.assertRaisesRegex(HeliusBudgetDenied, "HOLDER_ONLY"):
+                self.usage.reserve(method)
+        self.usage.reserve("getTokenAccounts")
+        self.assertEqual(self.usage.summary()["hour"], {"getTokenAccounts": 10})
+        with sqlite3.connect(self.usage.path) as conn:
+            row = conn.execute("SELECT pid,length(module_digest) FROM clients").fetchone()
+        self.assertEqual(row, (os.getpid(), 64))
 
 
 class ServiceTests(BudgetFixture):

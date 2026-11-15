@@ -12,8 +12,10 @@ inventory determine which version is actually active; GitHub HEAD alone
 does **not** establish live deployment. Runtime secrets, wallet tracking
 state, and deployment logs stay local and ignored.
 
-Protected settings: `LIVE_TRADING=false`, `HELIUS_ENABLED=0`,
-`SMART_MONEY_HELIUS_ENABLED=0`. No live-trading promotion is authorized.
+Protected settings: `LIVE_TRADING=false`, `HELIUS_ENABLED=1`,
+`HELIUS_MODE=holders_only`, `SMART_MONEY_HELIUS_ENABLED=0`. Holder scans use
+persistent credit limits; wallet monitoring and balances stay on public RPC.
+No live-trading promotion is authorized.
 
 Read-only local inventory, after a clean explicit fast-forward:
 

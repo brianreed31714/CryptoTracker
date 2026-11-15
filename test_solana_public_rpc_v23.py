@@ -53,8 +53,8 @@ class PublicRPCTests(unittest.TestCase):
         self.assertIn("old",state["rpc_seen_signatures"][WALLET])
         self.assertTrue(state["rpc_initialized"][WALLET])
 
-    def test_helius_is_blocked_by_repo_config(self):
-        self.assertTrue(monitor.HELIUS_REPO_DISABLED)
+    def test_paid_wallet_history_is_blocked_by_repo_config(self):
+        self.assertFalse(monitor.HELIUS_REPO_DISABLED)
         with patch("SmartMoneyMonitor.smart_money_monitor_v2_3_feed_health_audit.requests.get") as get:
             with self.assertRaises(RuntimeError):
                 monitor.helius_recent_transactions("wallet")
