@@ -7,6 +7,7 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -128,7 +129,7 @@ class BudgetTests(BudgetFixture):
                 self.usage.reserve(method)
         self.usage.reserve("getTokenAccounts")
         self.assertEqual(self.usage.summary()["hour"], {"getTokenAccounts": 10})
-        with sqlite3.connect(self.usage.path) as conn:
+        with closing(sqlite3.connect(self.usage.path)) as conn:
             row = conn.execute("SELECT pid,length(module_digest) FROM clients").fetchone()
         self.assertEqual(row, (os.getpid(), 64))
 
