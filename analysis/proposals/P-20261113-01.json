@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261113-01",
+  "title": "Investigate forward-outcome attribution completeness",
+  "change_type": "RESEARCH",
+  "target": "SURGE_FOLLOWUP and missed-opportunity outcome attribution",
+  "current": "Follow-up metrics report no horizons; missed-opportunity audit reports MISSING_FORWARD_HORIZONS, zero 30/60-minute sample rows, and zero usable rejected signals.",
+  "proposed": "With human approval, run a shadow-only data-quality investigation of timestamp, token-identity, and horizon joins; report 30/60/120-minute outcome completeness by path before using these records for strategy evaluation. Do not alter signals, trading settings, or execution.",
+  "evidence": [
+    "The 55,069 follow-up rows have no reported horizons or score bands.",
+    "The missed-opportunity audit has 41 rows but only 1 signal, 1 rejected signal, and 0 usable rejected signals.",
+    "The latest audit status is MISSING_FORWARD_HORIZONS, with zero 30- and 60-minute sample rows."
+  ],
+  "risk": "The investigation may identify a reporting or filtering artifact rather than a collection defect; changing attribution without validation could create misleading labels or double-count outcomes.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-13",
+  "created_at": "2026-11-14T17:07:03",
+  "updated_at": "2026-11-14T17:07:03",
+  "implementation": {},
+  "deployment": {}
+}
