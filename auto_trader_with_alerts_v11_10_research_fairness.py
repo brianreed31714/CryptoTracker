@@ -47,6 +47,7 @@ from solders.transaction import VersionedTransaction
 import market_scanner_2 as ms
 import paper_research_lab_v11_10 as paper_lab
 import publish_daily_evidence as evidence_publisher
+from helius_usage import HeliusUsage, HeliusBudgetDenied
 
 
 ROOT = Path(__file__).resolve().parent
@@ -173,7 +174,6 @@ _GECKO_PRICE_CACHE = {}
 _TOKEN_DECIMALS_CACHE = {}
 _API_WARNING_LAST = {}
 _GECKO_DISCOVERY_CACHE = {"fetched_at": 0.0, "tokens": []}
-_HOLDER_METRICS_CACHE = {}
 _AI_CONFIRMATION_CACHE = {}
 _WALLET_USDC_BALANCE_CACHE = {"value": None, "fetched_at": 0.0}
 _HELIUS_CIRCUIT = {"open_until": 0.0, "reason": "", "opened_at": 0.0, "alerted": False}
@@ -317,10 +317,10 @@ DEFAULTS = {
     # Helius getTokenAccounts is queried only for the most relevant live
     # candidates and the open position. Results are cached to control usage.
     "HOLDER_METRICS_ENABLED": 1,
-    "HOLDER_METRICS_CACHE_SECONDS": 600,
-    "HOLDER_METRICS_MAX_TOKENS_PER_CYCLE": 10,
+    "HOLDER_METRICS_CACHE_SECONDS": 21600,
+    "HOLDER_METRICS_MAX_TOKENS_PER_CYCLE": 1,
     "HOLDER_METRICS_PAGE_LIMIT": 1000,
-    "HOLDER_METRICS_MAX_PAGES": 10,
+    "HOLDER_METRICS_MAX_PAGES": 2,
     "HOLDER_METRICS_HISTORY_RETENTION_HOURS": 48,
     "HOLDER_METRICS_ALERTS_ENABLED": 1,
 
@@ -1298,7 +1298,8 @@ def _helius_holder_count(token_address, settings):
         }
 
     limit = max(1, min(1000, int(settings.get("HOLDER_METRICS_PAGE_LIMIT", 1000))))
-    max_pages = max(1, int(settings.get("HOLDER_METRICS_MAX_PAGES", 10)))
+    max_pages = min(HeliusUsage(ROOT).policy()["HOLDER_METRICS_MAX_PAGES"],
+                    max(1, int(settings.get("HOLDER_METRICS_MAX_PAGES", 2))))
     owners = set()
     pages_fetched = 0
     capped = False
@@ -1353,6 +1354,29 @@ def _helius_holder_count(token_address, settings):
 
 
 def holder_metrics_for_token(token_address, symbol, market_cap, settings, force=False):
+    """Persistent six-hour observations; force cannot bypass credit protections."""
+    if not token_address or not bool(settings.get("HOLDER_METRICS_ENABLED", 1)):
+        return {}
+    usage = HeliusUsage(ROOT)
+    try:
+        ttl = max(usage.policy()["HOLDER_METRICS_CACHE_SECONDS"],
+                  int(settings.get("HOLDER_METRICS_CACHE_SECONDS", 21600)))
+        metrics = dict(usage.cached(
+            f"holders:{token_address}", ttl,
+            lambda: _refresh_holder_metrics(token_address, symbol, market_cap, settings)))
+        count = int(safe_number(metrics.get("holder_count")))
+        metrics["market_cap"] = safe_number(market_cap)
+        metrics["market_cap_per_holder"] = safe_number(market_cap) / count if count else 0.0
+        return metrics
+    except HeliusBudgetDenied as exc:
+        return {"holder_status": str(exc), "holder_count": 0,
+                "holder_count_capped": False, "holder_change_10m": "",
+                "holder_change_10m_pct": "", "holder_change_30m": "",
+                "holder_change_30m_pct": "", "market_cap": safe_number(market_cap),
+                "market_cap_per_holder": 0.0, "pages_fetched": 0}
+
+
+def _refresh_holder_metrics(token_address, symbol, market_cap, settings):
     """
     Return current holder count plus 10m/30m holder growth and market-cap/holder.
     This layer is observation-only: values are logged/displayed/alerted but never
@@ -1361,22 +1385,6 @@ def holder_metrics_for_token(token_address, symbol, market_cap, settings, force=
     token_address = str(token_address or "").strip()
     if not token_address or not bool(settings.get("HOLDER_METRICS_ENABLED", 1)):
         return {}
-
-    cache_seconds = max(60, int(settings.get("HOLDER_METRICS_CACHE_SECONDS", 600)))
-    cached = _HOLDER_METRICS_CACHE.get(token_address)
-
-    if (
-        not force
-        and cached
-        and time.time() - safe_number(cached.get("fetched_at")) < cache_seconds
-    ):
-        result = dict(cached.get("metrics") or {})
-        # Market cap changes every scan even while holder count is cached.
-        mc = safe_number(market_cap)
-        hc = int(safe_number(result.get("holder_count")))
-        result["market_cap"] = mc
-        result["market_cap_per_holder"] = (mc / hc) if mc > 0 and hc > 0 else 0.0
-        return result
 
     now_utc = datetime.now(timezone.utc)
     retention = int(settings.get("HOLDER_METRICS_HISTORY_RETENTION_HOURS", 48))
@@ -1390,26 +1398,22 @@ def holder_metrics_for_token(token_address, symbol, market_cap, settings, force=
             f"Holder metrics warning for {symbol or token_address[:8]}: {exc}",
             900,
         )
-        # A recent cached value is better than blanking the alert on one failed RPC.
-        if cached:
-            return dict(cached.get("metrics") or {})
-        return {
-            "holder_status": "ERROR",
-            "holder_count": 0,
-            "holder_count_capped": False,
-            "holder_change_10m": "",
-            "holder_change_10m_pct": "",
-            "holder_change_30m": "",
-            "holder_change_30m_pct": "",
-            "market_cap": safe_number(market_cap),
-            "market_cap_per_holder": 0.0,
-        }
+        raise HeliusBudgetDenied("HELIUS_HOLDER_REFRESH_FAILED") from None
+
+    if raw.get("status") != "OK":
+        raise HeliusBudgetDenied(str(raw.get("status", "HELIUS_UNAVAILABLE")))
 
     count = int(safe_number(raw.get("holder_count")))
     prior10 = _prior_holder_sample(history, now_utc, 10)
     prior30 = _prior_holder_sample(history, now_utc, 30)
-    d10, p10 = _holder_change(count, prior10)
-    d30, p30 = _holder_change(count, prior30)
+    # Six-hour samples cannot establish 10m/30m growth. Never label an older
+    # baseline as a recent observation simply because a request was cached.
+    d10, p10 = ("", "")
+    d30, p30 = ("", "")
+    if prior10 and (now_utc - prior10["dt"]).total_seconds() <= 1200:
+        d10, p10 = _holder_change(count, prior10)
+    if prior30 and (now_utc - prior30["dt"]).total_seconds() <= 3600:
+        d30, p30 = _holder_change(count, prior30)
 
     # Once pagination is capped, count is only a lower bound; suppress growth
     # rather than imply false precision.
@@ -1435,11 +1439,6 @@ def holder_metrics_for_token(token_address, symbol, market_cap, settings, force=
 
     _append_holder_history(metrics)
     _save_holder_latest(token_address, metrics)
-    _HOLDER_METRICS_CACHE[token_address] = {
-        "fetched_at": time.time(),
-        "metrics": metrics,
-    }
-
     return metrics
 
 
@@ -1457,7 +1456,7 @@ def apply_holder_metrics(candidates, settings):
     if not bool(settings.get("HOLDER_METRICS_ENABLED", 1)):
         return candidates
 
-    max_tokens = max(1, int(settings.get("HOLDER_METRICS_MAX_TOKENS_PER_CYCLE", 10)))
+    max_tokens = max(1, int(settings.get("HOLDER_METRICS_MAX_TOKENS_PER_CYCLE", 1)))
 
     priority = sorted(
         candidates,
@@ -3585,6 +3584,7 @@ def _open_helius_circuit(reason, settings=None):
         "opened_at": now,
         "reason": str(reason or "Helius unavailable")[:300],
     })
+    HeliusUsage(ROOT).halt(seconds)
     _warn_api_once(
         "helius-permanent-halt",
         f"Helius disabled for {seconds // 3600}h: {_HELIUS_CIRCUIT['reason']}",
@@ -3642,6 +3642,8 @@ def _helius_post_json(url, payload, timeout=25, settings=None):
     provider = "Helius" if is_helius else "Solana RPC"
 
     for attempt in range(retries + 1):
+        if is_helius:
+            HeliusUsage(ROOT).reserve(payload.get("method"))
         try:
             response = requests.post(url, json=payload, timeout=timeout)
             response_text = str(getattr(response, "text", "") or "")[:1000]
@@ -7120,9 +7122,7 @@ def token_decimals_rpc(token_mint):
         return _TOKEN_DECIMALS_CACHE[token_mint]
     try:
         payload = {"jsonrpc": "2.0", "id": 1, "method": "getTokenSupply", "params": [token_mint]}
-        r = requests.post(_solana_rpc_url(), json=payload, timeout=15)
-        r.raise_for_status()
-        body = r.json()
+        body = _helius_post_json(_solana_rpc_url(), payload, timeout=15)
         if body.get("error"):
             raise RuntimeError(str(body["error"]))
         decimals = int((((body.get("result") or {}).get("value") or {}).get("decimals")))
@@ -8723,8 +8723,8 @@ def print_settings(settings, wallet_address):
     print(
         f"Holder metrics:          "
         f"{'ENABLED' if settings.get('HOLDER_METRICS_ENABLED', 1) else 'OFF'} | "
-        f"cache {int(settings.get('HOLDER_METRICS_CACHE_SECONDS', 600)) // 60}m | "
-        f"max {int(settings.get('HOLDER_METRICS_MAX_TOKENS_PER_CYCLE', 10))} token(s)/cycle"
+        f"cache {int(settings.get('HOLDER_METRICS_CACHE_SECONDS', 21600)) // 60}m | "
+        f"max {int(settings.get('HOLDER_METRICS_MAX_TOKENS_PER_CYCLE', 1))} token(s)/cycle"
     )
     print(
         "MC/holder scoring:       OBSERVATION ONLY — no entry/exit weight yet"

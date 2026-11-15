@@ -33,6 +33,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -50,6 +51,9 @@ from dotenv import load_dotenv, dotenv_values
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+from helius_usage import HeliusUsage
 ENV_PATH = PROJECT_ROOT / ".env"
 TRADERS_PATH = HERE / "traders.json"
 DATA_DIR = HERE / "data"
@@ -128,7 +132,7 @@ SAMPLE_SANITY_MAX_ABS_RETURN_PCT = float(
 
 SAMPLE_MINUTES = [1, 3, 5, 15, 30, 60]
 
-HELIUS_TX_URL = "https://api.helius.xyz/v0/addresses/{wallet}/transactions"
+HELIUS_TX_URL = "https://api-mainnet.helius-rpc.com/v0/addresses/{wallet}/transactions"
 DEX_TOKEN_PAIRS_URL = "https://api.dexscreener.com/token-pairs/v1/solana/{mint}"
 
 DEX_TOKEN_GENERIC_URL = "https://api.dexscreener.com/latest/dex/tokens/{mint}"
@@ -538,19 +542,28 @@ CAMPAIGN_FIELDS = [
 # ---------------------------------------------------------------------------
 
 def helius_recent_transactions(wallet: str) -> list[dict]:
-    if HELIUS_REPO_DISABLED or os.getenv("SMART_MONEY_HELIUS_ENABLED", "0").strip() != "1":
+    policy = dotenv_values(PROJECT_ROOT / ".env.config")
+    if HELIUS_REPO_DISABLED or policy.get("SMART_MONEY_HELIUS_ENABLED", "0") != "1":
         raise RuntimeError("Helius access disabled by repository configuration")
-    url = HELIUS_TX_URL.format(wallet=wallet)
-    response = requests.get(
-        url,
-        params={"api-key": HELIUS_API_KEY, "limit": HELIUS_LIMIT},
-        timeout=20,
-    )
-    response.raise_for_status()
-    data = response.json()
-    if not isinstance(data, list):
-        raise RuntimeError(f"Unexpected Helius response: {data}")
-    return data
+    usage = HeliusUsage(PROJECT_ROOT)
+
+    def fetch():
+        usage.reserve("enhanced_history")
+        response = requests.get(
+            HELIUS_TX_URL.format(wallet=wallet),
+            params={"api-key": HELIUS_API_KEY, "limit": HELIUS_LIMIT},
+            timeout=20,
+        )
+        if response.status_code in {402, 403}:
+            usage.halt()
+        response.raise_for_status()
+        data = response.json()
+        if not isinstance(data, list):
+            raise RuntimeError("Unexpected Helius history response")
+        return data
+
+    return usage.cached(f"history:{wallet}:{HELIUS_LIMIT}",
+                        usage.policy()["SMART_MONEY_HELIUS_CACHE_SECONDS"], fetch)
 
 
 def token_transfer_direction(

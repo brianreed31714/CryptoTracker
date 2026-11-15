@@ -31,7 +31,7 @@ jobs:
           python -m py_compile cryptotracker_supervisor.py
           python -m py_compile smart_money_dashboard_health.py
           python -m py_compile cryptotracker_dashboard_v11_8_2.py
-          python -m unittest -v test_solana_public_rpc_v23 test_smart_money_dashboard_health
+          python -m unittest -v test_solana_public_rpc_v23 test_smart_money_dashboard_health test_helius_usage
           python - <<'PY'
           from cryptotracker_supervisor import smart_money_settings
           script, enabled = smart_money_settings()
