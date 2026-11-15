@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261115-02",
+  "status": "READY_TO_DEPLOY",
+  "commit": "362b3d0a0e7c46ce83b92d73364b0342f92200ea",
+  "components": ["trader", "smart_money", "dashboard"],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "approval": "User explicitly approved all four Helius rollout steps and subsequently instructed Keep going. PR #47 exact-head CI passed on Windows and Linux before merge.",
+  "purpose": "Reload staged services with holder-only method restrictions. Preserve paper mode, public-RPC wallet monitoring, persistent ledger and current credit caps."
+}
