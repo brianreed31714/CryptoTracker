@@ -23,12 +23,12 @@ This file describes the **repository design**, not a claim that every service is
 - The Windows run previously showed Smart Money PID 3096 and 4/4 wallets as a **past observation**, not a persistent expected PID.
 - The dashboard now trusts v2.3's heartbeat (within 360 seconds); it does not prove a particular PID.
 - The configured SMART_MONEY script is v2.3; active trader selection follows the local release manifest, then the supervisor fallback.
-- Helius and paid Smart Money polling are disabled by tracked configuration. Never enable automatically.
+- User-approved Helius holder-only enrichment uses persistent credit caps. Paid Smart Money history remains disabled; do not broaden provider use automatically.
 - Crypto EOD is implemented in the trader and reporting workflow; data activity is not equivalent to an independently running EOD process.
 
 ## Non-negotiable operating constraints
 
-`LIVE_TRADING=false`, `HELIUS_ENABLED=0`, and `SMART_MONEY_HELIUS_ENABLED=0` must remain effective. The local `.env` must not override them to true. `SmartMoneyMonitor/traders.json` and wallet credentials remain local, ignored, and never uploaded.
+`LIVE_TRADING=false`, `HELIUS_ENABLED=1`, `HELIUS_MODE=holders_only`, and `SMART_MONEY_HELIUS_ENABLED=0` must remain effective. Routine wallet reads use public RPC. The local `.env` cannot raise tracked credit caps or allow another Helius method. `SmartMoneyMonitor/traders.json` and wallet credentials remain local, ignored, and never uploaded.
 
 ## Local host inventory (read-only)
 
@@ -115,10 +115,11 @@ versions, standalone whale discovery tools, other checkouts and external apps
 using the key are outside this cap. Keep those stopped or independently limited.
 No account-wide limit or autoscaling setting is changed by this implementation.
 
-Both Helius switches remain zero while the change is reviewed. Deployment and
-enabling require a release that updates the protected provider contract, covers
-both importing services, and verifies the shared ledger on the host. No live
-trading setting is changed. The analysis is in
+The user approved holder-only activation after staging the controls. The provider
+contract now permits only `getTokenAccounts`; general Helius RPC and Enhanced
+Transactions are rejected before credit reservation or HTTP. Deployment covers
+both importing services and verifies the shared ledger on the host. No live
+trading setting is changed. The original analysis is in
 [`analysis/helius_credit_review_20261115.md`](../analysis/helius_credit_review_20261115.md).
 
 Any change that adds, renames, retires, or reconnects a component must update `registry.json`, source ownership, dependencies, data/provider contracts, negative tests, and this document in the same release. The registry is checked on every main-branch change affecting infrastructure and on deployment preflight. CI branch-protection settings must be verified separately; a GitHub Action cannot guarantee branch blocking without repository rules.
@@ -146,4 +147,4 @@ Windows bootstrap check after the new code reaches the PC:
 python -m infrastructure.windows_activation_attestation --notify
 ```
 
-This is read-only with respect to trading and scheduled tasks and writes only the ignored local receipt plus a sanitized remote status update. It is not proof the trader, deployment agent, or dashboard has loaded changed in-memory code. To bootstrap unattended 60-second polling, the existing deployment agent still requires one **separately safely attributed and approved** reload; do not restart the trader or another project just for diagnostics. `LIVE_TRADING=false`, `HELIUS_ENABLED=0`, and `SMART_MONEY_HELIUS_ENABLED=0` remain mandatory.
+This is read-only with respect to trading and scheduled tasks and writes only the ignored local receipt plus a sanitized remote status update. It is not proof the trader, deployment agent, or dashboard has loaded changed in-memory code. To bootstrap unattended 60-second polling, the existing deployment agent still requires one safely attributed and approved reload; do not restart the trader or another project just for diagnostics. Paper-only trading and the current protected holder-only provider contract remain mandatory.
