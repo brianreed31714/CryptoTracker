@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261115-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "2e21e265c16a5cb68f0d501dff02c1599c2caa92",
+  "components": ["trader", "smart_money", "dashboard"],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "approval": "User approved merge, deployment, holder-only Helius enablement and 24-48-hour usage verification in the Helius enhancement thread on 2026-11-15.",
+  "purpose": "Stage shared persistent credit controls before enabling Helius. Both Helius switches remain disabled in this release. Preserve existing runtime data and credit ledger."
+}
