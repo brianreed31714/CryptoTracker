@@ -99,7 +99,8 @@
       "depends_on": [
         "smart_money",
         "market_scanner",
-        "research_lab"
+        "research_lab",
+        "helius_usage"
       ],
       "dependency_optional": [
         "smart_money"
@@ -117,8 +118,20 @@
       },
       "code_imports": [
         "market_scanner",
-        "research_lab"
+        "research_lab",
+        "helius_usage"
       ]
+    },
+    {
+      "id": "helius_usage",
+      "role": "library",
+      "entrypoint": "helius_usage.py",
+      "managed_by": null,
+      "depends_on": [],
+      "deployment_component": null,
+      "script_pattern": null,
+      "source_files": ["helius_usage.py", "test_helius_usage.py"],
+      "health": {"type": "not_applicable"}
     },
     {
       "id": "smart_money_rpc",
@@ -143,7 +156,8 @@
       "config_key": "SUPERVISOR_SMART_MONEY_SCRIPT",
       "managed_by": "supervisor",
       "depends_on": [
-        "smart_money_rpc"
+        "smart_money_rpc",
+        "helius_usage"
       ],
       "deployment_component": "smart_money",
       "script_pattern": "smart_money_monitor_*.py",
@@ -157,7 +171,8 @@
         "success_status": "OK"
       },
       "code_imports": [
-        "smart_money_rpc"
+        "smart_money_rpc",
+        "helius_usage"
       ]
     },
     {
@@ -371,7 +386,7 @@
       "mode": "paid_provider",
       "component": "smart_money",
       "endpoint": "service-configured",
-      "current_policy": "DISABLED by HELIUS_ENABLED=0 and SMART_MONEY_HELIUS_ENABLED=0"
+      "current_policy": "DISABLED by HELIUS_ENABLED=0 and SMART_MONEY_HELIUS_ENABLED=0; current trader and Smart Money share persistent 1000/hour, 20000/day, 600000/31-day estimated-credit caps"
     },
     {
       "name": "Birdeye",
@@ -396,6 +411,13 @@
     }
   ],
   "data_contracts": [
+    {
+      "producer": "helius_usage",
+      "artifact": "data/helius_usage.sqlite3",
+      "consumers": ["trader", "smart_money"],
+      "freshness_seconds": null,
+      "reason": "Private persistent reservations/cache; preserve across releases. Historical clients and other checkouts are outside this ledger."
+    },
     {
       "producer": "smart_money",
       "artifact": "SmartMoneyMonitor/data/smart_money_feed_health_v23.json",

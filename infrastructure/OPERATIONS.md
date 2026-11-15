@@ -83,6 +83,44 @@ When a status is incorrect, compare its data source with producer output before 
 
 ## Updating the contract
 
+### Helius credit controls (November 15, 2026)
+
+The current trader and Smart Money v2.3 import `helius_usage.py`. Both use one
+local `data/helius_usage.sqlite3` ledger. SQLite transactions reserve estimated
+credits **before each HTTP attempt**, including retries. Tracked `.env.config`
+sets rolling limits of 1,000/hour, 20,000/24 hours and 600,000/31 days. Local
+`.env` values cannot increase these limits. Missing/invalid policy, unknown
+methods, inaccessible/corrupt ledger, and exhausted budgets fail closed.
+Reservations are conservative estimates, not the provider's billing balance.
+Do not delete the ledger when restarting, deploying, or rotating logs.
+
+Holder snapshots persist for six hours and stop after two pages; counts from
+full capped pages remain lower bounds. Cache hits retain the observation time
+and do not append history. Old baselines do not produce 10m/30m growth. Failed
+refreshes are cooled down for 15 minutes and do not append zero-holder samples.
+Provider halt state persists for 24 hours across service restarts.
+
+Public Solana RPC remains the default for regular wallet monitoring and balance
+reads. If explicitly enabled later, the legacy Enhanced Transactions path caches
+each wallet's history for one hour and shares the same budget. This means up to
+one-hour detection latency on that optional path; the public-RPC observer keeps
+its existing cadence. The optional latest-20 history path can miss high-volume
+wallet activity at that slower cadence. Cached history is deduplicated by the
+existing monitor.
+
+Inspect local reserved totals with `python helius_usage.py`; this performs no
+Helius requests. Ledger/cache files stay ignored and local. The estimate covers
+only these revised services sharing this checkout and ledger. Historical trader
+versions, standalone whale discovery tools, other checkouts and external apps
+using the key are outside this cap. Keep those stopped or independently limited.
+No account-wide limit or autoscaling setting is changed by this implementation.
+
+Both Helius switches remain zero while the change is reviewed. Deployment and
+enabling require a release that updates the protected provider contract, covers
+both importing services, and verifies the shared ledger on the host. No live
+trading setting is changed. The analysis is in
+[`analysis/helius_credit_review_20261115.md`](../analysis/helius_credit_review_20261115.md).
+
 Any change that adds, renames, retires, or reconnects a component must update `registry.json`, source ownership, dependencies, data/provider contracts, negative tests, and this document in the same release. The registry is checked on every main-branch change affecting infrastructure and on deployment preflight. CI branch-protection settings must be verified separately; a GitHub Action cannot guarantee branch blocking without repository rules.
 
 ## Read-only Windows activation and Pushover attestation (October 19, 2026)
