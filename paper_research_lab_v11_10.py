@@ -10,6 +10,7 @@ model decision, simulated fill, exit, and daily model summary is written under
 from __future__ import annotations
 
 import csv
+from contextvars import ContextVar
 import json
 import math
 import os
@@ -30,6 +31,7 @@ TRADE_FILE = DATA_DIR / "paper_trades.csv"
 SHADOW_TRADE_FILE = DATA_DIR / "shadow_trades.csv"
 EQUITY_FILE = DATA_DIR / "model_equity.csv"
 SUMMARY_DIR = DATA_DIR / "daily"
+_CYCLE_ROWS = ContextVar("paper_cycle_rows", default=None)
 
 
 def _num(value, default=0.0):
@@ -50,6 +52,9 @@ def _bool_env(name, default=True):
 
 def _append_csv(path, row):
     """Append while safely evolving CSV schemas without losing old rows."""
+    captured = _CYCLE_ROWS.get()
+    if captured is not None and path in (TRADE_FILE, DECISION_FILE):
+        captured.append((path, dict(row)))
     path.parent.mkdir(parents=True, exist_ok=True)
     new_fields = list(row.keys())
     exists = path.exists() and path.stat().st_size > 0
@@ -1120,7 +1125,90 @@ def _add_shadow_positions(
     model["shadow_positions"] = positions
 
 
-def run_paper_research(
+def run_paper_research(candidates, settings, **kwargs):
+    """Expose actual fills and a specific decision for every candidate/model."""
+    for candidate in candidates:
+        candidate.pop("paper_actions", None)
+    rows = []
+    capture = _CYCLE_ROWS.set(rows)
+    try:
+        result = _run_paper_research(candidates, settings, **kwargs)
+    finally:
+        _CYCLE_ROWS.reset(capture)
+    events = [row for path, row in rows if path == TRADE_FILE]
+    decisions = {(row["model"], row.get("token_address")): row
+                 for path, row in rows if path == DECISION_FILE}
+    models = result.get("models", {})
+    regime = result.get("regime", {})
+    for candidate in candidates:
+        token = candidate.get("token_address")
+        actions = []
+        for name, spec in MODEL_SPECS.items():
+            fills = [e for e in events if e.get("model") == name
+                     and e.get("token_address") == token]
+            if fills:
+                actions.extend(dict(e) for e in fills)
+                continue
+            decision = decisions.get((name, token))
+            position = models.get(name, {}).get("position")
+            if not models:
+                reason = "paper_research_disabled"
+            elif position:
+                reason = ("already_holding_this_token" if position.get("token_address") == token
+                          else "position_occupied:" + str(position.get("symbol")))
+            elif decision and decision["reason"] != "no_eligible_candidate":
+                reason = decision["reason"]
+                if decision.get("integrity_detail"):
+                    reason += ":" + decision["integrity_detail"]
+            else:
+                score = candidate.get("paper_model_scores", {}).get(name, 0)
+                safe, reasons = _model_safety_pass(name, candidate, spec, regime, score)
+                reason = ("higher_ranked_candidate_selected" if safe else ";".join(reasons))
+                if "score_below_threshold" in reason:
+                    reason += f" (score {score:.1f} < {spec.threshold:.1f})"
+            actions.append({"model": name, "action": "PASS", "reason": reason,
+                            "symbol": candidate.get("symbol", ""), "token_address": token})
+        candidate["paper_actions"] = actions
+        for action in actions:
+            _append_csv(DATA_DIR / "signal_actions.csv", {
+                "timestamp": datetime.now().isoformat(), **action})
+    result["trade_events"] = events
+    return result
+
+
+def paper_action_lines(candidate):
+    actions = candidate.get("paper_actions")
+    if not actions:
+        return ["Paper PASS: decision unavailable (research disabled or cycle failed)"]
+    grouped = {}
+    for action in actions:
+        key = (action["action"], action["reason"])
+        grouped.setdefault(key, []).append(action["model"])
+    return [f"Paper {action} {', '.join(names)}: {reason}"
+            for (action, reason), names in grouped.items()]
+
+
+def alert_pages(lines, limit=1000):
+    pages = []
+    current = ""
+    for line in lines:
+        while line:
+            room = limit - len(current) - (1 if current else 0)
+            if room <= 0:
+                pages.append(current)
+                current = ""
+                continue
+            piece, line = line[:room], line[room:]
+            current += ("\n" if current else "") + piece
+            if line:
+                pages.append(current)
+                current = ""
+    if current:
+        pages.append(current)
+    return pages
+
+
+def _run_paper_research(
     candidates,
     settings,
     price_lookup=None,
