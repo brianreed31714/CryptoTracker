@@ -1,0 +1,19 @@
+{
+  "proposal_id": "P-20261115-03",
+  "status": "READY_TO_DEPLOY",
+  "commit": "5e81a62024f37f4f1e79a989f1fd55c76ce19739",
+  "components": [
+    "trader",
+    "smart_money",
+    "dashboard"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "mode": "PAPER",
+  "approval": "User explicitly said Yes, deploy in the CryptoTracker paper-action alert chat on 2026-11-15.",
+  "purpose": "Show strategy BUY or specific PASS reasons on eligible alerts; notify actual paper BUY/SELL fills and net results; persist batched signal action audit. Preserve all existing paper positions, equity history, Helius credit ledger, trade sizing and protected settings. Existing deployment agent performs a coordinated service restart.",
+  "validation": "PR #48 source head b9b2ff4675bee31d45a22dcf2b0761b15ec65557 passed CryptoTracker Python Validation, Supervisor restart safety tests and Infrastructure registry contract on Windows and Linux. 57 local tests and isolated actual paper BUY/stop SELL integration passed. Merge source is identical to tested PR head."
+}
