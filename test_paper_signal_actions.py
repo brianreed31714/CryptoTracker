@@ -46,5 +46,35 @@ class SignalActionsTest(unittest.TestCase):
         self.assertTrue(all(len(p)<=1000 for p in pages))
         self.assertEqual(''.join(pages).replace('\n',''),''.join(lines))
 
+class StrategySentenceTests(unittest.TestCase):
+    def test_every_strategy_has_buy_description(self):
+        self.assertEqual(set(lab.MODEL_SPECS), set(lab.STRATEGY_DESCRIPTIONS))
+        for name in lab.MODEL_SPECS:
+            with self.subTest(model=name):
+                text = lab.trade_alert_sentence({'model': name, 'action': 'BUY', 'reason': 'MODEL_ENTRY'},
+                    {'paper_model_scores': {name: 75}})
+                self.assertIn('entry rules and execution checks passed', text)
+                self.assertIn('score 75.0, minimum', text)
+                self.assertLess(len(text), 800)
+
+    def test_sells_follow_actual_reason(self):
+        cases = {'STOP': 'before trading costs', 'MAX_HOLD': 'holding-time limit',
+                 'FAILED_MOMENTUM': 'down at least 2%', 'RUNNER_TRAIL': 'pulled back',
+                 'STAGED_PROFIT_FLOOR:5.0': 'profit-protection floor',
+                 'STAGE1_DONE': 'keeping the remainder open', 'STAGE2_DONE': 'keeping the remainder open',
+                 'MOMENTUM_DECAY:not_surging,sell_pressure': 'token stopped surging, selling pressure increased'}
+        for reason, expected in cases.items():
+            with self.subTest(reason=reason):
+                text = lab.trade_alert_sentence({'model': 'fast_exit', 'action': 'SELL', 'reason': reason})
+                self.assertIn(expected, text)
+                self.assertNotIn('execution checks passed', text)
+
+    def test_old_events_and_unknown_reasons_do_not_invent_details(self):
+        text = lab.trade_alert_sentence({'model': 'future_model', 'action': 'SELL', 'reason': 'NEW_EXIT'})
+        self.assertIn('NEW_EXIT', text)
+        text = lab.trade_alert_sentence({'model': 'balanced_ev', 'action': 'BUY'})
+        self.assertNotIn('score', text)
+
+
 if __name__=='__main__':
     unittest.main()

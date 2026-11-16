@@ -1188,6 +1188,67 @@ def run_paper_research(candidates, settings, **kwargs):
     return result
 
 
+STRATEGY_DESCRIPTIONS = {
+    "strict_baseline": "This baseline follows the main NORMAL or EARLY entry rules",
+    "balanced_ev": "This strategy balances momentum, buying pressure and activity",
+    "flow_breakout": "This strategy emphasizes rising volume and buying pressure",
+    "whale_luna": "This strategy weights momentum with whale activity and AI confirmation",
+    "early_breakout": "This strategy favors early acceleration in momentum and volume",
+    "low_friction": "This strategy prioritizes low estimated trading costs",
+    "fast_exit": "This strategy trades momentum with a tighter loss stop",
+    "patient_runner": "This strategy gives momentum trades more room and time to develop",
+    "regime_filtered": "This strategy trades momentum only in a broadly favorable market",
+    "anti_chase": "This strategy favors momentum while penalizing already stretched price moves",
+    "extended_probe": "This small-position strategy tests continuation after a large price move",
+    "staged_runner": "This strategy takes profits in stages while leaving part of the position running",
+    "novelty_probe": "This small-position strategy weights name novelty alongside momentum",
+    "runner_hunter": "This small-position strategy seeks strong momentum continuation",
+    "diy_whale": "This small-position strategy seeks early organic volume and buying pressure",
+}
+
+
+def trade_alert_sentence(event, candidate=None):
+    """Explain recorded paper fills without inferring unobserved catalysts."""
+    name = event.get("model", "")
+    description = STRATEGY_DESCRIPTIONS.get(name, "This paper strategy follows its configured trading rules")
+    reason = str(event.get("reason") or "")
+    spec = MODEL_SPECS.get(name)
+    if event.get("action") == "BUY":
+        trigger = "we bought because its entry rules and execution checks passed"
+        score = (candidate or {}).get("paper_model_scores", {}).get(name)
+        if score is not None and spec is not None:
+            trigger += f" (score {_num(score):.1f}, minimum {spec.threshold:.1f})"
+    elif reason == "STOP":
+        trigger = "we sold because the price loss reached its stop"
+        if spec:
+            trigger += f" ({spec.stop_pct:g}% before trading costs)"
+    elif reason == "MAX_HOLD":
+        trigger = "we sold because its holding-time limit expired"
+        if spec:
+            trigger += f" ({spec.max_hold_minutes:g} minutes)"
+    elif reason == "RUNNER_TRAIL":
+        trigger = "we sold because the price pulled back far enough from its peak to trigger the trailing exit"
+    elif reason.startswith("STAGED_PROFIT_FLOOR:"):
+        trigger = "we sold the remainder because the price fell to its profit-protection floor"
+    elif reason == "FAILED_MOMENTUM":
+        trigger = "we sold because the trade was down at least 2% after its initial grace period"
+    elif reason.startswith("MOMENTUM_DECAY:"):
+        labels = {
+            "not_surging": "the token stopped surging", "score_decay": "its momentum score weakened",
+            "delta_decay": "acceleration faded", "sell_pressure": "selling pressure increased",
+            "volume_decay": "volume weakened",
+        }
+        causes = [labels.get(x, x.replace("_", " ")) for x in reason.split(":", 1)[1].split(",") if x]
+        trigger = "we sold after repeated signs of fading momentum"
+        if causes:
+            trigger += ": " + ", ".join(causes)
+    elif reason in {"STAGE1_DONE", "STAGE2_DONE"}:
+        trigger = "we sold part of the position because its staged profit target was reached, keeping the remainder open"
+    else:
+        trigger = "we sold because the recorded exit trigger was " + (reason or "unavailable")
+    return description + "; " + trigger + "."
+
+
 def paper_action_lines(candidate):
     actions = candidate.get("paper_actions")
     if not actions:

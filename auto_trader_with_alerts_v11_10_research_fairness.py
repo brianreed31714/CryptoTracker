@@ -8485,6 +8485,8 @@ def run_cycle(
                 )
                 if event.get("net_return_pct") not in (None, ""):
                     detail += f" | Net {safe_number(event['net_return_pct']):+.2f}%"
+                candidate = next((c for c in candidates if c.get("token_address") == event.get("token_address")), None)
+                detail += "\n" + paper_lab.trade_alert_sentence(event, candidate)
                 send_pushover_once(
                     key=f"paper:{event.get('model')}:{event.get('token_address')}:{action}:{event.get('timestamp')}",
                     title=f"PAPER {action}: {event.get('symbol')}",
