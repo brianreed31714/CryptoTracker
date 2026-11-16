@@ -61,7 +61,7 @@ jobs:
         run: |
           python -m py_compile paper_research_lab_v11_10.py
           python -m py_compile research/runner_sleeve.py
-          python -m unittest -v test_runner_hunter
+          python -m unittest -v test_runner_hunter test_paper_signal_actions
           python -m py_compile publish_daily_evidence.py
           python -m py_compile build_daily_review_bundle.py
           python -m py_compile auto_trader_with_alerts_v11_10_research_fairness.py

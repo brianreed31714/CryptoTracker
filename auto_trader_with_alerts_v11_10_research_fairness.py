@@ -1067,6 +1067,9 @@ def send_surging_alerts(candidates, settings):
             ),
         ]
 
+        if eligible:
+            lines[1:1] = paper_lab.paper_action_lines(c)
+
         if bool(settings.get("HOLDER_METRICS_ALERTS_ENABLED", 1)):
             lines.extend(holder_alert_lines(c).splitlines())
 
@@ -1122,15 +1125,17 @@ def send_surging_alerts(candidates, settings):
                 "Blocked: " + ", ".join(str(x) for x in reasons)
             )
 
-        send_pushover_once(
-            key=f"surging:{token}",
-            title=f"SURGING: {symbol}",
-            message="\n".join(lines),
-            cooldown_seconds=cooldown_seconds,
-            priority=0,
-            sound="pushover",
-            audience="movement",
-        )
+        pages = paper_lab.alert_pages(lines)
+        for index, page in enumerate(pages):
+            send_pushover_once(
+                key=f"surging:{token}" + (f":page:{index}" if index else ""),
+                title=f"SURGING: {symbol}" + (f" ({index + 1}/{len(pages)})" if len(pages) > 1 else ""),
+                message=page,
+                cooldown_seconds=cooldown_seconds,
+                priority=0,
+                sound="pushover",
+                audience="movement",
+            )
 
 
 
@@ -8452,7 +8457,7 @@ def run_cycle(
         for candidate in candidates:
             candidate["research_entry_path"] = surge_entry_path(candidate, settings)
         try:
-            paper_lab.run_paper_research(
+            paper_result = paper_lab.run_paper_research(
                 candidates,
                 settings,
                 price_lookup=direct_token_market_snapshot,
@@ -8472,7 +8477,26 @@ def run_cycle(
                     "flags": "" if helius_data_quality() == "AVAILABLE" else "HELIUS_UNAVAILABLE_OPTIONAL",
                 },
             )
+            for event in paper_result.get("trade_events", []):
+                action = event.get("action", "")
+                detail = (
+                    f"Paper {action} | {event.get('model')} | {event.get('reason')}\n"
+                    f"Size ${safe_number(event.get('size_usdc')):.2f}"
+                )
+                if event.get("net_return_pct") not in (None, ""):
+                    detail += f" | Net {safe_number(event['net_return_pct']):+.2f}%"
+                send_pushover_once(
+                    key=f"paper:{event.get('model')}:{event.get('token_address')}:{action}:{event.get('timestamp')}",
+                    title=f"PAPER {action}: {event.get('symbol')}",
+                    message=detail, cooldown_seconds=60, priority=0,
+                    sound="pushover", audience="movement",
+                )
         except Exception as exc:
+            for candidate in candidates:
+                candidate["paper_actions"] = [{
+                    "model": "research", "action": "PASS",
+                    "reason": "paper_cycle_failed; decision unavailable",
+                }]
             print(f"  PAPER RESEARCH WARNING: {exc}")
 
     # Notify immediately when a token is SURGING. This is informational only
