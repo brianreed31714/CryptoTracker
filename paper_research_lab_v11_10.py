@@ -1140,6 +1140,7 @@ def run_paper_research(candidates, settings, **kwargs):
                  for path, row in rows if path == DECISION_FILE}
     models = result.get("models", {})
     regime = result.get("regime", {})
+    audit_rows = []
     for candidate in candidates:
         token = candidate.get("token_address")
         actions = []
@@ -1169,9 +1170,20 @@ def run_paper_research(candidates, settings, **kwargs):
             actions.append({"model": name, "action": "PASS", "reason": reason,
                             "symbol": candidate.get("symbol", ""), "token_address": token})
         candidate["paper_actions"] = actions
-        for action in actions:
-            _append_csv(DATA_DIR / "signal_actions.csv", {
-                "timestamp": datetime.now().isoformat(), **action})
+        audit_rows.extend({"timestamp": datetime.now().isoformat(), **action}
+                          for action in actions)
+    if audit_rows:
+        audit = DATA_DIR / "signal_actions.csv"
+        audit.parent.mkdir(parents=True, exist_ok=True)
+        exists = audit.exists() and audit.stat().st_size > 0
+        with audit.open("a", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=[
+                "timestamp", "model", "action", "symbol", "token_address", "reason",
+                "size_usdc", "entry_price", "exit_price", "net_return_pct",
+                "realized_pnl_usd"], extrasaction="ignore")
+            if not exists:
+                writer.writeheader()
+            writer.writerows(audit_rows)
     result["trade_events"] = events
     return result
 

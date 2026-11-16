@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 import paper_research_lab_v11_10 as lab
 
@@ -8,7 +10,7 @@ class SignalActionsTest(unittest.TestCase):
         def cycle(*args, **kwargs):
             lab._CYCLE_ROWS.get().extend(rows)
             return {'models': {'strict_baseline': {'position': position}}, 'regime': {'name': 'NEUTRAL'}}
-        with patch.object(lab, 'MODEL_SPECS', {'strict_baseline': lab.MODEL_SPECS['strict_baseline']}), patch.object(lab, '_run_paper_research', side_effect=cycle), patch.object(lab, '_model_safety_pass', return_value=(safe, ['score_below_threshold'])), patch.object(lab, '_append_csv'):
+        with tempfile.TemporaryDirectory() as temp, patch.object(lab, 'DATA_DIR', Path(temp)), patch.object(lab, 'MODEL_SPECS', {'strict_baseline': lab.MODEL_SPECS['strict_baseline']}), patch.object(lab, '_run_paper_research', side_effect=cycle), patch.object(lab, '_model_safety_pass', return_value=(safe, ['score_below_threshold'])), patch.object(lab, '_append_csv'):
             result = lab.run_paper_research([candidate], {})
         return candidate['paper_actions'], result
 
