@@ -1,0 +1,19 @@
+{
+  "proposal_id": "P-20261115-04",
+  "status": "READY_TO_DEPLOY",
+  "commit": "3a31f6e3f69cd699a76bddf09328dfb7ce496620",
+  "components": [
+    "trader",
+    "smart_money",
+    "dashboard"
+  ],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "mode": "PAPER",
+  "approval": "User requested adding a strategy and trigger sentence to every buy/sell alert in the same thread where deployment of paper alert improvements was explicitly approved.",
+  "purpose": "Add one plain-language sentence describing the strategy and recorded fill trigger to each paper BUY, SELL and PARTIAL_SELL alert. Preserve all strategy rules, sizing, paper positions, historical equity, credit ledger and protected settings.",
+  "validation": "PR #49 head 35a1278e3a15044866edf1ae9fb3c20b90a225f4 passed all three CI workflows including Windows and Linux infrastructure checks. 22 local regressions passed; all strategy descriptions fit the alert limit. Merge has identical tested source."
+}
