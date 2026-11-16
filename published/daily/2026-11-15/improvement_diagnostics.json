@@ -1,0 +1,250 @@
+{
+  "additional_research": {
+    "balanced_ev": "Test 30/60/120-minute loss cooldown in parallel independent variants.",
+    "capital": "No scaling before adequate liquidity/slippage validation and stable prospective net portfolio returns.",
+    "diy_whale": "Test NEUTRAL-only versus strict RISK_OFF organic-flow criteria in prospectively isolated variants.",
+    "profit_capture": "Test stage exits and narrower trailing rules against the frozen baseline using executable exit estimates.",
+    "runner_hunter": "Test independently timed 2- and 3-confirmation continuation with future executable quotes."
+  },
+  "date": "2026-11-15",
+  "experiments_are": "historical diagnostics, not proven strategy changes",
+  "full_mark_to_market_available": false,
+  "goal_daily_portfolio_return_pct": 1.0,
+  "mode": "PAPER_READ_ONLY",
+  "promotion_allowed": false,
+  "sleeves": {
+    "balanced_ev": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 64
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 25
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 35
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": -0.8632,
+        "completed": 5,
+        "net_pnl_usd": -0.064737,
+        "profit_factor": 0.2614,
+        "valid_pnl_rows": 5,
+        "win_rate_pct": 20.0
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": -0.43158,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [
+          {
+            "estimated_cost_pct": -3.76975247,
+            "timestamp": "2026-11-15T05:41:23.672153",
+            "token": "BIG"
+          },
+          {
+            "estimated_cost_pct": -6.56292386,
+            "timestamp": "2026-11-15T09:13:59.196526",
+            "token": "BIG"
+          },
+          {
+            "estimated_cost_pct": -2.21575288,
+            "timestamp": "2026-11-15T13:39:26.272117",
+            "token": "GATO"
+          }
+        ],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 3,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": []
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": 63.235,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 4,
+        "losing_exits_after_at_least_8pct_observed_peak": 0
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": 0.0102,
+        "completed": 344,
+        "net_pnl_usd": 0.05247873,
+        "profit_factor": 1.0044,
+        "valid_pnl_rows": 344,
+        "win_rate_pct": 37.2093
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": -0.0911,
+          "completed": 292,
+          "net_pnl_usd": -0.398813,
+          "profit_factor": 0.953,
+          "valid_pnl_rows": 292,
+          "win_rate_pct": 36.3014
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 0.167785,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -11.1857,
+          "completed": 1,
+          "net_pnl_usd": -0.167785,
+          "profit_factor": 0.0,
+          "valid_pnl_rows": 1,
+          "win_rate_pct": 0.0
+        }
+      }
+    },
+    "diy_whale": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 126
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 57
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 90
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": -5.3118,
+        "completed": 6,
+        "net_pnl_usd": -0.239029,
+        "profit_factor": 0.0668,
+        "valid_pnl_rows": 6,
+        "win_rate_pct": 16.6667
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": -1.59353,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [
+          {
+            "estimated_cost_pct": 5.0466338,
+            "timestamp": "2026-11-15T12:31:39.387764",
+            "token": "BUTTHOLE"
+          }
+        ],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 1,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": []
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": 100.0,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 5,
+        "losing_exits_after_at_least_8pct_observed_peak": 0
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": -1.3378,
+        "completed": 619,
+        "net_pnl_usd": -6.210938,
+        "profit_factor": 0.7102,
+        "valid_pnl_rows": 619,
+        "win_rate_pct": 39.0953
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": -1.1171,
+          "completed": 221,
+          "net_pnl_usd": -1.851642,
+          "profit_factor": 0.6916,
+          "valid_pnl_rows": 221,
+          "win_rate_pct": 39.819
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 4.216707,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -1.4757,
+          "completed": 381,
+          "net_pnl_usd": -4.216707,
+          "profit_factor": 0.7184,
+          "valid_pnl_rows": 381,
+          "win_rate_pct": 38.3202
+        }
+      }
+    },
+    "runner_hunter": {
+      "cooldown_candidates": {
+        "120": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 16
+        },
+        "30": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 5
+        },
+        "60": {
+          "interpretation": "retrospective entry count, not prevented losses or a causal simulation",
+          "observed_reentries_after_loss": 8
+        }
+      },
+      "daily": {
+        "avg_net_return_per_trade_pct": null,
+        "completed": 0,
+        "net_pnl_usd": 0,
+        "profit_factor": null,
+        "valid_pnl_rows": 0,
+        "win_rate_pct": null
+      },
+      "daily_realized_pnl_as_pct_of_initial_capital_not_portfolio_return": 0.0,
+      "eligibility": {
+        "minimum_prospective_exits_for_preliminary_review": 30,
+        "qualification": "No promotion on these retrospective observations."
+      },
+      "execution": {
+        "estimated_cost_outlier_samples": [],
+        "exit_quotations_missing_or_fallback_count": 0,
+        "negative_or_over_5pct_estimated_cost_count": 0,
+        "qualification": "Quotes are estimates, not settled swaps; large stop overruns and negative estimated costs require investigation.",
+        "stops_exceeding_threshold_by_more_than_3pp": []
+      },
+      "exit_capture": {
+        "avg_positive_raw_peak_capture_pct": null,
+        "caveat": "Observed price extrema are sampled; peak capture is price-based, before execution cost.",
+        "exits_with_positive_observed_peak": 0,
+        "losing_exits_after_at_least_8pct_observed_peak": 0
+      },
+      "inception": {
+        "avg_net_return_per_trade_pct": -1.6445,
+        "completed": 214,
+        "net_pnl_usd": -2.639421,
+        "profit_factor": 0.6063,
+        "valid_pnl_rows": 214,
+        "win_rate_pct": 35.514
+      },
+      "regime_selection": {
+        "limitation": "Removing trades changes capital availability, future signals, and the alternative equity path.",
+        "neutral": {
+          "avg_net_return_per_trade_pct": -1.652,
+          "completed": 195,
+          "net_pnl_usd": -2.415984,
+          "profit_factor": 0.6065,
+          "valid_pnl_rows": 195,
+          "win_rate_pct": 34.359
+        },
+        "possible_avoided_historical_risk_off_losses_usd_not_causal": 0.053415,
+        "risk_off": {
+          "avg_net_return_per_trade_pct": -3.561,
+          "completed": 2,
+          "net_pnl_usd": -0.053415,
+          "profit_factor": 0.3991,
+          "valid_pnl_rows": 2,
+          "win_rate_pct": 50.0
+        }
+      }
+    }
+  },
+  "version": 1
+}
