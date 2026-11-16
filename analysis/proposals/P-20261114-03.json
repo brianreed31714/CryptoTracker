@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261114-03",
+  "title": "Audit smart-money export coverage before using campaign signals",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor daily event/campaign export and feed-health reconciliation",
+  "current": "Date-filtered event, campaign, and wallet-scorecard exports each show 0 rows; feed-health reports latest status OK, 100% latest wallet coverage, and 1,767 failed wallet checks across 16,962 rows.",
+  "proposed": "Reconcile export time windows, filtering, and event-to-campaign joins against feed-health deltas; publish date-scoped counts and coverage before evaluating campaign strength. Do not change signal weights during this audit.",
+  "evidence": [
+    "The daily filtered smart-money files contain zero rows, preventing calculation of campaign strength or convergence for this review.",
+    "Feed-health reports event and campaign row deltas of 1,318 and zero event-without-campaign cycles, indicating the zero-row exports need a scope or export reconciliation before interpretation.",
+    "The same feed-health file reports 1,767 failed wallet checks, despite 100% latest coverage."
+  ],
+  "risk": "The zero-row exports may be expected for the review window rather than a pipeline defect; changing signal use before confirming scope could discard valid information or overstate data availability.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-14",
+  "created_at": "2026-11-15T17:07:01",
+  "updated_at": "2026-11-15T17:07:01",
+  "implementation": {},
+  "deployment": {}
+}

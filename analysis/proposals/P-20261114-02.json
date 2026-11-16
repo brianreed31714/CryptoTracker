@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261114-02",
+  "title": "Extend the extended_probe shadow sample",
+  "change_type": "RESEARCH",
+  "target": "paper_shadow_research / extended_probe",
+  "current": "8 completed shadow trades; 4 wins, 4 losses; median net return 2.1187%; profit factor 2.4868; maximum drawdown 7.1803%",
+  "proposed": "Continue the unchanged model in SHADOW and review again after at least 30 completed observations, including MFE/MAE and false-positive cost for rejected or failed candidates.",
+  "evidence": [
+    "The current sample of 8 is too small to establish the reported positive median or profit factor.",
+    "The reported mean net return is 3.7962%, notably above the median 2.1187%, so outcome concentration should be checked as the sample grows.",
+    "No promotion candidates are reported."
+  ],
+  "risk": "The favorable early results may be chance-driven or tied to a narrow market regime; the sample does not validate live fills or tail risk.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-14",
+  "created_at": "2026-11-15T17:07:01",
+  "updated_at": "2026-11-15T17:07:01",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,14 +1,38 @@
 {
-  "generated_at": "2026-11-14T17:07:03",
-  "review_date": "2026-11-13",
-  "proposal_count": 1,
+  "generated_at": "2026-11-15T17:07:01",
+  "review_date": "2026-11-14",
+  "proposal_count": 4,
   "pending": [
-    "P-20261113-01"
+    "P-20261114-01",
+    "P-20261114-02",
+    "P-20261114-03",
+    "P-20261114-04"
   ],
   "proposals": [
     {
-      "proposal_id": "P-20261113-01",
-      "title": "Investigate forward-outcome attribution completeness",
+      "proposal_id": "P-20261114-01",
+      "title": "Continue shadow evaluation of early_breakout",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261114-02",
+      "title": "Extend the extended_probe shadow sample",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261114-03",
+      "title": "Audit smart-money export coverage before using campaign signals",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261114-04",
+      "title": "Complete rejected-signal outcome and cost analysis",
       "confidence": "LOW",
       "recommended_mode": "SHADOW",
       "status": "PENDING"

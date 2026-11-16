@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261114-01",
+  "title": "Continue shadow evaluation of early_breakout",
+  "change_type": "RESEARCH",
+  "target": "paper_shadow_research / early_breakout",
+  "current": "17 completed shadow trades; 8 wins, 9 losses; median net return -0.2262%; profit factor 1.3942; maximum drawdown 13.5663%",
+  "proposed": "Keep the existing model in SHADOW without changing its rules; collect at least 30 completed observations and report median return, hit rate, MFE/MAE, and drawdown before considering promotion.",
+  "evidence": [
+    "The 17-observation cohort is below the 30-observation research checkpoint and below the 12-observation minimum for treating a result as more than preliminary.",
+    "Mean net return is +0.691% while median net return is -0.2262%, consistent with a result that may depend on a small number of large outcomes.",
+    "No promotion candidates are reported."
+  ],
+  "risk": "The apparent positive mean and profit factor may not persist; additional shadow results may remain regime-specific and do not establish live execution performance.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-14",
+  "created_at": "2026-11-15T17:07:01",
+  "updated_at": "2026-11-15T17:07:01",
+  "implementation": {},
+  "deployment": {}
+}

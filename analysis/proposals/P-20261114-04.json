@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261114-04",
+  "title": "Complete rejected-signal outcome and cost analysis",
+  "change_type": "RESEARCH",
+  "target": "missed_opportunity_audit / rejected-signal forward outcomes",
+  "current": "Audit reports 78 usable rejected signals and 83/78 sampled 30m/60m rows, but the supplied metrics contain no outcome hit rates, MFE/MAE summaries, or false-positive cost.",
+  "proposed": "Produce a date-scoped rejected-signal analysis with deduplicated counts, 30m/60m/120m hit rates, median MFE/MAE, and an explicit false-positive cost before proposing any entry-gate change.",
+  "evidence": [
+    "The audit establishes a rejected-signal sample but does not report whether those signals met a consistent missed-opportunity outcome definition.",
+    "Without outcome distributions and false-positive cost, the report counts alone cannot establish that relaxing a gate would improve expected results.",
+    "There were no live trades on the review date to validate any proposed gate relaxation."
+  ],
+  "risk": "Outcome windows may be incomplete or overlapping, and retrospective labeling can overstate opportunity quality if it does not account for executable prices and costs.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-14",
+  "created_at": "2026-11-15T17:07:01",
+  "updated_at": "2026-11-15T17:07:01",
+  "implementation": {},
+  "deployment": {}
+}
