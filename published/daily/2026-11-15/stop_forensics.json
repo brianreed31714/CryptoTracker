@@ -2,16 +2,16 @@
   "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
   "models": {
     "balanced_ev": {
-      "all_completed_exits": 5,
+      "all_completed_exits": 7,
       "configured_stop_trigger_pct": -5.0,
       "invalid_stop_marks": 0,
-      "negative_estimated_quote_cost_count": 1,
+      "negative_estimated_quote_cost_count": 3,
       "quote_timestamp_verified_count": 0,
-      "stop_exits": 1,
+      "stop_exits": 3,
       "stop_net_overrun_count": 0,
       "stop_over_20pct_net_loss_count": 0,
-      "stop_raw_gap_count": 1,
-      "valid_stop_exits": 1,
+      "stop_raw_gap_count": 3,
+      "valid_stop_exits": 3,
       "worst_stops": [
         {
           "entry_regime": "NEUTRAL",
@@ -24,6 +24,32 @@
           "quote_timestamp_verified": false,
           "raw_return_pct": -7.994924,
           "raw_stop_overrun_pp": 2.994924,
+          "symbol": "BIG"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -3.945656,
+          "estimated_net_return_pct": -1.298467,
+          "estimated_pnl_usdc": -0.019477,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 3.158,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -5.244123,
+          "raw_stop_overrun_pp": 0.244123,
+          "symbol": "BIG"
+        },
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -5.286621,
+          "estimated_net_return_pct": -1.037,
+          "estimated_pnl_usdc": -0.015555,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 14.237,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -6.323621,
+          "raw_stop_overrun_pp": 1.323621,
           "symbol": "BIG"
         }
       ]

@@ -2,7 +2,7 @@
 
 | Sleeve | Stop trigger | Stops | Invalid | Raw gap | Net overrun | Worst net stop |
 |---|---:|---:|---:|---:|---:|---:|
-| balanced_ev | -5.0% | 1 | 0 | 1 | 0 | BIG -1.43% |
+| balanced_ev | -5.0% | 3 | 0 | 3 | 0 | BIG -1.43% |
 | runner_hunter | -7.0% | 0 | 0 | 0 | 0 | N/A |
 | diy_whale | -8.0% | 1 | 0 | 1 | 1 | BUTTHOLE -9.49% |
 
