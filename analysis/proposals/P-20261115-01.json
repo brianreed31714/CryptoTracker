@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261115-01",
+  "title": "Validate follow-up outcome completeness before tuning entries",
+  "change_type": "RESEARCH",
+  "target": "SURGE_FOLLOWUP audit and daily outcome reporting",
+  "current": "56,676 follow-up rows are reported, but horizons_found and score_bands are empty.",
+  "proposed": "In research/shadow, investigate why outcome horizons and score bands are absent; validate horizon coverage and report outcome counts, returns, MFE, and MAE by path and score band before using follow-ups to change entry gates.",
+  "evidence": [
+    "The daily metrics report 56,676 follow-up rows across NONE (49,119), NORMAL (6,754), and EARLY_ACCEL (803).",
+    "Despite those rows, horizons_found and score_bands are empty, so follow-up outcome quality and rejected-signal cost cannot be assessed."
+  ],
+  "risk": "The missing summaries may reflect filtering or report-generation issues rather than missing raw outcomes; conclusions could be biased if the underlying records are incomplete or duplicated.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-15",
+  "created_at": "2026-11-16T17:06:27",
+  "updated_at": "2026-11-16T17:06:27",
+  "implementation": {},
+  "deployment": {}
+}

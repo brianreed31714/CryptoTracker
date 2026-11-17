@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261115-02",
+  "title": "Keep Luna calibration unchanged pending a larger shadow sample",
+  "change_type": "RESEARCH",
+  "target": "Luna confidence/setup calibration and AI_CONFIRMATION_MAX_BONUS",
+  "current": "AI_CONFIRMATION_MAX_BONUS=5; daily Luna log has 10 reviews.",
+  "proposed": "Make no bonus or gate adjustment; shadow-track at least 12 independent Luna-reviewed signals per relevant setup/confidence group, with token-clustered 30/60/120-minute returns, MFE, MAE, and false-positive rates.",
+  "evidence": [
+    "The daily Luna log contains 10 reviews, below the minimum sample threshold for calibration claims.",
+    "POSITIVE|MEDIUM outcomes are weak in a small sample: n=5 at 30 and 60 minutes, positive rates 40% and 0%, and median returns -5.213% and -7.771%; n=4 at 120 minutes."
+  ],
+  "risk": "Signals may be correlated or regime-specific, and small-group results may not persist; changing calibration before a larger independent sample could suppress useful confirmations.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-15",
+  "created_at": "2026-11-16T17:06:27",
+  "updated_at": "2026-11-16T17:06:27",
+  "implementation": {},
+  "deployment": {}
+}
