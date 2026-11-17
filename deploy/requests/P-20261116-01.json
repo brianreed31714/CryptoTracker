@@ -1,0 +1,13 @@
+{
+  "proposal_id": "P-20261116-01",
+  "status": "READY_TO_DEPLOY",
+  "commit": "0642c4be0d26009b86ad29b552d47c32cb1e263b",
+  "components": ["trader", "smart_money", "dashboard"],
+  "files": {
+    "trader": "auto_trader_with_alerts_v11_10_research_fairness.py",
+    "smart_money": "SmartMoneyMonitor/smart_money_monitor_v2_3_feed_health_audit.py",
+    "dashboard": "cryptotracker_dashboard_v11_8_2.py"
+  },
+  "approval": "User requested all EOD reports at 4 PM Pacific daily. PR #50 passed exact-head CI. Report-only Windows task is installed and tested with no duplicate send.",
+  "purpose": "Adopt central 4 PM performance delivery; disable the overlapping legacy evening push while preserving paper trading, Helius limits and runtime data."
+}
