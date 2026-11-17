@@ -17,6 +17,12 @@ Protected settings: `LIVE_TRADING=false`, `HELIUS_ENABLED=1`,
 persistent credit limits; wallet monitoring and balances stay on public RPC.
 No live-trading promotion is authorized.
 
+Daily performance delivery is owned by the report-only Windows task
+`TradingOps Daily Paper EOD` at 4 PM Pacific, including weekends. It combines
+StockTracker, CryptoTracker and the ZPTA sleeve using a single dated receipt.
+The legacy in-engine performance push is disabled to prevent a second report
+at the former 8 PM time. Research/model-review generation remains independent.
+
 Read-only local inventory, after a clean explicit fast-forward:
 
 ```powershell

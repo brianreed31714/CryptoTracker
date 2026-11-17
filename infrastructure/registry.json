@@ -11,6 +11,7 @@
   "safety": {
     "tracked_settings": {
       "LIVE_TRADING": "false",
+      "PUSHOVER_CRYPTO_EOD_ENABLED": "0",
       "HELIUS_ENABLED": "1",
       "HELIUS_MODE": "holders_only",
       "SMART_MONEY_HELIUS_ENABLED": "0",
@@ -22,6 +23,7 @@
     },
     "effective_settings_must_not_enable": [
       "LIVE_TRADING",
+      "PUSHOVER_CRYPTO_EOD_ENABLED",
       "SMART_MONEY_HELIUS_ENABLED"
     ],
     "trader_source_markers": [
