@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261116-01",
+  "title": "Continue name12-flow evaluation in shadow",
+  "change_type": "RESEARCH",
+  "target": "paper_shadow model xp_diy_name12_flow",
+  "current": "7 completed shadow observations; 6 wins, median net return 3.2458%, maximum drawdown 3.0276%; no promotion candidate",
+  "proposed": "Keep the variant shadow-only and collect at least 12 distinct completed token-signal observations, deduplicated by token and campaign; report net returns, costs, MFE/MAE, and drawdown before reassessment. Do not promote automatically.",
+  "evidence": [
+    "The observed 6/7 hit rate and 3.2458% median are promising but based on fewer than 12 observations.",
+    "The research summary lists no promotion candidates, and other model comparisons are not established as independent controlled tests."
+  ],
+  "risk": "Small-sample selection effects or repeated observations from the same token/campaign may make the apparent performance disappear; shadow results may not reflect executable live returns.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-16",
+  "created_at": "2026-11-17T17:06:55",
+  "updated_at": "2026-11-17T17:06:55",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261116-02",
+  "title": "Reconcile forward-outcome coverage before rule changes",
+  "change_type": "RESEARCH",
+  "target": "surge_followup_log, surge_followup_audit, and missed_opportunity_audit outcome reporting",
+  "current": "57,855 follow-up rows but no reported horizons; missed-opportunity summary has 46 usable rejected signals without reported outcome distributions",
+  "proposed": "In research reporting, reconcile signal identity and timestamps, then produce deduplicated 30/60/120-minute outcomes with MFE, MAE, and rejection reason where available; use the results to quantify missed-opportunity benefit and false-positive cost before considering entry-filter changes.",
+  "evidence": [
+    "The follow-up summary reports no horizons despite 57,855 rows.",
+    "The missed-opportunity audit reports 46 usable rejected signals but no MFE/MAE or outcome breakdown in the supplied metrics."
+  ],
+  "risk": "Incomplete or survivorship-biased follow-up coverage could misstate both missed upside and the cost of admitting rejected signals.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-16",
+  "created_at": "2026-11-17T17:06:55",
+  "updated_at": "2026-11-17T17:06:55",
+  "implementation": {},
+  "deployment": {}
+}
