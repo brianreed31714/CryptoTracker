@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-16",
+  "models": {
+    "balanced_ev": {
+      "completed": 12,
+      "entries": 12,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 3,
+      "over_5pct_estimated_execution_cost_exits": 0,
+      "risk_off_entries": 0,
+      "severe_net_loss_below_minus_20pct": 0,
+      "tokens_with_repeated_loss_exits": {
+        "34DXEU2ttEtBSb1TqGJm7izgvYTTkqKcCoiNWdPDpump": 3,
+        "8s11PkgQt4ZzdZ7oo84hK5t9HG1EvdgAjcg4W7Lpump": 3,
+        "GexThZHgaswpAQ7Fi8QrHFubjPimUNSYhJiAA7XZpump": 2
+      },
+      "unavailable_helius_exits": 0
+    },
+    "diy_whale": {
+      "completed": 19,
+      "entries": 19,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 5,
+      "over_5pct_estimated_execution_cost_exits": 2,
+      "risk_off_entries": 15,
+      "severe_net_loss_below_minus_20pct": 1,
+      "tokens_with_repeated_loss_exits": {
+        "D9EcoQZeAytCrF1kQFSpRNpoPhibJUvJcmRHXhubpump": 2,
+        "GexThZHgaswpAQ7Fi8QrHFubjPimUNSYhJiAA7XZpump": 4,
+        "HsprHxBRgiVaQdRf3TnKNuZZtaX9JUSPgMFdAkk6pump": 2
+      },
+      "unavailable_helius_exits": 0
+    },
+    "runner_hunter": {
+      "completed": 4,
+      "entries": 4,
+      "execution_warning": "Jupiter executable quote labels are simulation estimates; no swaps were submitted.",
+      "negative_estimated_execution_cost_exits": 0,
+      "over_5pct_estimated_execution_cost_exits": 0,
+      "risk_off_entries": 0,
+      "severe_net_loss_below_minus_20pct": 0,
+      "tokens_with_repeated_loss_exits": {},
+      "unavailable_helius_exits": 0
+    }
+  },
+  "paper_only": true,
+  "reconciliation": {
+    "by_sleeve": {
+      "balanced_ev": {
+        "campaign_completed_delta": 0,
+        "campaign_pnl_delta_usd": 0.0,
+        "count_reconciled": false,
+        "daily_completed": 12,
+        "note": "Mismatch can be caused by historical backfill or corrections; investigate rather than attributing to today's trades."
+      },
+      "diy_whale": {
+        "campaign_completed_delta": 0,
+        "campaign_pnl_delta_usd": 0.0,
+        "count_reconciled": false,
+        "daily_completed": 19,
+        "note": "Mismatch can be caused by historical backfill or corrections; investigate rather than attributing to today's trades."
+      },
+      "runner_hunter": {
+        "campaign_completed_delta": 0,
+        "campaign_pnl_delta_usd": 0.0,
+        "count_reconciled": false,
+        "daily_completed": 4,
+        "note": "Mismatch can be caused by historical backfill or corrections; investigate rather than attributing to today's trades."
+      }
+    },
+    "previous_publication": "2026-11-15",
+    "status": "mismatch_review_required"
+  }
+}
