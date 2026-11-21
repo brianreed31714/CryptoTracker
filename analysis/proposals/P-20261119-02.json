@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261119-02",
+  "title": "Continue one-variable runner-exit comparison in shadow",
+  "change_type": "RESEARCH",
+  "target": "xp_runner_early_trail versus xp_runner_control shadow experiment",
+  "current": "Each variant has 16 completed observations. Early trail has a 56.25% win rate and 4.1919% median return; control has a 50.0% win rate and 0.2459% median return. Both report 0 realized PnL.",
+  "proposed": "Keep both variants in SHADOW, verify whether their token-event cohorts are comparable, and extend the comparison with all entry settings held constant. Include costs and drawdown uncertainty; do not promote either variant based on the current sample.",
+  "evidence": [
+    "Early trail's observed median return is higher than control's (4.1919% versus 0.2459%) on 16 observations per variant.",
+    "The win-rate difference is modest (56.25% versus 50.0%), and the samples may overlap.",
+    "Both variants have substantial reported max drawdown (36.2029% and 39.4469%), and shadow realized PnL is 0."
+  ],
+  "risk": "The apparent difference may reflect small-sample variation, cohort overlap, or shadow pricing that omits executable costs; treating it as a proven exit improvement could increase losses.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-19",
+  "created_at": "2026-11-20T17:06:55",
+  "updated_at": "2026-11-20T17:06:55",
+  "implementation": {},
+  "deployment": {}
+}

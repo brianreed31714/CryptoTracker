@@ -1,0 +1,24 @@
+{
+  "proposal_id": "P-20261119-01",
+  "title": "Validate outcome attribution before strategy changes",
+  "change_type": "RESEARCH",
+  "target": "Daily research outcome joins and reporting",
+  "current": "Follow-up horizons_found is empty; Luna outcomes have 0 rows; trade metrics have 0 buys and sells; the missed-opportunity audit reports 46 usable rejected signals without outcome aggregates in the supplied metrics.",
+  "proposed": "In RESEARCH/SHADOW, validate token-and-time joins and report 30/60/120-minute MFE/MAE, accepted-versus-rejected outcomes, execution costs where available, exit reasons, and adjudicated Luna labels. Do not change thresholds or live behavior as part of this work.",
+  "evidence": [
+    "The 60,593 follow-up rows have no reported outcome horizons, preventing hit-rate and MFE/MAE analysis.",
+    "Luna has 7 reviews but 0 labeled outcome rows.",
+    "The missed-opportunity audit has 46 usable rejected signals but no supplied outcome summary.",
+    "There are no live trades from which to estimate realized execution or exit costs."
+  ],
+  "risk": "Join or labeling errors could produce misleading outcome attribution; results must be audited and treated as exploratory before informing strategy decisions.",
+  "confidence": "HIGH",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-19",
+  "created_at": "2026-11-20T17:06:55",
+  "updated_at": "2026-11-20T17:06:55",
+  "implementation": {},
+  "deployment": {}
+}
