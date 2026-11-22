@@ -1,56 +1,55 @@
-# CryptoTracker Proposals — 2026-11-19
+# CryptoTracker Proposals — 2026-11-20
 
 These are the current model-improvement proposals from the nightly review.
 Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20261119-01 — Validate outcome attribution before strategy changes
+## P-20261120-01 — Keep early_breakout shadow-only and extend validation
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Daily research outcome joins and reporting`
-- **Current:** Follow-up horizons_found is empty; Luna outcomes have 0 rows; trade metrics have 0 buys and sells; the missed-opportunity audit reports 46 usable rejected signals without outcome aggregates in the supplied metrics.
-- **Proposed:** In RESEARCH/SHADOW, validate token-and-time joins and report 30/60/120-minute MFE/MAE, accepted-versus-rejected outcomes, execution costs where available, exit reasons, and adjudicated Luna labels. Do not change thresholds or live behavior as part of this work.
-- **Confidence:** HIGH
+- **Target:** `paper_research.early_breakout`
+- **Current:** 16 completed shadow observations; no promotion candidate; no live execution evidence
+- **Proposed:** Continue shadow-only evaluation and do not promote. Reassess after a larger set of independent observations with execution costs and MFE/MAE reported.
+- **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Join or labeling errors could produce misleading outcome attribution; results must be audited and treated as exploratory before informing strategy decisions.
+- **Risk:** Shadow returns may overstate executable results, and overlapping token or time-window observations could make the effective sample smaller than 16.
 - **Evidence:**
-  - The 60,593 follow-up rows have no reported outcome horizons, preventing hit-rate and MFE/MAE analysis.
-  - Luna has 7 reviews but 0 labeled outcome rows.
-  - The missed-opportunity audit has 46 usable rejected signals but no supplied outcome summary.
-  - There are no live trades from which to estimate realized execution or exit costs.
+  - Shadow early_breakout has 16 completed observations, 11 wins (68.75%), median net return 1.7072%, and maximum drawdown 3.0082%.
+  - The shadow result is not realized PnL, and the research summary lists no promotion candidates.
+  - Paper results across model variants are weak and do not independently confirm this shadow result.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261119-01`
+`Approve P-20261120-01`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261119-01`
+`Decline P-20261120-01`
 
 ---
 
-## P-20261119-02 — Continue one-variable runner-exit comparison in shadow
+## P-20261120-02 — Reconcile forward outcomes before tuning signal gates
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `xp_runner_early_trail versus xp_runner_control shadow experiment`
-- **Current:** Each variant has 16 completed observations. Early trail has a 56.25% win rate and 4.1919% median return; control has a 50.0% win rate and 0.2459% median return. Both report 0 realized PnL.
-- **Proposed:** Keep both variants in SHADOW, verify whether their token-event cohorts are comparable, and extend the comparison with all entry settings held constant. Include costs and drawdown uncertainty; do not promote either variant based on the current sample.
+- **Target:** `surge_followup and missed_opportunity outcome reporting`
+- **Current:** 61,520 follow-up rows with no reported horizons or score bands; 46 usable rejected signals without reported MFE/MAE outcomes
+- **Proposed:** Conduct a research-only linkage audit for accepted and rejected signals, reporting available 30/60/120-minute MFE/MAE, entry quote costs, and false-positive costs before changing thresholds.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** The apparent difference may reflect small-sample variation, cohort overlap, or shadow pricing that omits executable costs; treating it as a proven exit improvement could increase losses.
+- **Risk:** Timestamp or token-identity mismatches could bias linked outcomes; unavailable market data may leave some signals unlabeled.
 - **Evidence:**
-  - Early trail's observed median return is higher than control's (4.1919% versus 0.2459%) on 16 observations per variant.
-  - The win-rate difference is modest (56.25% versus 50.0%), and the samples may overlap.
-  - Both variants have substantial reported max drawdown (36.2029% and 39.4469%), and shadow realized PnL is 0.
+  - The follow-up summary reports horizons_found as empty and score_bands as empty.
+  - The missed-opportunity audit reports 46 usable rejected signals but no outcome MFE values in the supplied metrics.
+  - Without these outcomes, current anti-chase and missed-opportunity thresholds cannot be evaluated for benefit versus false-positive cost.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261119-02`
+`Approve P-20261120-02`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261119-02`
+`Decline P-20261120-02`
 
 ---
 

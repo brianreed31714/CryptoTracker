@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261120-01",
+  "title": "Keep early_breakout shadow-only and extend validation",
+  "change_type": "RESEARCH",
+  "target": "paper_research.early_breakout",
+  "current": "16 completed shadow observations; no promotion candidate; no live execution evidence",
+  "proposed": "Continue shadow-only evaluation and do not promote. Reassess after a larger set of independent observations with execution costs and MFE/MAE reported.",
+  "evidence": [
+    "Shadow early_breakout has 16 completed observations, 11 wins (68.75%), median net return 1.7072%, and maximum drawdown 3.0082%.",
+    "The shadow result is not realized PnL, and the research summary lists no promotion candidates.",
+    "Paper results across model variants are weak and do not independently confirm this shadow result."
+  ],
+  "risk": "Shadow returns may overstate executable results, and overlapping token or time-window observations could make the effective sample smaller than 16.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-20",
+  "created_at": "2026-11-21T17:07:05",
+  "updated_at": "2026-11-21T17:07:05",
+  "implementation": {},
+  "deployment": {}
+}

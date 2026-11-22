@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261120-02",
+  "title": "Reconcile forward outcomes before tuning signal gates",
+  "change_type": "RESEARCH",
+  "target": "surge_followup and missed_opportunity outcome reporting",
+  "current": "61,520 follow-up rows with no reported horizons or score bands; 46 usable rejected signals without reported MFE/MAE outcomes",
+  "proposed": "Conduct a research-only linkage audit for accepted and rejected signals, reporting available 30/60/120-minute MFE/MAE, entry quote costs, and false-positive costs before changing thresholds.",
+  "evidence": [
+    "The follow-up summary reports horizons_found as empty and score_bands as empty.",
+    "The missed-opportunity audit reports 46 usable rejected signals but no outcome MFE values in the supplied metrics.",
+    "Without these outcomes, current anti-chase and missed-opportunity thresholds cannot be evaluated for benefit versus false-positive cost."
+  ],
+  "risk": "Timestamp or token-identity mismatches could bias linked outcomes; unavailable market data may leave some signals unlabeled.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-20",
+  "created_at": "2026-11-21T17:07:05",
+  "updated_at": "2026-11-21T17:07:05",
+  "implementation": {},
+  "deployment": {}
+}
