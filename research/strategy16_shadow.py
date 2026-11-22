@@ -6,12 +6,13 @@ Input is a complete decision batch for ONE candidate observation, not fills.
 from datetime import datetime, timezone
 import hashlib
 import json
+from types import MappingProxyType
 
 MEMBERS = ('extended_probe', 'regime_filtered', 'whale_luna')
-POLICY = dict(name='strategy16_consensus_v1', members=MEMBERS, quorum=2,
+POLICY = MappingProxyType(dict(name='strategy16_consensus_v1', members=MEMBERS, quorum=2,
               maximum_age_seconds=60, maximum_skew_seconds=10,
-              mode='SHADOW_SIGNAL_ONLY', position_execution=False)
-POLICY_HASH = hashlib.sha256(json.dumps(POLICY, sort_keys=True).encode()).hexdigest()
+              mode='SHADOW_SIGNAL_ONLY', position_execution=False))
+POLICY_HASH = hashlib.sha256(json.dumps(dict(POLICY), sort_keys=True).encode()).hexdigest()
 
 
 def aware(value):
@@ -42,27 +43,48 @@ def evaluate(rows, *, observation_id, token_address, evaluated_at):
                 row['observation_id'] != observation_id or
                 row['token_address'] != token_address or
                 row['action'] not in ('ACCEPT','REJECT') or
-                row.get('data_quality_flags') or not row.get('source_sha256') or
+                row.get('data_quality_flags') or not isinstance(row.get('source_sha256'), str) or
+                len(row['source_sha256']) != 64 or
+                any(c not in '0123456789abcdef' for c in row['source_sha256']) or
                 not 0 <= (now-ts).total_seconds() <= POLICY['maximum_age_seconds']):
                 return result
             votes[member]=row['action'];times.append(ts)
         if (max(times)-min(times)).total_seconds()>POLICY['maximum_skew_seconds']:
             return result
         accepted=sorted(k for k,v in votes.items() if v=='ACCEPT')
-        result.update(action='SHADOW_CONSENSUS' if len(accepted)>=2 else 'REJECT',
-                      reason='QUORUM' if len(accepted)>=2 else 'NO_QUORUM',votes=accepted)
+        result.update(action='SHADOW_CONSENSUS' if len(accepted)>=POLICY['quorum'] else 'REJECT',
+                      reason='QUORUM' if len(accepted)>=POLICY['quorum'] else 'NO_QUORUM',votes=accepted)
         return result
     except (KeyError,ValueError,TypeError,AttributeError):
         return result
 
 
 def evaluate_batch(candidates):
-    """Suppress repeated observation/token pairs within this supplied batch."""
-    seen=set();out=[]
+    """Inspect all duplicates before deciding; malformed envelopes abstain.
+
+    Reordered identical rows are equivalent. Any differing duplicate evidence
+    (including time/provenance) invalidates that observation/token group.
+    """
+    groups={};out=[]
     for candidate in candidates:
-        key=(candidate['observation_id'],candidate['token_address'])
-        if key in seen:
+        try:
+            if not isinstance(candidate, dict) or set(candidate) != {'rows','observation_id','token_address','evaluated_at'}:
+                raise ValueError('Malformed envelope')
+            key=(candidate['observation_id'],candidate['token_address'])
+            if not all(isinstance(k,str) and k for k in key):
+                raise ValueError('Malformed identity')
+            canonical=dict(candidate)
+            canonical['rows']=sorted(candidate['rows'],key=lambda r: json.dumps(r,sort_keys=True))
+            fingerprint=json.dumps(canonical,sort_keys=True)
+            result=evaluate(**candidate)
+        except (KeyError,ValueError,TypeError,AttributeError):
+            out.append(dict(action='ABSTAIN',reason='MALFORMED_ENVELOPE',
+                            policy_sha256=POLICY_HASH,strategy=POLICY['name'],
+                            classification='SHADOW_SIGNAL_ONLY_NOT_PERFORMANCE',votes=[]))
             continue
-        seen.add(key)
-        out.append(evaluate(**candidate))
+        if key not in groups:
+            groups[key]=(fingerprint,result)
+        elif groups[key][0]!=fingerprint:
+            groups[key][1].update(action='ABSTAIN',reason='CONFLICTING_DUPLICATE',votes=[])
+    out.extend(result for _,result in groups.values())
     return out

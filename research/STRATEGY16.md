@@ -18,6 +18,13 @@ Two of three ACCEPT votes on the same token and observation produce one
 SHADOW_CONSENSUS signal. All three explicit votes must be present, fresh (60s),
 timezone-aware, within 10s of one another, source-referenced and quality-clean.
 Duplicate, conflicting, missing, future or stale votes cause ABSTAIN. Batch
+groups are checked in full before emitting consensus: contradictory duplicate
+envelopes abstain regardless of their order, while identical reordered votes
+deduplicate. Malformed envelopes emit explicit abstentions. The policy mapping
+and member tuple are immutable and its digest covers the declared quorum;
+source digests require 64 lowercase hexadecimal characters (format validation
+only, not source authentication).
+Batch
 deduplication is within a single invocation only; persistent exactly-once
 collection is a future adapter responsibility. Hash fields are provenance
 references, not cryptographic authentication of the source.

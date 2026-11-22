@@ -1,6 +1,8 @@
 import copy
 import unittest
-from research.strategy16_shadow import MEMBERS, evaluate, evaluate_batch
+from research.strategy16_shadow import MEMBERS, POLICY, POLICY_HASH, evaluate, evaluate_batch
+import hashlib
+import json
 
 
 class ConsensusTests(unittest.TestCase):
@@ -35,5 +37,34 @@ class ConsensusTests(unittest.TestCase):
         self.assertEqual(len(evaluate_batch([c,c])),1);self.assertEqual(c,before)
         c['rows'][0]['timestamp']='2026-11-22T05:59:40+00:00'
         self.assertEqual(evaluate(**c)['action'],'ABSTAIN')
+
+    def test_conflicting_duplicates_abstain_in_both_orders(self):
+        c=self.candidate();conflict=copy.deepcopy(c)
+        for row in conflict['rows']: row['action']='REJECT'
+        for batch in ([c,conflict],[conflict,c],[c,conflict,c]):
+            result=evaluate_batch(batch)
+            self.assertEqual(len(result),1)
+            self.assertEqual(result[0]['reason'],'CONFLICTING_DUPLICATE')
+            self.assertEqual(result[0]['action'],'ABSTAIN')
+
+    def test_reordered_identical_duplicate(self):
+        c=self.candidate();other=copy.deepcopy(c);other['rows'].reverse()
+        self.assertEqual(len(evaluate_batch([c,other])),1)
+        self.assertEqual(evaluate_batch([c,other])[0]['action'],'SHADOW_CONSENSUS')
+
+    def test_policy_is_immutable_and_hash_matches(self):
+        with self.assertRaises(TypeError): POLICY['maximum_age_seconds']=1000
+        self.assertEqual(POLICY_HASH,hashlib.sha256(json.dumps(dict(POLICY),sort_keys=True).encode()).hexdigest())
+
+    def test_malformed_batch_entries_do_not_hide_valid_candidate(self):
+        for bad in ({},None,{'rows':[]},dict(self.candidate(),token_address=[])):
+            results=evaluate_batch([bad,self.candidate()])
+            self.assertEqual(results[0]['action'],'ABSTAIN')
+            self.assertEqual(results[1]['action'],'SHADOW_CONSENSUS')
+
+    def test_bad_digest_abstains(self):
+        for digest in ('x'*64,'a',True):
+            c=self.candidate();c['rows'][0]['source_sha256']=digest
+            self.assertEqual(evaluate(**c)['action'],'ABSTAIN')
 
 if __name__=='__main__': unittest.main()
