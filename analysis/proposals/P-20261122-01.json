@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261122-01",
+  "title": "Require outcome coverage before strategy conclusions",
+  "change_type": "RESEARCH",
+  "target": "Daily evidence and outcome-labeling review",
+  "current": "Follow-up horizon coverage is unavailable; Luna has 0 labeled outcomes; MFE/MAE and rejected-signal false-positive cost are not reported.",
+  "proposed": "For research reviews, report matched sample counts by path and horizon, outcome-label coverage, MFE/MAE when available, and cost-adjusted outcomes for accepted and rejected signals before recommending parameter changes.",
+  "evidence": [
+    "The supplied metrics report 63,500 follow-up rows but horizons_found is empty.",
+    "Luna outcomes report 0 rows and 0 labeled rows for 15 reviewed signals.",
+    "The missed-opportunity audit has 46 usable rejected signals but no reported outcome or false-positive-cost summary."
+  ],
+  "risk": "Additional labeling and matching requirements may delay conclusions; incomplete or mismatched outcomes could still bias comparisons.",
+  "confidence": "HIGH",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-22",
+  "created_at": "2026-11-23T17:06:46",
+  "updated_at": "2026-11-23T17:06:46",
+  "implementation": {},
+  "deployment": {}
+}

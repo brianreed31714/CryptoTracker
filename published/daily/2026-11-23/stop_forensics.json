@@ -1,0 +1,102 @@
+{
+  "execution_note": "All exits are simulated Jupiter quote estimates, not executed fills. Holding duration is NOT quote age; no route, fill, or timestamp provenance inferred.",
+  "models": {
+    "balanced_ev": {
+      "all_completed_exits": 4,
+      "configured_stop_trigger_pct": -5.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 1,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 1,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 1,
+      "valid_stop_exits": 1,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": -12.403401,
+          "estimated_net_return_pct": 3.780533,
+          "estimated_pnl_usdc": 0.056708,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 7.439,
+          "net_stop_overrun_pp": 0,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -8.622868,
+          "raw_stop_overrun_pp": 3.622868,
+          "symbol": "FIONA"
+        }
+      ]
+    },
+    "diy_whale": {
+      "all_completed_exits": 14,
+      "configured_stop_trigger_pct": -8.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 3,
+      "stop_net_overrun_count": 3,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 3,
+      "valid_stop_exits": 3,
+      "worst_stops": [
+        {
+          "entry_regime": "NEUTRAL",
+          "estimated_cost_pct": 1.661356,
+          "estimated_net_return_pct": -19.904933,
+          "estimated_pnl_usdc": -0.149287,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 7.372,
+          "net_stop_overrun_pp": 11.904933,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -18.243577,
+          "raw_stop_overrun_pp": 10.243577,
+          "symbol": "UCASH"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 0.915735,
+          "estimated_net_return_pct": -12.746933,
+          "estimated_pnl_usdc": -0.095602,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 13.325,
+          "net_stop_overrun_pp": 4.746933,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -11.831198,
+          "raw_stop_overrun_pp": 3.831198,
+          "symbol": "UCASH"
+        },
+        {
+          "entry_regime": "RISK_OFF",
+          "estimated_cost_pct": 2.353902,
+          "estimated_net_return_pct": -11.398933,
+          "estimated_pnl_usdc": -0.085492,
+          "exit_quote_status": "EXECUTABLE_JUPITER",
+          "holding_minutes": 10.61,
+          "net_stop_overrun_pp": 3.398933,
+          "quote_timestamp_verified": false,
+          "raw_return_pct": -9.045031,
+          "raw_stop_overrun_pp": 1.045031,
+          "symbol": "PumpMeme"
+        }
+      ]
+    },
+    "runner_hunter": {
+      "all_completed_exits": 2,
+      "configured_stop_trigger_pct": -7.0,
+      "invalid_stop_marks": 0,
+      "negative_estimated_quote_cost_count": 0,
+      "quote_timestamp_verified_count": 0,
+      "stop_exits": 0,
+      "stop_net_overrun_count": 0,
+      "stop_over_20pct_net_loss_count": 0,
+      "stop_raw_gap_count": 0,
+      "valid_stop_exits": 0,
+      "worst_stops": []
+    }
+  },
+  "paper_only": true,
+  "quote_age_status": "UNVERIFIED_NO_QUOTE_OBSERVED_AT_IN_TRADE_LEDGER",
+  "report_date": "2026-11-23",
+  "schema": "PAPER_STOP_FORENSICS_V1"
+}

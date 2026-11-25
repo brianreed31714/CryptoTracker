@@ -1,22 +1,30 @@
 {
-  "generated_at": "2026-11-21T17:07:05",
-  "review_date": "2026-11-20",
-  "proposal_count": 2,
+  "generated_at": "2026-11-24T17:06:46",
+  "review_date": "2026-11-23",
+  "proposal_count": 3,
   "pending": [
-    "P-20261120-01",
-    "P-20261120-02"
+    "P-20261123-01",
+    "P-20261123-02",
+    "P-20261123-03"
   ],
   "proposals": [
     {
-      "proposal_id": "P-20261120-01",
-      "title": "Keep early_breakout shadow-only and extend validation",
+      "proposal_id": "P-20261123-01",
+      "title": "Build a shadow matched-outcome review for accepted and rejected candidates",
       "confidence": "LOW",
       "recommended_mode": "SHADOW",
       "status": "PENDING"
     },
     {
-      "proposal_id": "P-20261120-02",
-      "title": "Reconcile forward outcomes before tuning signal gates",
+      "proposal_id": "P-20261123-02",
+      "title": "Validate Luna outcome linkage before calibration",
+      "confidence": "LOW",
+      "recommended_mode": "SHADOW",
+      "status": "PENDING"
+    },
+    {
+      "proposal_id": "P-20261123-03",
+      "title": "Audit smart-money strength and wallet-check data before using campaign signals",
       "confidence": "LOW",
       "recommended_mode": "SHADOW",
       "status": "PENDING"
