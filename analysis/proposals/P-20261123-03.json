@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261123-03",
+  "title": "Audit smart-money strength and wallet-check data before using campaign signals",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor campaign-strength and feed-health validation",
+  "current": "98 campaign rows across 13 unique campaigns; median strength 0, zero convergence, zero scorecard rows, and 1,970 failed wallet checks",
+  "proposed": "Perform a shadow data-integrity review of strength generation, campaign deduplication, convergence calculation, scorecard population, and failed-check denominators. Keep smart-money signal influence unchanged until the audit is complete.",
+  "evidence": [
+    "Campaign strength has a reported median of 0 and multi-wallet convergence count is 0.",
+    "The wallet scorecard contains zero rows while the feed-health log records 1,970 failed wallet checks.",
+    "Latest feed status is OK with 100% coverage, but that does not resolve the strength, scorecard, or failure-count discrepancies."
+  ],
+  "risk": "The apparent zero strength or convergence may reflect field semantics or filtering rather than a feed defect, so an incorrect diagnosis could waste research effort.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-23",
+  "created_at": "2026-11-24T17:06:46",
+  "updated_at": "2026-11-24T17:06:46",
+  "implementation": {},
+  "deployment": {}
+}

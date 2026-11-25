@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261123-01",
+  "title": "Build a shadow matched-outcome review for accepted and rejected candidates",
+  "change_type": "RESEARCH",
+  "target": "SURGE follow-up and missed-opportunity outcome analysis",
+  "current": "64,032 follow-up rows with no horizons found; 53 audited signal rows including 46 usable rejected signals, with no reported outcome or false-positive-cost summaries",
+  "proposed": "Conduct an offline, deduplicated review matched by token and signal time; report 30/60/120-minute hit rates, median returns, MFE/MAE, and false-positive cost separately for accepted and rejected candidates. Do not alter entry thresholds during this review.",
+  "evidence": [
+    "The follow-up metrics contain no found horizons or score-band results.",
+    "The missed-opportunity audit identifies 46 usable rejected signals but supplies no outcome breakdown.",
+    "Available shadow results have negative medians in both strict_baseline (n=12) and xp_balanced_cd0 (n=38), so aggregate means alone are not a sound basis for loosening gates."
+  ],
+  "risk": "Token/time matching, duplicate signals, incomplete price histories, or selection bias could distort estimated opportunity costs.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-23",
+  "created_at": "2026-11-24T17:06:46",
+  "updated_at": "2026-11-24T17:06:46",
+  "implementation": {},
+  "deployment": {}
+}
