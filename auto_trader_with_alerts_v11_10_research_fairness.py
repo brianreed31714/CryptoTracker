@@ -28,6 +28,7 @@ No trading strategy can reliably guarantee a positive return every day.
 
 import base64
 import csv
+import hashlib
 import json
 import os
 import re
@@ -51,6 +52,7 @@ from helius_usage import HeliusUsage, HeliusBudgetDenied
 
 
 ROOT = Path(__file__).resolve().parent
+_STRATEGY16_PRODUCER_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 ENV_FILE = ROOT / ".env"
 CONFIG_FILE = ROOT / ".env.config"
 
@@ -3956,6 +3958,7 @@ def jupiter_order(
     output_mint,
     raw_amount,
     taker=None,
+    timeout_seconds=25,
 ):
     params = {
         "inputMint": input_mint,
@@ -3973,7 +3976,7 @@ def jupiter_order(
             "x-api-key": api_key,
             "Accept": "application/json",
         },
-        timeout=25,
+        timeout=timeout_seconds,
     )
 
     if not response.ok:
@@ -8457,6 +8460,20 @@ def run_cycle(
         for candidate in candidates:
             candidate["research_entry_path"] = surge_entry_path(candidate, settings)
         try:
+            strategy16_observer = None
+            try:
+                from research.strategy16_runtime import configured_observer
+                strategy16_observer = configured_observer(
+                    ROOT, lambda source, target, amount: jupiter_order(
+                        api_key, source, target, amount, timeout_seconds=3), USDC_MINT,
+                    live_trading=settings.get("LIVE_TRADING", False),
+                    loaded_lab_sha256=paper_lab._STRATEGY16_LAB_SOURCE_SHA256,
+                    loaded_producer_sha256=_STRATEGY16_PRODUCER_SHA256,
+                )
+            except Exception as exc:
+                # A bad/absent optional activation never suppresses the 15
+                # existing paper books or changes their execution parameters.
+                print(f"  STRATEGY16 ACTIVATION WARNING: {type(exc).__name__}")
             paper_result = paper_lab.run_paper_research(
                 candidates,
                 settings,
@@ -8476,7 +8493,10 @@ def run_cycle(
                     "helius_status": helius_data_quality(),
                     "flags": "" if helius_data_quality() == "AVAILABLE" else "HELIUS_UNAVAILABLE_OPTIONAL",
                 },
+                strategy16_observer=strategy16_observer,
             )
+            if paper_result.get("strategy16", {}).get("status") == "OBSERVER_FAILED":
+                print("  STRATEGY16 OBSERVER WARNING: study cycle failed; inspect its private database")
             for event in paper_result.get("trade_events", []):
                 action = event.get("action", "")
                 detail = (
