@@ -1,0 +1,14 @@
+name: Strategy 16 shadow contract
+on: [push, pull_request]
+jobs:
+  isolated-shadow-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest -v test_strategy16_shadow test_strategy16_paper test_strategy16_runtime test_paper_signal_actions

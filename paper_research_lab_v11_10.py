@@ -11,18 +11,20 @@ from __future__ import annotations
 
 import csv
 from contextvars import ContextVar
+import hashlib
 import json
 import math
 import os
 import re
 from difflib import SequenceMatcher
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
 
 
 ROOT = Path(__file__).resolve().parent
+_STRATEGY16_LAB_SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 DATA_DIR = ROOT / "data" / "paper_research"
 STATE_FILE = DATA_DIR / "state.json"
 OBS_FILE = DATA_DIR / "candidate_observations.csv"
@@ -1288,6 +1290,7 @@ def _run_paper_research(
     integrity_lookup=None,
     exit_value_lookup=None,
     data_quality=None,
+    strategy16_observer=None,
 ):
     """Run one protected research cycle. This function cannot submit a transaction."""
     if not _bool_env("PAPER_RESEARCH_ENABLED", True):
@@ -1379,6 +1382,16 @@ def _run_paper_research(
         name: sorted(scored, key=lambda item: item[1][name], reverse=True)
         for name in MODEL_SPECS
     }
+
+    # Explicit opt-in only. Capture candidate safety decisions BEFORE entries,
+    # independently of occupied/ranked base-model positions and BUY fill logs.
+    strategy16_result = None
+    if strategy16_observer is not None:
+        try:
+            strategy16_result = _observe_strategy16(
+                strategy16_observer, scored, regime, quality_flags, settings)
+        except Exception as exc:
+            strategy16_result = {"status": "OBSERVER_FAILED", "error_type": type(exc).__name__}
 
     # Separate raw-mark-only shadow experiments. No quotes, trades, or changes
     # to baseline model parameters are caused by this section.
@@ -1646,7 +1659,37 @@ def _run_paper_research(
     state["last_cycle_at"] = now.isoformat()
     state["last_regime"] = regime
     _save_state(state)
-    return {"regime": regime, "models": state["models"]}
+    result = {"regime": regime, "models": state["models"]}
+    if strategy16_result is not None:
+        result["strategy16"] = strategy16_result
+    return result
+
+
+def _observe_strategy16(observer, scored, regime, quality_flags, settings=None):
+    from research.strategy16_paper import SIGNALS, digest
+    candidates = []
+    for candidate, scores in scored:
+        if not candidate.get("token_address"):
+            continue
+        votes, reasons = {}, {}
+        for name in SIGNALS:
+            safe, why = _model_safety_pass(name, candidate, MODEL_SPECS[name], regime, scores[name])
+            votes[name] = bool(safe)
+            reasons[name] = list(why)
+        candidates.append({"token_address": str(candidate["token_address"]), "votes": votes,
+                           "features": _features(candidate), "reasons": reasons})
+    extended_keys = ("PAPER_EXTENDED_LIVE_5M_PCT", "PAPER_EXTENDED_LIVE_1H_PCT",
+                     "PAPER_EXTENDED_MIN_LIQUIDITY", "PAPER_EXTENDED_MIN_TX5",
+                     "PAPER_EXTENDED_MIN_QUANT", "PAPER_EXTENDED_MIN_VOLUME_ACCEL",
+                     "PAPER_EXTENDED_MIN_BUY_SELL", "PAPER_EXTENDED_MAX_5M_PCT",
+                     "PAPER_EXTENDED_MAX_1H_PCT")
+    configuration = {"models": {m:asdict(MODEL_SPECS[m]) for m in SIGNALS},
+                     "gate_environment": {k:os.getenv(k) for k in extended_keys},
+                     "producer_numeric_settings":{k:v for k,v in (settings or {}).items()
+                                                  if type(v) in (int,float,bool)}}
+    return observer(candidates=candidates, observed_at=datetime.now(timezone.utc).isoformat(),
+                    source_sha256=_STRATEGY16_LAB_SOURCE_SHA256,
+                    configuration_sha256=digest(configuration), data_quality_flags=quality_flags)
 
 
 def _max_drawdown_from_returns(returns):
