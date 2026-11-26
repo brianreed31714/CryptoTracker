@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261124-03",
+  "title": "Build a labeled Luna calibration cohort before tuning",
+  "change_type": "RESEARCH",
+  "target": "Luna signal outcome labeling",
+  "current": "Three Luna signals are logged and no Luna outcome rows or labeled rows are reported.",
+  "proposed": "Accumulate a shadow-only cohort with confidence, setup type, and fixed-horizon outcome labels including MFE and MAE; defer calibration or threshold changes until at least 12 relevant labeled observations are available.",
+  "evidence": [
+    "The current Luna sample is n=3, with two EARLY_ACCELERATION signals and one CONFLICTING_SIGNAL.",
+    "Median confidence is 75.0, but there are 0 outcome rows and 0 labeled rows, so confidence-to-outcome calibration cannot be assessed."
+  ],
+  "risk": "Even 12 observations may be underpowered or regime-specific; the proposed minimum is a research checkpoint, not proof of calibration.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-24",
+  "created_at": "2026-11-25T17:06:43",
+  "updated_at": "2026-11-25T17:06:43",
+  "implementation": {},
+  "deployment": {}
+}

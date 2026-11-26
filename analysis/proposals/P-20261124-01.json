@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261124-01",
+  "title": "Reconcile paper and shadow return attribution before ranking models",
+  "change_type": "RESEARCH",
+  "target": "paper_research performance attribution",
+  "current": "39 completed paper model observations and 258 completed shadow model observations are summarized across models; no preliminary paper leader or promotion candidate is reported.",
+  "proposed": "Run a shadow-only per-trade reconciliation of entry/exit prices, fees, assumed slippage, net return, dollar PnL, exit reason, and MFE/MAE; document cohort overlap and defer model ranking or promotion until the accounting is coherent.",
+  "evidence": [
+    "diy_whale paper results (n=10) show 40% wins, median net return -1.1251%, and profit factor 0.0259, while its shadow results (n=14) show 57.14% wins, median +1.8038%, and profit factor 46.5769.",
+    "The diy_whale paper average net return is -20.5363% versus a median of -1.1251%; its shadow average is +34.6544% versus a median of +1.8038%, indicating substantial mean/median divergence.",
+    "Shadow summaries report $0 realized PnL while reporting nonzero net returns; the supplied metrics do not explain that accounting convention."
+  ],
+  "risk": "Reconciliation may identify non-comparable or incomplete cohorts, delaying model comparisons; results must not be treated as an out-of-sample performance guarantee.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-24",
+  "created_at": "2026-11-25T17:06:43",
+  "updated_at": "2026-11-25T17:06:43",
+  "implementation": {},
+  "deployment": {}
+}

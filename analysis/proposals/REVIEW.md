@@ -1,79 +1,79 @@
-# CryptoTracker Proposals — 2026-11-23
+# CryptoTracker Proposals — 2026-11-24
 
 These are the current model-improvement proposals from the nightly review.
 Each proposal has a stable ID that can be used directly in ChatGPT.
 
-## P-20261123-01 — Build a shadow matched-outcome review for accepted and rejected candidates
+## P-20261124-01 — Reconcile paper and shadow return attribution before ranking models
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `SURGE follow-up and missed-opportunity outcome analysis`
-- **Current:** 64,032 follow-up rows with no horizons found; 53 audited signal rows including 46 usable rejected signals, with no reported outcome or false-positive-cost summaries
-- **Proposed:** Conduct an offline, deduplicated review matched by token and signal time; report 30/60/120-minute hit rates, median returns, MFE/MAE, and false-positive cost separately for accepted and rejected candidates. Do not alter entry thresholds during this review.
+- **Target:** `paper_research performance attribution`
+- **Current:** 39 completed paper model observations and 258 completed shadow model observations are summarized across models; no preliminary paper leader or promotion candidate is reported.
+- **Proposed:** Run a shadow-only per-trade reconciliation of entry/exit prices, fees, assumed slippage, net return, dollar PnL, exit reason, and MFE/MAE; document cohort overlap and defer model ranking or promotion until the accounting is coherent.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** Token/time matching, duplicate signals, incomplete price histories, or selection bias could distort estimated opportunity costs.
+- **Risk:** Reconciliation may identify non-comparable or incomplete cohorts, delaying model comparisons; results must not be treated as an out-of-sample performance guarantee.
 - **Evidence:**
-  - The follow-up metrics contain no found horizons or score-band results.
-  - The missed-opportunity audit identifies 46 usable rejected signals but supplies no outcome breakdown.
-  - Available shadow results have negative medians in both strict_baseline (n=12) and xp_balanced_cd0 (n=38), so aggregate means alone are not a sound basis for loosening gates.
+  - diy_whale paper results (n=10) show 40% wins, median net return -1.1251%, and profit factor 0.0259, while its shadow results (n=14) show 57.14% wins, median +1.8038%, and profit factor 46.5769.
+  - The diy_whale paper average net return is -20.5363% versus a median of -1.1251%; its shadow average is +34.6544% versus a median of +1.8038%, indicating substantial mean/median divergence.
+  - Shadow summaries report $0 realized PnL while reporting nonzero net returns; the supplied metrics do not explain that accounting convention.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261123-01`
+`Approve P-20261124-01`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261123-01`
+`Decline P-20261124-01`
 
 ---
 
-## P-20261123-02 — Validate Luna outcome linkage before calibration
+## P-20261124-02 — Label rejected-signal outcomes and false-positive cost
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `Luna confirmation outcome labeling`
-- **Current:** 14 reviewed signals with median confidence 78 and zero labeled outcome rows
-- **Proposed:** Run a shadow-only linkage and labeling audit by signal and setup type, then report labeled sample counts, hit rates, median returns, and MFE/MAE by confidence band; make no confidence or gating changes until outcomes are available.
+- **Target:** `missed_opportunity_audit outcome analysis`
+- **Current:** The audit has 53 signal rows and 46 usable rejected signals, but the supplied summary contains no MFE/MAE, hit rates, or false-positive cost.
+- **Proposed:** For the existing rejected-signal sample, produce a shadow-only outcome table at the reported 30- and 60-minute horizons with MFE, MAE, executable-price assumptions, and false-positive cost; do not relax entry gates based on counts alone.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** A small or selectively matchable labeled cohort may create misleading confidence-band estimates.
+- **Risk:** Sparse or survivorship-biased follow-up coverage, and optimistic price marks, could overstate missed opportunity; require executable-price and missing-outcome reporting.
 - **Evidence:**
-  - The review log contains 14 signals across four setup categories.
-  - Luna outcomes report zero signals and zero labeled rows, preventing calibration despite the logged confidence scores.
+  - The audit reports 46 usable rejected signals out of 53 signal rows.
+  - The 30- and 60-minute samples each contain 53 rows, but no corresponding outcome statistics are supplied.
+  - The configured missed-opportunity MFE flags (20% at 30 minutes and 50% at 60 minutes) do not by themselves quantify rejection precision or the cost of false positives.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261123-02`
+`Approve P-20261124-02`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261123-02`
+`Decline P-20261124-02`
 
 ---
 
-## P-20261123-03 — Audit smart-money strength and wallet-check data before using campaign signals
+## P-20261124-03 — Build a labeled Luna calibration cohort before tuning
 
 - **Status:** PENDING
 - **Type:** RESEARCH
-- **Target:** `SmartMoneyMonitor campaign-strength and feed-health validation`
-- **Current:** 98 campaign rows across 13 unique campaigns; median strength 0, zero convergence, zero scorecard rows, and 1,970 failed wallet checks
-- **Proposed:** Perform a shadow data-integrity review of strength generation, campaign deduplication, convergence calculation, scorecard population, and failed-check denominators. Keep smart-money signal influence unchanged until the audit is complete.
+- **Target:** `Luna signal outcome labeling`
+- **Current:** Three Luna signals are logged and no Luna outcome rows or labeled rows are reported.
+- **Proposed:** Accumulate a shadow-only cohort with confidence, setup type, and fixed-horizon outcome labels including MFE and MAE; defer calibration or threshold changes until at least 12 relevant labeled observations are available.
 - **Confidence:** LOW
 - **Recommended mode:** SHADOW
-- **Risk:** The apparent zero strength or convergence may reflect field semantics or filtering rather than a feed defect, so an incorrect diagnosis could waste research effort.
+- **Risk:** Even 12 observations may be underpowered or regime-specific; the proposed minimum is a research checkpoint, not proof of calibration.
 - **Evidence:**
-  - Campaign strength has a reported median of 0 and multi-wallet convergence count is 0.
-  - The wallet scorecard contains zero rows while the feed-health log records 1,970 failed wallet checks.
-  - Latest feed status is OK with 100% coverage, but that does not resolve the strength, scorecard, or failure-count discrepancies.
+  - The current Luna sample is n=3, with two EARLY_ACCELERATION signals and one CONFLICTING_SIGNAL.
+  - Median confidence is 75.0, but there are 0 outcome rows and 0 labeled rows, so confidence-to-outcome calibration cannot be assessed.
 
 **Approve in ChatGPT:**
 
-`Approve P-20261123-03`
+`Approve P-20261124-03`
 
 **Decline in ChatGPT:**
 
-`Decline P-20261123-03`
+`Decline P-20261124-03`
 
 ---
 

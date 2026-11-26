@@ -1,0 +1,23 @@
+{
+  "proposal_id": "P-20261124-02",
+  "title": "Label rejected-signal outcomes and false-positive cost",
+  "change_type": "RESEARCH",
+  "target": "missed_opportunity_audit outcome analysis",
+  "current": "The audit has 53 signal rows and 46 usable rejected signals, but the supplied summary contains no MFE/MAE, hit rates, or false-positive cost.",
+  "proposed": "For the existing rejected-signal sample, produce a shadow-only outcome table at the reported 30- and 60-minute horizons with MFE, MAE, executable-price assumptions, and false-positive cost; do not relax entry gates based on counts alone.",
+  "evidence": [
+    "The audit reports 46 usable rejected signals out of 53 signal rows.",
+    "The 30- and 60-minute samples each contain 53 rows, but no corresponding outcome statistics are supplied.",
+    "The configured missed-opportunity MFE flags (20% at 30 minutes and 50% at 60 minutes) do not by themselves quantify rejection precision or the cost of false positives."
+  ],
+  "risk": "Sparse or survivorship-biased follow-up coverage, and optimistic price marks, could overstate missed opportunity; require executable-price and missing-outcome reporting.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-24",
+  "created_at": "2026-11-25T17:06:43",
+  "updated_at": "2026-11-25T17:06:43",
+  "implementation": {},
+  "deployment": {}
+}
