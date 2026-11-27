@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261125-01",
+  "title": "Reconcile follow-up outcome coverage before strategy evaluation",
+  "change_type": "RESEARCH",
+  "target": "SURGE_FOLLOWUP audit and outcome reporting",
+  "current": "65,434 follow-up rows are reported, but score_bands is empty and horizons_found is empty; usable 30/60/120-minute outcome coverage is not demonstrated.",
+  "proposed": "With human approval, perform a research-only audit of timestamp, token/signal joins, horizon availability, and outcome-label generation; report coverage and join failures before using these records to compare entry paths or false positives. Do not alter trading thresholds.",
+  "evidence": [
+    "The daily metrics report 65,434 follow-up rows but no found outcome horizons.",
+    "The missed-opportunity audit reports 46 usable rejected signals but does not provide measured MFE/MAE or threshold-hit counts."
+  ],
+  "risk": "A broader join or horizon window could create stale or mismatched labels and falsely inflate apparent opportunity quality.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-25",
+  "created_at": "2026-11-26T17:06:53",
+  "updated_at": "2026-11-26T17:06:53",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261125-02",
+  "title": "Reconcile smart-money export counts with feed-health counters",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor daily event/campaign export and feed-health audit",
+  "current": "Daily filtered event and campaign exports each report 0 rows, while feed health reports 1,685 event and 1,685 campaign row deltas, 100% latest wallet coverage, and 0 event-without-campaign cycles.",
+  "proposed": "With human approval, compare export time windows, timestamp filters, and row-count definitions, then document whether the zero-row exports are expected. Do not widen discovery or change trading behavior until the discrepancy is explained.",
+  "evidence": [
+    "The manifest records 0 filtered rows for smart_money_events_v22.csv and smart_money_campaigns_v22.csv.",
+    "Feed-health metrics report 1,685 event_rows_delta and 1,685 campaign_rows_delta, with latest status OK and 100% latest wallet coverage."
+  ],
+  "risk": "Treating counters from different windows or scopes as equivalent could lead to unnecessary pipeline changes or reliance on stale campaign data.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-25",
+  "created_at": "2026-11-26T17:06:53",
+  "updated_at": "2026-11-26T17:06:53",
+  "implementation": {},
+  "deployment": {}
+}
