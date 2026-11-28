@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261126-01",
+  "title": "Produce signal-level forward-outcome evidence",
+  "change_type": "RESEARCH",
+  "target": "Surge follow-up and missed-opportunity research reporting",
+  "current": "65,958 follow-up rows are reported, but score bands and outcome horizons are empty; 46 usable rejected signals lack reported outcome attribution.",
+  "proposed": "In research/shadow reporting, link records to unique signal and token-time cohorts and report 30/60/120-minute MFE, MAE, executable net return, sample size, median, hit rate, and false-positive cost by path and accepted/rejected status. Do not change trading thresholds based on this report alone.",
+  "evidence": [
+    "The follow-up metrics report 65,958 rows but no horizons_found and empty score_bands.",
+    "The missed-opportunity audit reports 46 usable rejected signals but provides no reported outcome metrics for them."
+  ],
+  "risk": "Incorrect signal deduplication, overlapping observation windows, or censored follow-ups could bias outcomes and make repeated scans appear to be independent signals.",
+  "confidence": "MEDIUM",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-26",
+  "created_at": "2026-11-27T17:07:02",
+  "updated_at": "2026-11-27T17:07:02",
+  "implementation": {},
+  "deployment": {}
+}

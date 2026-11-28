@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261126-02",
+  "title": "Collect outcome labels before Luna recalibration",
+  "change_type": "RESEARCH",
+  "target": "Luna confirmation outcome linkage and calibration analysis",
+  "current": "9 reviewed signals, median confidence 78.0, and 0 reported outcome or labeled rows.",
+  "proposed": "Continue shadow-only collection linking each reviewed signal to defined forward outcomes and its setup/confidence; assess calibration only after at least 12 labeled observations, treating that threshold as exploratory rather than proof. Do not tune confidence or setup rules yet.",
+  "evidence": [
+    "The Luna sample is 9, below the 12-observation review threshold.",
+    "luna_outcomes reports 0 signals and 0 labeled rows, so predictive accuracy cannot be measured."
+  ],
+  "risk": "Labels may be delayed, selectively missing, or influenced by repeated reviews of the same token, producing misleading calibration.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-26",
+  "created_at": "2026-11-27T17:07:02",
+  "updated_at": "2026-11-27T17:07:02",
+  "implementation": {},
+  "deployment": {}
+}

@@ -1,0 +1,22 @@
+{
+  "proposal_id": "P-20261126-03",
+  "title": "Reconcile smart-money campaign and wallet records",
+  "change_type": "RESEARCH",
+  "target": "SmartMoneyMonitor campaign attribution and wallet scorecard audit",
+  "current": "70 campaign rows represent 3 unique campaigns; median campaign strength is 0, convergence count is 0, and the wallet 30-minute scorecard is empty.",
+  "proposed": "Audit campaign-row deduplication, event-to-campaign linkage, wallet scorecard coverage, and failed-check accounting in shadow research before using campaign strength or convergence to alter decisions.",
+  "evidence": [
+    "The reported campaign count is 70 rows but only 3 unique campaigns, so the row count is not an adequate independent sample.",
+    "The wallet scorecard contains no rows; feed health reports 2,010 failed wallet checks across 25,601 rows despite latest status OK and 100% latest coverage."
+  ],
+  "risk": "Over-aggressive deduplication or excluding intermittent wallet failures could hide valid campaign updates or create survivorship bias.",
+  "confidence": "LOW",
+  "recommended_mode": "SHADOW",
+  "approval_required": true,
+  "status": "PENDING",
+  "review_date": "2026-11-26",
+  "created_at": "2026-11-27T17:07:02",
+  "updated_at": "2026-11-27T17:07:02",
+  "implementation": {},
+  "deployment": {}
+}
