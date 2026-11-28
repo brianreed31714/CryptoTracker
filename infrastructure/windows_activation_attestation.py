@@ -316,7 +316,10 @@ def poll(root: Path, *, observation: dict | None = None,
         from infrastructure.host_status_publisher import publish as remote_publish
     enabled = os.getenv("CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED", "1").strip().lower() not in (
         "0", "false", "no", "off")
-    if report["code_synced"] and remote_publish is not None and enabled:
+    # Publish fresh negative observations too. Source divergence must remain
+    # UNVERIFIED, but must not hide Windows observer liveness behind an old
+    # healthy heartbeat. The publisher still enforces its strict public schema.
+    if SHA.fullmatch(str(report.get("git_head") or "")) and remote_publish is not None and enabled:
         if remote_key == previous.get("remote_key") and recent_publish:
             report["remote_key"] = remote_key
             report["remote_published_at_utc"] = previous_publish

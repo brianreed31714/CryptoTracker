@@ -31,6 +31,65 @@ def sample(state="CODE_SYNCED_PROCESS_OBSERVED"):
 
 
 class HostSignalTests(unittest.TestCase):
+    def test_source_divergence_publishes_negative_heartbeat_without_notice(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            payloads = []
+            notices = []
+            def publish(root, report):
+                payloads.append(publisher.sanitized(report))
+                return "a" * 40
+            with patch.object(attest, "git_head", return_value=HEAD), \
+                 patch.object(attest, "_head", return_value="e" * 40), \
+                 patch.object(attest, "_code_clean", return_value=True):
+                for minutes in (0, 1, 61):
+                    receipt = attest.poll(root, observation={},
+                        clock=T0 + timedelta(minutes=minutes), remote_publish=publish,
+                        notify=lambda *args: notices.append(args))
+            self.assertEqual(len(payloads), 2)
+            self.assertEqual(payloads[-1]["observed_at_utc"],
+                             (T0 + timedelta(minutes=61)).isoformat())
+            self.assertEqual(receipt["remote_publish"], "PUBLISHED")
+            self.assertEqual(notices, [])
+            for payload in payloads:
+                self.assertEqual(payload["state"], "UNVERIFIED")
+                for flag in ("source_code_synced", "processes_stable", "post_sync_eod_verified",
+                             "in_memory_trader_digest_verified", "loaded_dependencies_verified",
+                             "broker_trade_health_verified"):
+                    self.assertIs(payload[flag], False)
+                self.assertNotIn("fingerprint", payload)
+
+    def test_dirty_source_publishes_negative_but_invalid_head_cannot_publish(self):
+        for head, expected_count in ((HEAD, 1), ("", 0), ("f" * 8, 0)):
+            with self.subTest(head=head), tempfile.TemporaryDirectory() as temp:
+                calls = []
+                with patch.object(attest, "git_head", return_value=head), \
+                     patch.object(attest, "_head", return_value=HEAD), \
+                     patch.object(attest, "_code_clean", return_value=False):
+                    receipt = attest.poll(Path(temp), observation={}, clock=T0,
+                        remote_publish=lambda root, report: calls.append(report))
+                self.assertEqual(len(calls), expected_count)
+                self.assertFalse(receipt["code_synced"])
+
+    def test_negative_heartbeat_respects_remote_disable_and_publish_failure(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with patch.object(attest, "git_head", return_value=HEAD), \
+                 patch.object(attest, "_head", return_value="e" * 40), \
+                 patch.object(attest, "_code_clean", return_value=True):
+                with patch.dict("os.environ", {"CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED": "0"}):
+                    def forbidden(*args):
+                        self.fail("Disabled publication attempted")
+                    disabled = attest.poll(Path(temp), observation={}, clock=T0,
+                                          remote_publish=forbidden)
+                self.assertEqual(disabled["remote_publish"], "DISABLED")
+                def rejected(*args):
+                    raise RuntimeError("SECRET_PROVIDER_EXCEPTION")
+                with patch.dict("os.environ", {"CRYPTOTRACKER_ATTESTATION_REMOTE_ENABLED": "1"}):
+                    failed = attest.poll(Path(temp), observation={},
+                        clock=T0 + timedelta(minutes=1), remote_publish=rejected)
+                self.assertEqual(failed["remote_publish"], "UNCONFIRMED")
+                self.assertNotIn("SECRET_PROVIDER_EXCEPTION", json.dumps(failed))
+
     def test_strict_status_payload_contains_no_local_details(self):
         data = sample()
         clean = json.dumps(publisher.sanitized(data))
